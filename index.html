@@ -294,6 +294,25 @@
     margin-top: 12px;
   }
 
+  .timer-custom {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    justify-content: center;
+    margin-top: 8px;
+  }
+  .timer-custom input {
+    width: 48px;
+    text-align: center;
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.9rem;
+    padding: 4px;
+    border-radius: 4px;
+  }
+
   /* ===== BUTTONS ===== */
   .btn {
     padding: 8px 16px;
@@ -1622,6 +1641,12 @@
           <button class="btn btn-primary" id="timer-toggle" onclick="toggleTimer()">▶ Start</button>
           <button class="btn" onclick="resetTimer()">↺ Reset</button>
         </div>
+        <div class="timer-custom">
+          <input type="number" id="custom-minutes" min="0" max="99" value="2" placeholder="min">
+          <span>:</span>
+          <input type="number" id="custom-seconds" min="0" max="59" value="0" placeholder="sec">
+          <button class="btn btn-sm" onclick="setCustomTimer()">Stel in</button>
+        </div>
       </div>
     </div>
 
@@ -2652,6 +2677,13 @@ function toggleTimer() {
       }
     }, 1000);
   }
+}
+
+function setCustomTimer() {
+  const m = parseInt(document.getElementById('custom-minutes').value) || 0;
+  const s = parseInt(document.getElementById('custom-seconds').value) || 0;
+  const total = m * 60 + s;
+  if (total > 0) startTimer(total, 'Aangepaste timer');
 }
 
 function resetTimer() {
