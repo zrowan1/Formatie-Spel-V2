@@ -1901,6 +1901,20 @@
     <div class="splog-list" id="tv-splog-list"></div>
   </div>
 
+  <!-- SPEED-DEBAT STELLING VIEW -->
+  <div class="tv-view" id="view-stelling" style="justify-content:center;align-items:center;flex-direction:column;text-align:center;padding:60px 80px;">
+    <div style="font-family:'Oswald',sans-serif;font-size:0.85rem;letter-spacing:0.2em;color:var(--text-dim);margin-bottom:24px;">
+      SPEED-DEBAT &mdash; STELLING <span id="tv-stelling-num"></span>
+    </div>
+    <div id="tv-stelling-text" style="font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.3;max-width:960px;margin-bottom:48px;"></div>
+    <div style="display:flex;align-items:center;gap:40px;">
+      <div id="tv-stelling-party1" style="font-family:'Oswald',sans-serif;font-size:2rem;color:#fff;letter-spacing:0.06em;"></div>
+      <div style="font-size:1.4rem;color:var(--text-dim);font-family:'Oswald',sans-serif;">vs</div>
+      <div id="tv-stelling-party2" style="font-family:'Oswald',sans-serif;font-size:2rem;color:#fff;letter-spacing:0.06em;"></div>
+    </div>
+    <div id="tv-stelling-fullnames" style="font-size:0.9rem;color:var(--text-dim);margin-top:14px;font-family:'EB Garamond',serif;"></div>
+  </div>
+
 </div><!-- end tv-main -->
 
 <!-- COALITION METER OVERLAY -->
@@ -2195,6 +2209,19 @@ function handleEvent(ev) {
   if (type === 'superpowerLog') {
     renderSuperpowerLogTV(data.log || []);
     showView('view-superpower-log');
+  }
+
+  if (type === 'stelling') {
+    const p1 = PARTIES.find(p => p.id === data.party1);
+    const p2 = PARTIES.find(p => p.id === data.party2);
+    document.getElementById('tv-stelling-num').textContent =
+      data.totalPairs ? `${data.pairIndex} / ${data.totalPairs}` : '';
+    document.getElementById('tv-stelling-text').textContent = `"${data.stelling}"`;
+    document.getElementById('tv-stelling-party1').textContent = data.party1;
+    document.getElementById('tv-stelling-party2').textContent = data.party2;
+    document.getElementById('tv-stelling-fullnames').textContent =
+      `${p1 ? p1.full : data.party1}  ·  ${p2 ? p2.full : data.party2}`;
+    showView('view-stelling');
   }
 }
 
