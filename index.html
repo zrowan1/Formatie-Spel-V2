@@ -1,0 +1,3177 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE FORMATIE — Spelleiding</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Oswald:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a1628;
+    --navy-mid: #132040;
+    --navy-light: #1e3160;
+    --gold: #c9a84c;
+    --gold-light: #e8c96a;
+    --gold-dim: #7a6230;
+    --red: #c0392b;
+    --green: #27ae60;
+    --cream: #f5f0e8;
+    --text: #e8dcc8;
+    --text-dim: #8a7a5a;
+    --border: #2a3f6a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: 'EB Garamond', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: linear-gradient(135deg, var(--navy-mid), var(--navy));
+    border-bottom: 2px solid var(--gold);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .header-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .btn-tv {
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    padding: 10px 20px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-tv:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+  .btn-reset {
+    background: transparent;
+    color: var(--red);
+    border: 1px solid var(--red);
+    padding: 8px 16px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .btn-reset:hover { background: var(--red); color: white; }
+
+  /* ===== HEMICYCLE BUILDER ===== */
+  .hemi-party-btn {
+    background: var(--navy-mid);
+    border: 1.5px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 6px 4px;
+    cursor: pointer;
+    border-radius: 3px;
+    text-align: center;
+    transition: all 0.15s;
+    line-height: 1.2;
+  }
+  .hemi-party-btn .hpb-abbr { display: block; font-size: 0.85rem; }
+  .hemi-party-btn .hpb-seats { display: block; font-size: 0.65rem; font-weight: 400; color: var(--text-dim); }
+  .hemi-party-btn.selected {
+    color: var(--navy);
+    border-color: transparent;
+    font-weight: 700;
+  }
+  .hemi-party-btn.selected .hpb-seats { color: rgba(0,0,0,0.6); }
+
+  /* ===== PHASE NAV ===== */
+  .phase-nav {
+    display: flex;
+    background: var(--navy-mid);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+
+  .phase-btn {
+    padding: 14px 20px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-dim);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .phase-btn:hover { color: var(--gold); }
+  .phase-btn.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+    background: rgba(201,168,76,0.08);
+  }
+
+  /* ===== LAYOUT ===== */
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 0;
+    min-height: calc(100vh - 120px);
+  }
+
+  .content-area {
+    padding: 24px;
+    border-right: 1px solid var(--border);
+  }
+
+  .sidebar {
+    padding: 20px;
+    background: var(--navy-mid);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ===== PANELS ===== */
+  .panel {
+    background: rgba(30, 49, 96, 0.4);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    background: var(--navy-light);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--gold-dim);
+  }
+
+  .panel-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .panel-body { padding: 16px; }
+
+  /* ===== PHASE CONTENT ===== */
+  .phase-content { display: none; }
+  .phase-content.active { display: block; }
+
+  .phase-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+
+  .phase-duration {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+  }
+
+  /* ===== STEPS ===== */
+  .steps { display: flex; flex-direction: column; gap: 12px; }
+
+  .step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .step:hover { border-color: var(--gold-dim); background: rgba(201,168,76,0.05); }
+  .step.done { opacity: 0.4; border-color: var(--border); }
+  .step.current { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.8rem;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+  .step.done .step-num { background: var(--gold-dim); border-color: var(--gold-dim); color: var(--navy); }
+  .step.current .step-num { background: var(--gold); color: var(--navy); }
+
+  .step-text { font-size: 0.95rem; line-height: 1.5; }
+  .step-label { font-weight: 600; color: var(--cream); display: block; margin-bottom: 3px; }
+
+  /* ===== TIMER ===== */
+  .timer-display {
+    text-align: center;
+    padding: 20px;
+  }
+
+  .timer-time {
+    font-family: 'Oswald', sans-serif;
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 4px;
+    line-height: 1;
+  }
+  .timer-time.warning { color: #e67e22; }
+  .timer-time.danger { color: var(--red); animation: pulse 0.5s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .timer-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .timer-controls {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 12px;
+  }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 1px;
+  }
+  .btn:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-primary {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--navy);
+    font-weight: 700;
+  }
+  .btn-primary:hover { background: var(--gold-light); color: var(--navy); }
+  .btn-danger { border-color: var(--red); color: var(--red); }
+  .btn-danger:hover { background: var(--red); color: white; }
+  .btn-success { border-color: var(--green); color: var(--green); }
+  .btn-success:hover { background: var(--green); color: white; }
+  .btn-sm { padding: 5px 10px; font-size: 0.7rem; }
+
+  /* ===== ZETELVER DELING ===== */
+  .party-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .party-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .party-row:hover { border-color: var(--border); background: rgba(255,255,255,0.03); }
+  .party-row.coalition { border-color: var(--gold-dim); background: rgba(201,168,76,0.06); }
+
+  .party-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gold);
+    width: 50px;
+    flex-shrink: 0;
+  }
+
+  .party-fullname {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .party-seats-input {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--cream);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid transparent;
+    width: 38px;
+    text-align: center;
+    padding: 0;
+    -moz-appearance: textfield;
+  }
+  .party-seats-input::-webkit-outer-spin-button,
+  .party-seats-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .party-seats-input:focus {
+    outline: none;
+    border-bottom-color: var(--gold);
+  }
+
+  .party-bar-wrap {
+    width: 80px;
+    height: 6px;
+    background: var(--navy-light);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .party-bar {
+    height: 100%;
+    background: var(--gold-dim);
+    transition: width 0.3s;
+    border-radius: 1px;
+  }
+  .party-row.coalition .party-bar { background: var(--gold); }
+
+  .seat-adj {
+    display: flex;
+    gap: 4px;
+  }
+
+  .seat-btn {
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text-dim);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1px;
+    line-height: 1;
+    transition: all 0.15s;
+  }
+  .seat-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  .party-tv-btn {
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--border);
+    background: none;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1px;
+    opacity: 0.5;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+  }
+  .party-tv-btn:hover { opacity: 1; border-color: var(--gold-dim); }
+
+  /* ===== COALITION TOGGLE ===== */
+  .coalition-toggle {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--gold-dim);
+    background: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    border-radius: 1px;
+  }
+  .coalition-toggle.in::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: var(--gold);
+  }
+
+  /* ===== SEATS TOTAL ===== */
+  .seats-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 10px 6px;
+    border-top: 1px solid var(--border);
+    margin-top: 6px;
+  }
+
+  .seats-coalition {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .seats-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+  .seats-number.majority { color: var(--green); }
+  .seats-number.minority { color: #e67e22; }
+  .seats-number.low { color: var(--red); }
+
+  /* ===== CRISIS CARDS ===== */
+  .card-deck {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .crisis-card {
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+
+  .crisis-card-header {
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    background: rgba(30,49,96,0.5);
+  }
+  .crisis-card-header:hover { background: rgba(201,168,76,0.08); }
+
+  .crisis-card.revealed { border-color: var(--gold-dim); }
+  .crisis-card.revealed .crisis-card-header { background: rgba(201,168,76,0.1); }
+
+  .crisis-badge {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold-dim);
+    border-radius: 1px;
+  }
+  .crisis-card.revealed .crisis-badge { border-color: var(--gold); color: var(--gold); }
+
+  .crisis-title-text {
+    font-family: 'EB Garamond', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--cream);
+  }
+
+  .crisis-body {
+    padding: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    display: none;
+  }
+  .crisis-card.revealed .crisis-body { display: block; }
+
+  .reveal-btn {
+    padding: 4px 10px;
+    background: none;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold-dim);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 1px;
+    white-space: nowrap;
+  }
+  .reveal-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .crisis-card.revealed .reveal-btn { border-color: var(--text-dim); color: var(--text-dim); font-size: 0.6rem; }
+
+  /* ===== VOTING ===== */
+  .vote-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .vote-party {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gold);
+    width: 55px;
+  }
+
+  .vote-seats-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    width: 30px;
+    text-align: right;
+  }
+
+  .vote-btns {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+  }
+
+  .vote-btn {
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    background: none;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 1px;
+    color: var(--text-dim);
+  }
+  .vote-btn.voor.active { background: var(--green); border-color: var(--green); color: white; }
+  .vote-btn.tegen.active { background: var(--red); border-color: var(--red); color: white; }
+  .vote-btn:not(.active):hover { border-color: var(--text); color: var(--text); }
+
+  .vote-result {
+    display: flex;
+    gap: 20px;
+    padding: 14px 10px 6px;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+  }
+
+  .vote-count {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .vote-count-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .vote-count-num.voor { color: var(--green); }
+  .vote-count-num.tegen { color: var(--red); }
+
+  .vote-count-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .vote-verdict {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+  .vote-verdict.pass { color: var(--green); }
+  .vote-verdict.fail { color: var(--red); }
+
+  /* ===== SCOREBOARD ===== */
+  .score-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .score-row:hover { border-color: var(--border); }
+  .score-row.leader { border-color: var(--gold-dim); background: rgba(201,168,76,0.06); }
+
+  .score-rank {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    width: 20px;
+  }
+  .score-row.leader .score-rank { color: var(--gold); font-weight: 700; }
+
+  .score-party {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--cream);
+    width: 45px;
+  }
+
+  .score-breakdown {
+    flex: 1;
+    display: flex;
+    gap: 4px;
+  }
+
+  .score-pip {
+    font-size: 0.7rem;
+    padding: 2px 5px;
+    border-radius: 1px;
+    font-family: 'Oswald', sans-serif;
+    color: var(--text-dim);
+  }
+  .score-pip.pos { color: var(--green); }
+  .score-pip.neg { color: var(--red); }
+
+  .score-total {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gold);
+    width: 32px;
+    text-align: right;
+  }
+
+  .score-adj-btns { display: flex; gap: 4px; }
+
+  /* ===== WETSVOORSTEL SWITCHER ===== */
+  .law-selector {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .law-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text-dim);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-radius: 1px;
+    transition: all 0.2s;
+  }
+  .law-btn:hover { border-color: var(--gold-dim); color: var(--gold-dim); }
+  .law-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.08); }
+  .law-btn.passed { border-color: var(--green); color: var(--green); }
+  .law-btn.rejected { border-color: var(--red); color: var(--red); }
+
+  .law-display {
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .law-header {
+    background: var(--navy-light);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--gold-dim);
+  }
+
+  .law-num {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .law-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--cream);
+  }
+
+  .law-body { padding: 14px 16px; }
+  .law-text { font-size: 0.9rem; line-height: 1.6; margin-bottom: 10px; }
+  .law-hint {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-style: italic;
+    padding: 10px;
+    border-left: 2px solid var(--gold-dim);
+    background: rgba(201,168,76,0.04);
+    line-height: 1.5;
+  }
+
+  /* ===== DIVIDER ===== */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  /* ===== NOTIFICATION ===== */
+  .notification {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--gold);
+    color: var(--navy);
+    padding: 12px 20px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border-radius: 2px;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 1000;
+  }
+  .notification.show { transform: translateY(0); opacity: 1; }
+
+  /* ===== BROADCAST INDICATOR ===== */
+  .broadcast-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--red);
+    animation: blink 1s infinite;
+    display: inline-block;
+    margin-right: 6px;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+  /* ===== QUICK TIMERS ===== */
+  .quick-timers {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .quick-btn {
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text-dim);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-radius: 1px;
+    transition: all 0.2s;
+  }
+  .quick-btn:hover { border-color: var(--gold-dim); color: var(--gold-dim); }
+
+  /* ===== MISC ===== */
+  .hint-box {
+    padding: 10px 14px;
+    border-left: 2px solid var(--gold-dim);
+    background: rgba(201,168,76,0.05);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  .superpowers {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .superpower {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .superpower:hover { border-color: var(--gold-dim); }
+  .superpower.used { opacity: 0.35; }
+
+  .superpower-icon { font-size: 1.2rem; flex-shrink: 0; }
+  .superpower-info { flex: 1; }
+  .superpower-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    color: var(--gold);
+    margin-bottom: 2px;
+  }
+  .superpower-desc { font-size: 0.78rem; color: var(--text-dim); line-height: 1.4; }
+
+  .superpower-use {
+    padding: 4px 8px;
+    border: 1px solid var(--gold-dim);
+    background: none;
+    color: var(--gold-dim);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-radius: 1px;
+    white-space: nowrap;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .superpower-use:hover { border-color: var(--gold); color: var(--gold); }
+  .superpower.used .superpower-use { border-color: var(--border); color: var(--text-dim); cursor: default; }
+
+  .sp-log-section { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .sp-log-label { font-family: 'Oswald', sans-serif; font-size: 0.65rem; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 6px; }
+  .sp-log-empty { font-size: 0.75rem; color: var(--text-dim); font-style: italic; }
+  .sp-log-entry { display: flex; gap: 8px; align-items: center; padding: 2px 0; font-size: 0.78rem; }
+  .sp-log-time { color: var(--text-dim); font-family: 'Oswald', sans-serif; font-size: 0.7rem; flex-shrink: 0; }
+  .sp-log-icon { font-size: 0.8rem; flex-shrink: 0; }
+  .sp-log-name { color: var(--gold-dim); }
+
+  /* ===== AGENDA KAARTEN ===== */
+  .agenda-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .agenda-card {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .agenda-card:hover { border-color: var(--gold-dim); }
+  .agenda-card.revealed { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+
+  .agenda-party {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+
+  .agenda-type {
+    font-size: 0.78rem;
+    padding: 3px 8px;
+    border-radius: 1px;
+    display: inline-block;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .agenda-type.loyalist { background: rgba(39,174,96,0.2); color: var(--green); }
+  .agenda-type.opstandeling { background: rgba(192,57,43,0.2); color: var(--red); }
+  .agenda-type.opportunist { background: rgba(201,168,76,0.2); color: var(--gold); }
+  .agenda-type.kingmaker { background: rgba(100,100,200,0.2); color: #9b8de8; }
+  .agenda-type.hidden { background: rgba(100,100,100,0.2); color: var(--text-dim); }
+
+  .agenda-reveal-btn {
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text-dim);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-radius: 1px;
+    transition: all 0.2s;
+  }
+  .agenda-reveal-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--navy); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold-dim); }
+
+  /* ===== PARTIJPRESENTATIES ===== */
+  .announce-section { margin-top: 28px; }
+  .announce-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+  .announce-row { border: 1px solid var(--border); border-radius: 2px; overflow: hidden; transition: border-color 0.2s; }
+  .announce-row:hover { border-color: var(--gold-dim); }
+  .announce-row-header { background: var(--navy-light); padding: 10px 14px; display: flex; align-items: center; gap: 12px; }
+  .announce-row-header:hover { background: rgba(30,49,96,0.8); }
+  .announce-party-abbr { font-family: 'Oswald', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--gold); width: 50px; flex-shrink: 0; }
+  .announce-party-full { font-size: 0.83rem; color: var(--text-dim); flex: 1; }
+  .announce-toon-btn { padding: 6px 14px; background: var(--gold); color: var(--navy); border: none; font-family: 'Oswald', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; border-radius: 1px; flex-shrink: 0; transition: background 0.15s; }
+  .announce-toon-btn:hover { background: #e0bc70; }
+  .announce-close-btn { margin-top: 16px; }
+  .announce-assign-btn { padding: 6px 12px; background: transparent; color: var(--gold); border: 1px solid var(--gold-dim); font-family: 'Oswald', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; border-radius: 1px; flex-shrink: 0; transition: all 0.15s; }
+  .announce-assign-btn:hover:not(:disabled) { background: var(--gold); color: var(--navy); }
+  .announce-assign-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .announce-player-select { background: var(--navy-light); color: var(--cream); border: 1px solid var(--border); font-family: 'Oswald', sans-serif; font-size: 0.8rem; padding: 4px 8px; border-radius: 1px; flex-shrink: 0; }
+  .announce-player-select:focus { outline: none; border-color: var(--gold-dim); }
+  .announce-assigned-badge { font-family: 'Oswald', sans-serif; font-size: 0.75rem; color: var(--gold); flex-shrink: 0; letter-spacing: 0.5px; }
+
+  /* ===== SPELERS & TOEWIJZINGEN ===== */
+  .players-section { margin-top: 28px; }
+  .players-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .player-input-row { display: flex; align-items: center; gap: 8px; }
+  .player-num { font-family: 'Oswald', sans-serif; font-size: 0.8rem; color: var(--gold-dim); width: 22px; flex-shrink: 0; text-align: right; }
+  .player-input { flex: 1; background: var(--navy-light); border: 1px solid var(--border); color: var(--cream); font-family: 'EB Garamond', serif; font-size: 0.9rem; padding: 6px 10px; border-radius: 1px; }
+  .player-input:focus { outline: none; border-color: var(--gold-dim); }
+  .players-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .assignment-overview { margin-top: 14px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .assignment-chip { background: var(--navy-light); border: 1px solid var(--border); border-radius: 2px; padding: 6px 10px; text-align: center; }
+  .assignment-chip.assigned { border-color: var(--gold-dim); }
+  .assignment-chip-party { font-family: 'Oswald', sans-serif; font-size: 0.85rem; color: var(--gold); font-weight: 700; }
+  .assignment-chip-player { font-size: 0.75rem; color: var(--text-dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* COALITIEAKKOORD FORMULIER */
+  .akkoord-section { margin-top: 0; }
+  .akkoord-field { margin-bottom: 14px; }
+  .akkoord-label { font-family: 'Oswald', sans-serif; font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+  .akkoord-input { width: 100%; padding: 8px 10px; background: var(--navy); border: 1px solid var(--border); color: var(--text); font-family: 'EB Garamond', serif; font-size: 0.95rem; border-radius: 2px; box-sizing: border-box; }
+  .akkoord-input:focus { outline: none; border-color: var(--gold-dim); }
+  .akkoord-select { width: 100%; padding: 8px 10px; background: var(--navy); border: 1px solid var(--border); color: var(--text); font-family: 'EB Garamond', serif; font-size: 0.95rem; border-radius: 2px; }
+  .akkoord-ministeries-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .akkoord-ministerie-row { display: flex; gap: 8px; align-items: center; }
+  .akkoord-ministerie-label { font-family: 'Oswald', sans-serif; font-size: 0.8rem; color: var(--gold); width: 48px; flex-shrink: 0; }
+  .akkoord-punten-list { display: flex; flex-direction: column; gap: 6px; }
+  .akkoord-punt-row { display: flex; gap: 8px; align-items: center; }
+  .akkoord-punt-num { font-family: 'Oswald', sans-serif; font-size: 0.8rem; color: var(--text-dim); width: 18px; flex-shrink: 0; text-align: right; }
+  .akkoord-tv-btns { display: flex; gap: 10px; margin-top: 6px; }
+  .akkoord-no-coalition { font-size: 0.85rem; color: var(--text-dim); font-style: italic; padding: 10px 0; }
+
+  /* AMENDEMENT PANEL */
+  .amendement-panel { background: var(--navy-light); border: 1px solid var(--border); border-radius: 2px; padding: 14px 16px; margin-bottom: 16px; }
+  .amendement-header { font-family: 'Oswald', sans-serif; font-size: 0.85rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+  .amendement-row { display: flex; gap: 10px; align-items: center; }
+  .amendement-select { flex: 1; padding: 7px 10px; background: var(--navy); border: 1px solid var(--border); color: var(--text); font-family: 'EB Garamond', serif; font-size: 0.9rem; border-radius: 2px; }
+  .amendement-badge { display: inline-block; background: var(--gold); color: var(--navy); font-family: 'Oswald', sans-serif; font-size: 0.6rem; font-weight: 700; padding: 1px 4px; border-radius: 1px; margin-left: 4px; vertical-align: middle; }
+
+  /* ===== SETUP SCHERM ===== */
+  #setup-screen { position:fixed;inset:0;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500;padding:40px;overflow-y:auto; }
+  #setup-screen.hidden { display:none; }
+  .setup-title { font-family:'Playfair Display',serif;font-size:2.4rem;color:var(--gold);letter-spacing:3px;margin-bottom:6px;text-align:center; }
+  .setup-subtitle { font-family:'Oswald',sans-serif;font-size:0.85rem;color:var(--text-dim);letter-spacing:2px;margin-bottom:32px;text-transform:uppercase;text-align:center; }
+  .setup-party-grid { display:grid;grid-template-columns:repeat(5,1fr);gap:10px;max-width:800px;width:100%;margin-bottom:20px; }
+  .setup-party-check { display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;border:1px solid var(--border);border-radius:2px;cursor:pointer;transition:all 0.2s;background:var(--navy-mid);user-select:none; }
+  .setup-party-check:hover { border-color:rgba(201,168,76,0.5); }
+  .setup-party-check.selected { border-color:var(--gold);background:rgba(201,168,76,0.1); }
+  .setup-party-check input[type=checkbox] { display:none; }
+  .setup-party-abbr { font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:700;color:var(--gold); }
+  .setup-party-full { font-size:0.62rem;color:var(--text-dim);text-align:center;line-height:1.3; }
+  .setup-counter { font-family:'Oswald',sans-serif;font-size:0.9rem;color:var(--text-dim);margin-bottom:16px;text-align:center; }
+  .setup-counter.valid { color:#4ade80; }
+  .setup-counter.invalid { color:#f87171; }
+  .setup-start-btn { min-width:260px;padding:14px 32px;font-size:1rem; }
+  .setup-hint { margin-top:12px;font-size:0.75rem;color:var(--text-dim);text-align:center; }
+</style>
+</head>
+<body>
+
+<!-- SETUP SCHERM -->
+<div id="setup-screen" class="hidden">
+  <div class="setup-title">⚖ DE FORMATIE</div>
+  <div class="setup-subtitle">Selecteer de deelnemende partijen — minimaal 6, maximaal 10</div>
+  <div class="setup-party-grid" id="setup-party-grid"></div>
+  <div class="setup-counter" id="setup-counter">10 partijen geselecteerd</div>
+  <button class="btn btn-primary setup-start-btn" id="setup-start-btn" onclick="confirmSetup()">▶ Spel Starten</button>
+  <div class="setup-hint">Standaard zijn alle 10 partijen geselecteerd. Vink partijen uit om met minder te spelen.</div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="header-title">⚖ De Formatie</div>
+    <div class="header-subtitle">Informateur Paneel</div>
+  </div>
+  <div class="header-actions">
+    <div style="font-family:'Oswald',sans-serif;font-size:0.75rem;color:var(--text-dim);">
+      <span class="broadcast-dot"></span>TV-scherm actief
+    </div>
+    <button class="btn-reset" onclick="resetGame()" title="Reset alle speldata en begin opnieuw">↺ Reset Spel</button>
+    <button class="btn-tv" onclick="showQRCode()" title="Toon QR-code op TV zodat spelers meekijken op telefoon">QR</button>
+    <button class="btn-tv" onclick="openTV()">📺 Open TV-scherm</button>
+  </div>
+</div>
+
+<!-- PHASE NAV -->
+<div class="phase-nav">
+  <button class="phase-btn active" onclick="setPhase('prep')">Voorbereiding</button>
+  <button class="phase-btn" onclick="setPhase('r1')">Ronde 1 — Campagne</button>
+  <button class="phase-btn" onclick="setPhase('r2')">Ronde 2 — Formatie</button>
+  <button class="phase-btn" onclick="setPhase('r3')">Ronde 3 — Regeerperiode</button>
+  <button class="phase-btn" onclick="setPhase('r4')">Ronde 4 — Kabinetscrisis</button>
+  <button class="phase-btn" onclick="setPhase('score')">Eindstand</button>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- LEFT: CONTENT -->
+  <div class="content-area">
+
+    <!-- VOORBEREIDING -->
+    <div class="phase-content active" id="phase-prep">
+      <div class="phase-title">Voorbereiding</div>
+      <div class="phase-duration">10 minuten</div>
+
+      <!-- SPELUITLEG TUTORIAL -->
+      <div class="panel" style="margin-bottom:24px;">
+        <div class="panel-header">
+          <span class="panel-title">📖 Speluitleg op TV</span>
+        </div>
+        <div style="padding:16px 20px;">
+          <div style="color:var(--text-dim);font-size:0.9rem;font-family:'EB Garamond',serif;margin-bottom:14px;">Doorloop de spelregels op het TV-scherm zodat alle spelers de regels kennen voor de avond begint.</div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="startTutorial()">▶ Start speluitleg</button>
+            <button class="btn btn-secondary" id="tutorial-prev" onclick="prevTutorialSlide()" disabled>← Vorige</button>
+            <span id="tutorial-indicator" style="font-family:'Oswald',sans-serif;font-size:0.8rem;color:var(--text-dim);min-width:160px;text-align:center;padding:0 4px;">— niet gestart —</span>
+            <button class="btn btn-secondary" id="tutorial-next" onclick="nextTutorialSlide()" disabled>Volgende →</button>
+            <button class="btn btn-secondary" onclick="closeTutorial()" style="color:var(--text-dim);border-color:var(--border);">✕ Sluit</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <span class="step-label">Print & knip</span>
+            Document printen en alle kaarten uitknippen (partijkaarten, objectievenkaarten, crisiskaarten, wetsvoorstellen, kabinetscrisiskaarten, geheime agenda's)
+          </div>
+        </div>
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <span class="step-label">Crisiskaarten stapelen</span>
+            Formatiecrisiskaarten omgedraaid op een stapel leggen
+          </div>
+        </div>
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <span class="step-label">Stemfiches verdelen</span>
+            15 stemfiches per speler — NIET voor de Informateur
+          </div>
+        </div>
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">4</div>
+          <div class="step-text">
+            <span class="step-label">Groene & rode kaartjes</span>
+            Elk speler krijgt een groen en een rood kaartje (voor Ronde 3 & 4)
+          </div>
+        </div>
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">5</div>
+          <div class="step-text">
+            <span class="step-label">Whiteboard klaarleggen</span>
+            Of gebruik het zetelteller-paneel rechts
+          </div>
+        </div>
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">6</div>
+          <div class="step-text">
+            <span class="step-label">Partijkaarten schudden & uitdelen</span>
+            Iedereen trekt blind een partijkaart
+          </div>
+        </div>
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">7</div>
+          <div class="step-text">
+            <span class="step-label">Objectievenkaarten uitdelen</span>
+            Bijbehorende objectievenkaart bij de partijkaart — GEHEIM houden!
+          </div>
+        </div>
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">8</div>
+          <div class="step-text">
+            <span class="step-label">5 minuten leestijd</span>
+            Iedereen leest zijn partij door
+          </div>
+        </div>
+      </div>
+
+      <!-- SPELERS & TOEWIJZINGEN -->
+      <div class="players-section">
+        <div class="divider" style="margin-bottom:20px;"></div>
+        <div class="phase-title" style="font-size:1.3rem;margin-bottom:4px;">🎭 Spelers &amp; Toewijzingen</div>
+        <div class="phase-duration" style="margin-bottom:12px;">Voer de namen van de 10 spelers in en wijs partijen toe (handmatig of via randomize)</div>
+        <div class="players-grid" id="players-grid"></div>
+        <div class="players-actions">
+          <button class="btn btn-primary" onclick="randomizeAssignments()">🎲 Randomize toewijzingen</button>
+          <button class="btn btn-secondary" onclick="clearAssignments()">✕ Wis toewijzingen</button>
+        </div>
+        <div class="assignment-overview" id="assignment-overview"></div>
+      </div>
+
+      <!-- PARTIJPRESENTATIES -->
+      <div class="announce-section">
+        <div class="divider" style="margin-bottom:20px;"></div>
+        <div class="phase-title" style="font-size:1.3rem;margin-bottom:4px;">📺 Partijpresentaties</div>
+        <div class="phase-duration" style="margin-bottom:12px;">Optioneel — kondig elke partij dramatisch aan op de TV</div>
+        <div class="hint-box">Stel per partij een YouTube-link en/of welkomsttekst in en klik <strong>Toon op TV</strong>. Plak een gewone YouTube-URL (youtube.com/watch of youtu.be).</div>
+        <div class="announce-list" id="announcement-list"></div>
+        <button class="btn btn-secondary announce-close-btn" onclick="closeAnnouncement()">✕ Sluit aankondiging (terug naar standby)</button>
+      </div>
+    </div>
+
+    <!-- RONDE 1 -->
+    <div class="phase-content" id="phase-r1">
+      <div class="phase-title">Ronde 1 — De Verkiezingscampagne</div>
+      <div class="phase-duration">±30 minuten</div>
+
+      <div class="steps">
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <span class="step-label">Campagnepitch</span>
+            Elke partij: 2 minuten pitch. Gebruik de timer! Bel/toeter na 2 minuten.
+            <br><br>
+            <div class="quick-timers" style="margin-top:8px;">
+              <button class="quick-btn" onclick="startTimer(120,'Campagnepitch')">▶ 2 min pitch</button>
+            </div>
+          </div>
+        </div>
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <span class="step-label">Speed-debat — Stellingen</span>
+            Twee stoelen vooraan. Steeds twee partijen, 30 sec per speler.
+            <br><br>
+            <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px;">
+              <div class="hint-box">💬 "Het borreluurtje om 16:00 moet een wettelijk recht worden."</div>
+              <div class="hint-box">💬 "Kaas moet twee keer zo duur worden."</div>
+              <div class="hint-box">💬 "Alle Nederlanders moeten verplicht één dag offline zijn."</div>
+              <div class="hint-box">💬 "De Tweede Kamer vervangen door gelote burgers."</div>
+              <div class="hint-box">💬 "Iedereen boven €100.000 betaalt 75% belasting."</div>
+            </div>
+            <div class="quick-timers" style="margin-top:10px;">
+              <button class="quick-btn" onclick="startTimer(30,'Spreektijd')">▶ 30 sec</button>
+            </div>
+          </div>
+        </div>
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <span class="step-label">Stemming</span>
+            Elke speler verdeelt 15 stemfiches geheim. Niet op jezelf. Informateur stemt niet. Totaal = 150 zetels = 150 Kamerzetels.
+            <br><span style="color:var(--gold);font-size:0.85rem;margin-top:6px;display:block;">Coalitie heeft 76 zetels nodig!</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALLE PARTIJEN OVERZICHT -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-title">📋 Partijenoverzicht</div>
+        <button class="btn btn-gold" onclick="broadcastAllParties()" style="width:100%;">
+          📺 Toon alle partijen op TV
+        </button>
+        <div style="font-size:0.78rem;color:var(--text-dim);margin-top:4px;">Toont een overzicht van alle 10 partijen op het TV-scherm (handig bij de start).</div>
+      </div>
+
+      <!-- EXIT POLL + COALITIE EXPLORER -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-title">📊 Uitslag &amp; Coalities</div>
+
+        <div style="margin-bottom:12px;">
+          <div style="font-family:'Oswald',sans-serif;font-size:0.8rem;color:var(--text-dim);margin-bottom:6px;letter-spacing:0.04em;">STAP 1 — Voer eerst de zetels in via het Zetelpaneel rechts, daarna:</div>
+          <button class="btn btn-gold" onclick="broadcastExitPoll()" style="width:100%;">
+            📊 Start exit poll op TV
+          </button>
+          <button id="ep-reveal-btn" class="btn btn-secondary" onclick="revealNextExitPoll()" style="width:100%;margin-top:8px;display:none;">
+            ▶ Onthul volgende partij
+          </button>
+          <div style="font-size:0.78rem;color:var(--text-dim);margin-top:4px;">Start de exit poll, klik daarna op "Volgende" om partijen één voor één te onthullen.</div>
+        </div>
+
+        <div style="border-top:1px solid var(--border);padding-top:12px;">
+          <div style="font-family:'Oswald',sans-serif;font-size:0.8rem;color:var(--text-dim);margin-bottom:8px;letter-spacing:0.04em;">STAP 2 — Coalitie verkenner:</div>
+          <div id="hemi-builder-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:8px;"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="font-family:'Oswald',sans-serif;font-size:0.75rem;color:var(--text-dim);">Zetels geselecteerd:</div>
+            <div id="hemi-builder-total" style="font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:700;color:var(--gold);">0 / 150</div>
+          </div>
+          <button class="btn btn-gold" onclick="broadcastCoalities()" style="width:100%;">
+            🏛 Toon hemicycle op TV
+          </button>
+          <div style="font-size:0.78rem;color:var(--text-dim);margin-top:4px;">Klik partijen aan om ze te selecteren. TV toont het halfrond live.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RONDE 2 -->
+    <div class="phase-content" id="phase-r2">
+      <div class="phase-title">Ronde 2 — De Formatie</div>
+      <div class="phase-duration">±45 minuten — het hoofdspel!</div>
+
+      <div class="steps">
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">F1</div>
+          <div class="step-text">
+            <span class="step-label">Fase 1 — De Verkenning (10 min)</span>
+            Speed-dating! Elke partij 45 sec: wie ben ik, topprioriteit, met wie wil ik wel/niet. Informateur maakt daarna 2-3 kansrijke combinaties bekend.
+            <div class="quick-timers" style="margin-top:8px;">
+              <button class="quick-btn" onclick="startTimer(45,'Verkenning')">▶ 45 sec</button>
+              <button class="quick-btn" onclick="startTimer(600,'Fase 1 totaal')">▶ 10 min totaal</button>
+            </div>
+          </div>
+        </div>
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">F2</div>
+          <div class="step-text">
+            <span class="step-label">Fase 2 — Informatieronde 1 (10 min)</span>
+            2-3 onderhandelingstafels (groepjes van 3-4). Doel: eens worden over minstens 2 beleidsafspraken.
+            <div class="quick-timers" style="margin-top:8px;">
+              <button class="quick-btn" onclick="startTimer(600,'Informatieronde 1')">▶ 10 min</button>
+            </div>
+          </div>
+        </div>
+        <div class="step crisis-trigger" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-text">
+            <span class="step-label" style="color:var(--red);">→ Trek een Crisiskaart!</span>
+            Ga naar het Crisiskaarten tabblad hieronder
+          </div>
+        </div>
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">F3</div>
+          <div class="step-text">
+            <span class="step-label">Fase 3 — Informatieronde 2 (10 min)</span>
+            Informateur herschikt groepen of houdt ze intact. Doel: coalitie richting 76 zetels.
+            <div class="quick-timers" style="margin-top:8px;">
+              <button class="quick-btn" onclick="startTimer(600,'Informatieronde 2')">▶ 10 min</button>
+            </div>
+          </div>
+        </div>
+        <div class="step crisis-trigger" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-text">
+            <span class="step-label" style="color:var(--red);">→ Trek een Crisiskaart!</span>
+          </div>
+        </div>
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">F4</div>
+          <div class="step-text">
+            <span class="step-label">Fase 4 — De Beslissende Ronde (10 min)</span>
+            Laatste kans. Één serieuze coalitiepoging. Gebruik superkrachten! Na 5 min geen akkoord → crisiskaart.
+            <div class="quick-timers" style="margin-top:8px;">
+              <button class="quick-btn" onclick="startTimer(300,'Tot crisiskaart')">▶ 5 min</button>
+              <button class="quick-btn" onclick="startTimer(600,'Beslissende Ronde')">▶ 10 min totaal</button>
+            </div>
+          </div>
+        </div>
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">F5</div>
+          <div class="step-text">
+            <span class="step-label">Fase 5 — De Presentatie (5 min)</span>
+            Coalitiepartijen vullen samen het coalitieakkoord-template in: titel, min. 5 afspraken, naam MP. Alle coalitiepartijen ondertekenen. Presenteren aan oppositie (2 min reactie).
+            <div class="quick-timers" style="margin-top:8px;">
+              <button class="quick-btn" onclick="startTimer(300,'Coalitie presentatie')">▶ 5 min</button>
+              <button class="quick-btn" onclick="startTimer(120,'Oppositie reactie')">▶ 2 min reactie</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">⚡ Superkrachten Informateur</div>
+        </div>
+        <div class="panel-body">
+          <div class="superpowers">
+            <div class="superpower" id="sp-bonus">
+              <div class="superpower-icon">🎖</div>
+              <div class="superpower-info">
+                <div class="superpower-name">10 Bonuszetels</div>
+                <div class="superpower-desc">Wijs op elk moment 10 zetels toe aan een partij naar keuze. Pas de teller aan!</div>
+              </div>
+              <button class="superpower-use" onclick="useSuperpower('sp-bonus')">Gebruik</button>
+            </div>
+            <div class="superpower" id="sp-veto">
+              <div class="superpower-icon">🛑</div>
+              <div class="superpower-info">
+                <div class="superpower-name">Veto</div>
+                <div class="superpower-desc">Blokkeer één deal naar keuze. Eenmalig!</div>
+              </div>
+              <button class="superpower-use" onclick="useSuperpower('sp-veto')">Gebruik</button>
+            </div>
+            <div class="superpower" id="sp-marriage">
+              <div class="superpower-icon">💍</div>
+              <div class="superpower-info">
+                <div class="superpower-name">Gedwongen Huwelijk</div>
+                <div class="superpower-desc">Twee partijen verplichten 5 min samen te onderhandelen</div>
+              </div>
+              <button class="superpower-use" onclick="useSuperpower('sp-marriage')">Gebruik</button>
+            </div>
+            <div class="superpower" id="sp-press">
+              <div class="superpower-icon">📰</div>
+              <div class="superpower-info">
+                <div class="superpower-name">De Pers Bellen</div>
+                <div class="superpower-desc">Onthul het geheime objectief van één partij aan de groep</div>
+              </div>
+              <button class="superpower-use" onclick="useSuperpower('sp-press')">Gebruik</button>
+            </div>
+          </div>
+          <div class="sp-log-section">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <div class="sp-log-label" style="margin-bottom:0;">Gebruiksgeschiedenis</div>
+              <button class="btn btn-sm" onclick="broadcastSuperpowerLog()" style="font-size:0.65rem;padding:3px 8px;">📺 Toon op TV</button>
+            </div>
+            <div id="superpower-log"><div class="sp-log-empty">Nog geen superkrachten gebruikt.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Crisis kaarten ronde 2 -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">⚠️ Crisiskaarten — Formatie</div>
+          <button class="btn btn-sm" onclick="revealRandomCrisis()">Trek willekeurig</button>
+        </div>
+        <div class="panel-body">
+          <div class="card-deck" id="crisis-deck-r2"></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Coalitieakkoord formulier -->
+      <div class="panel akkoord-section">
+        <div class="panel-header">
+          <div class="panel-title">📜 Coalitieakkoord</div>
+          <div class="akkoord-tv-btns">
+            <button class="btn btn-sm btn-success" onclick="broadcastAkkoord()">▶ Toon op TV</button>
+            <button class="btn btn-sm" onclick="broadcast('phase',{phase:'r2'});notify('Coalitieakkoord gesloten op TV')">✕ Sluit TV</button>
+            <button class="btn btn-sm" onclick="exportAkkoord()">📋 Kopieer tekst</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="akkoord-field">
+            <div class="akkoord-label">Titel van het akkoord</div>
+            <input class="akkoord-input" id="akkoord-titel" type="text" placeholder="Coalitieakkoord van Nederland" oninput="state.coalitie.titel=this.value;saveState()">
+          </div>
+          <div class="akkoord-field">
+            <div class="akkoord-label">Minister-President</div>
+            <select class="akkoord-select" id="akkoord-premier" onchange="state.coalitie.premier=this.value;saveState()">
+              <option value="">— Kies coalitielid —</option>
+            </select>
+          </div>
+          <div class="akkoord-field">
+            <div class="akkoord-label">Ministeries per coalitielid</div>
+            <div class="akkoord-ministeries-grid" id="akkoord-ministeries">
+              <div class="akkoord-no-coalition">Nog geen coalitie geselecteerd in Zetelverdeling.</div>
+            </div>
+          </div>
+          <div class="akkoord-field">
+            <div class="akkoord-label">Programmapunten</div>
+            <div class="akkoord-punten-list" id="akkoord-punten"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RONDE 3 -->
+    <div class="phase-content" id="phase-r3">
+      <div class="phase-title">Ronde 3 — De Regeerperiode</div>
+      <div class="phase-duration">±30 minuten</div>
+
+      <div class="hint-box" style="margin-bottom:20px;">
+        Het kabinet is gevormd. Informateur leest 8 wetsvoorstellen voor. Per wet: debat, lobby, stemming. Elke speler stemt met zijn aantal zetels. 76+ zetels vóór = aangenomen.
+      </div>
+
+      <!-- Law selector -->
+      <div class="law-selector" id="law-selector"></div>
+      <div id="law-display-area"></div>
+
+      <!-- Voting -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">🗳 Stemming</div>
+          <button class="btn btn-sm" onclick="resetVote()">Reset stemmen</button>
+        </div>
+        <div class="panel-body" style="padding:8px;">
+          <div id="vote-rows"></div>
+          <div class="vote-result">
+            <div class="vote-count">
+              <div class="vote-count-num voor" id="vote-voor">0</div>
+              <div class="vote-count-label">Vóór</div>
+            </div>
+            <div class="vote-count">
+              <div class="vote-count-num tegen" id="vote-tegen">0</div>
+              <div class="vote-count-label">Tegen</div>
+            </div>
+            <div class="vote-verdict" id="vote-verdict">—</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+            <button class="btn btn-sm" onclick="publishVote()">▶ Publiceer op TV</button>
+            <button class="btn btn-success" onclick="recordLawResult('passed')">✓ Aangenomen</button>
+            <button class="btn btn-danger" onclick="recordLawResult('rejected')">✗ Verworpen</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Amendement tracking -->
+      <div class="amendement-panel" id="amendement-panel">
+        <div class="amendement-header">✏️ Amendement ingediend</div>
+        <div class="amendement-row">
+          <select class="amendement-select" id="amendement-select" onchange="setAmendement(this.value)">
+            <option value="">— Geen amendement —</option>
+          </select>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text-dim);margin-top:8px;">Als een amendement wordt overgenomen, ontvangt die partij automatisch +2 punten.</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="steps">
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">▶</div>
+          <div class="step-text">
+            <span class="step-label">Flow per wetsvoorstel (±4 min)</span>
+            1. Informateur leest wet voor<br>
+            2. MP verdedigt (30 sec), grootste oppositiepartij reageert (30 sec)<br>
+            3. Lobby-tijd (2 min): vrij onderhandelen<br>
+            4. Stemming: groen/rood kaart omhoog
+            <div class="quick-timers" style="margin-top:10px;">
+              <button class="quick-btn" onclick="startTimer(30,'MP verdedigt')">▶ 30 sec</button>
+              <button class="quick-btn" onclick="startTimer(120,'Lobby-tijd')">▶ 2 min lobby</button>
+              <button class="quick-btn" onclick="startTimer(240,'Wetsvoorstel')">▶ 4 min totaal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RONDE 4 -->
+    <div class="phase-content" id="phase-r4">
+      <div class="phase-title">Ronde 4 — De Kabinetscrisis</div>
+      <div class="phase-duration">±20 minuten</div>
+
+      <div class="hint-box" style="margin-bottom:20px;">
+        6 steeds heftiger crisismomenten. Na elke crisis stemt de hele Kamer: GROEN (vertrouwen) of ROOD (geen vertrouwen). 76+ zetels rood = kabinet valt!
+      </div>
+
+      <!-- Geheime Agenda's -->
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="panel-header">
+          <div class="panel-title">🃏 Geheime Agenda's — Onthullen</div>
+          <button class="btn btn-sm" onclick="revealAllAgendas()">Onthul alles</button>
+        </div>
+        <div class="panel-body">
+          <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:12px;">Klik per partij om de agenda te onthullen aan het einde van ronde 4.</p>
+          <div class="agenda-grid" id="agenda-grid"></div>
+        </div>
+      </div>
+
+      <!-- Kabinetscrisis kaarten -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">💥 Kabinetscrisis Kaarten</div>
+        </div>
+        <div class="panel-body">
+          <div class="card-deck" id="crisis-deck-r4"></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="steps">
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">▶</div>
+          <div class="step-text">
+            <span class="step-label">Flow per crisis (±3 min)</span>
+            1. Informateur leest crisiskaart voor<br>
+            2. MP bezweert crisis (30 sec), oppositiepartij reageert (30 sec)<br>
+            3. Stemming: groen/rood<br>
+            4. 76+ rood = kabinet valt direct!
+            <div class="quick-timers" style="margin-top:10px;">
+              <button class="quick-btn" onclick="startTimer(30,'MP bezweert')">▶ 30 sec</button>
+              <button class="quick-btn" onclick="startTimer(180,'Crisis totaal')">▶ 3 min</button>
+            </div>
+          </div>
+        </div>
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">💀</div>
+          <div class="step-text">
+            <span class="step-label">Als het kabinet valt</span>
+            MP houdt afscheidsrede 30 sec. Onthul alle geheime agenda's. Reken punten af.
+          </div>
+        </div>
+        <div class="step" onclick="toggleStep(this)">
+          <div class="step-num">🏆</div>
+          <div class="step-text">
+            <span class="step-label">Als het kabinet overleeft</span>
+            MP houdt overwinningsrede 30 sec. Onthul alle geheime agenda's. Reken punten af.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EINDSTAND -->
+    <div class="phase-content" id="phase-score">
+      <div class="phase-title">Eindstand</div>
+      <div class="phase-duration">Wie is de grootste politicus van de avond?</div>
+
+      <div class="hint-box" style="margin-bottom:20px;">
+        Controleer alle puntencategorieën per partij en druk dan op "Toon winnaar op TV".
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">📊 Scorebord</div>
+          <button class="btn btn-primary btn-sm" onclick="broadcastWinner()">🏆 Toon Winnaar op TV</button>
+        </div>
+        <div class="panel-body" style="padding:8px;">
+          <div id="scoreboard-detail"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end content-area -->
+
+  <!-- RIGHT: SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- TIMER -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">⏱ Timer</div>
+      </div>
+      <div class="timer-display">
+        <div class="timer-time" id="timer-display">2:00</div>
+        <div class="timer-label" id="timer-label">Klaar om te starten</div>
+        <div class="timer-controls">
+          <button class="btn btn-primary" id="timer-toggle" onclick="toggleTimer()">▶ Start</button>
+          <button class="btn" onclick="resetTimer()">↺ Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ZETELVERDELING -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">🏛 Zetelverdeling</div>
+        <button class="btn btn-sm" onclick="broadcastSeats()">📺 Stuur</button>
+      </div>
+      <div class="panel-body" style="padding:8px;">
+        <div class="party-grid" id="party-grid"></div>
+        <div class="seats-total">
+          <div class="seats-coalition">Coalitie:</div>
+          <div class="seats-number" id="coalition-total">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCOREBOARD SIDEBAR -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">🏆 Snelle Score</div>
+        <button class="btn btn-sm" onclick="broadcastScore()">📺 Stuur</button>
+      </div>
+      <div class="panel-body" style="padding:8px;">
+        <div class="score-grid" id="score-grid-sidebar"></div>
+      </div>
+    </div>
+
+  </div><!-- end sidebar -->
+</div><!-- end main-layout -->
+
+<!-- NOTIFICATION -->
+<div class="notification" id="notification"></div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const PARTIES = [
+  { id: 'PPP', name: 'PPP', full: 'Partij voor Plant en Planeet', seats: 15 },
+  { id: 'FBL', name: 'FBL', full: 'Front voor Betaalbaar Luieren', seats: 15 },
+  { id: 'KCV', name: 'KCV', full: 'Kunst, Cultuur en Vlaai', seats: 15 },
+  { id: 'WIFI', name: 'WIFI', full: 'Werkelijk Innovatief Fantastisch Internet', seats: 15 },
+  { id: 'DAM', name: 'DAM', full: 'De Absolute Middenpartij', seats: 15 },
+  { id: 'VBB', name: 'VBB', full: 'Verbond voor Bitterballen en Borrel', seats: 15 },
+  { id: 'KKB', name: 'KKB', full: 'De Koninklijke Kaasbeweging', seats: 15 },
+  { id: 'DDP', name: 'DDP', full: 'De Dikke Portemonnee', seats: 15 },
+  { id: 'FRR', name: 'FRR', full: 'Front voor Rust, Regels en Regelmaat', seats: 15 },
+  { id: 'PAN', name: 'PAN', full: 'Partij Absoluut Niks', seats: 15 },
+];
+
+// ============================================================
+// DYNAMISCHE PARTIJSELECTIE
+// ============================================================
+function getActiveParties() {
+  if (!state || !state.selectedPartyIds || state.selectedPartyIds.length === 0) return PARTIES;
+  return PARTIES.filter(p => state.selectedPartyIds.includes(p.id));
+}
+function getMajorityThreshold() {
+  return Math.floor(getActiveParties().length * 15 / 2) + 1;
+}
+function getTotalSeats() {
+  return getActiveParties().reduce((s, p) => s + (state.seats[p.id] || 15), 0);
+}
+
+const PARTY_LEADERS = {
+  PPP:  'Bloem Windmolen-de Vries',
+  FBL:  'Sjaak van de Hangmat',
+  KCV:  'Floris-Jan van het Podium',
+  WIFI: 'Byte van Dijkstra',
+  DAM:  'Jan-Willem Gemiddeld',
+  VBB:  'Henk Krokansen',
+  KKB:  'Gouda van Leerdammer',
+  DDP:  'Maximiliansen van Cashflow III',
+  FRR:  'Gerrit Klokslag',
+  PAN:  'Nihil "Nelis" van Niansen',
+};
+
+const PARTY_QUIRKS = {
+  PPP:  'Mag het woord "economie" niet zeggen → zegt "eco-harmonie" + boom-knuffel-gebaar',
+  FBL:  'Gaapt demonstratief, stelt constant voor om pauze te nemen',
+  KCV:  'Citeert steeds verzonnen dichters en filosofen',
+  WIFI: 'Vervangt alles door Engelse tech-termen ("coalition-API updaten")',
+  DAM:  'Kan nooit ergens definitief voor of tegen zijn, maakt zinnen nooit af',
+  VBB:  'Onderbouwt elk argument met een vergelijking met eten',
+  KKB:  'Relateert werkelijk alles aan kaas',
+  DDP:  'Noemt alles een "investering" of "groeikans"',
+  FRR:  'Houdt iedereen streng aan de tijd, kijkt constant op horloge',
+  PAN:  'Is het automatisch oneens met het laatste wat iemand zei',
+};
+
+const PARTY_CROWN_JEWELS = {
+  PPP:  'Vleesvrije Werkweek',
+  FBL:  '3-daagse werkweek',
+  KCV:  'Nationale Vlaaidag als officiële feestdag',
+  WIFI: 'WiFi als grondrecht',
+  DAM:  'Werkgroep over het woord "draagvlak"',
+  VBB:  'BTW op snacks naar 0%',
+  KKB:  'Ministerie van Zuivel',
+  DDP:  'Belastingverlaging',
+  FRR:  'De avondklok',
+  PAN:  'Minimaal één wet afschaffen',
+};
+
+const PARTY_INTROS = {
+  PPP:  'De enige partij die de planeet boven de portemonnee stelt. Bloem Windmolen-de Vries strijdt voor een vleesvrije werkweek en een groenere toekomst — ook als dat "eco-harmonisch" klinkt. Kroonjuweel: de Vleesvrije Werkweek.',
+  FBL:  'Rust is een recht, geen luxe. Sjaak van de Hangmat pleit voor de 3-daagse werkweek en betaalbaar niksdoen voor iedereen. Eventueel na de pauze. Kroonjuweel: de 3-daagse werkweek.',
+  KCV:  'Schoonheid, cultuur en gebak als staatszaak. Floris-Jan van het Podium wil de Nationale Vlaaidag invoeren als officiële feestdag. De filosofen zijn het erover eens — ook al bestaan ze niet. Kroonjuweel: de Nationale Vlaaidag.',
+  WIFI: 'Internet is een grondrecht. Byte van Dijkstra wil WiFi voor iedereen en innovatie als nationaal speerpunt. De coalition-API moet worden geüpdatet. Kroonjuweel: WiFi als grondrecht.',
+  DAM:  'Niemand blij, niemand boos. Jan-Willem Gemiddeld zoekt draagvlak, vormt werkgroepen en houdt zijn opties open. Definitief besluiten doet hij misschien... later. Kroonjuweel: meer draagvlak en een werkgroep.',
+  VBB:  'Gezelligheid is beleid. Henk Krokansen wil de BTW op snacks naar 0% — want een land dat samenkomt bij bitterballen, formeert beter. Kroonjuweel: BTW snacks naar 0%.',
+  KKB:  'Nederland is kaas, kaas is Nederland. Gouda van Leerdammer eist een Ministerie van Zuivel en beschermt de Hollandse identiteit met hart en ziel. Kroonjuweel: het Ministerie van Zuivel.',
+  DDP:  'Minder belasting, meer groei. Maximiliansen van Cashflow III ziet in elke uitgave een investering en in elke bezuiniging een groeikans. De markt lost het op. Kroonjuweel: belastingverlaging.',
+  FRR:  'Orde, structuur en een avondklok. Gerrit Klokslag houdt iedereen aan de tijd en eist concrete regels in elk akkoord. Vergaderen zonder agenda is bij FRR verboden. Kroonjuweel: de avondklok.',
+  PAN:  'Minder is meer. Nihil "Nelis" van Niansen wil wetten schrappen, regels afschaffen en de overheid terugdringen. Hij is het trouwens niet eens met wat net werd gezegd. Kroonjuweel: minimaal één wet afschaffen.',
+};
+
+const PARTY_DEALBREAKERS = {
+  PPP: 'KKB', FBL: 'DDP', KCV: 'PAN', WIFI: 'FRR',
+  DAM: null,   VBB: 'PPP', KKB: 'PPP', DDP: 'FBL', FRR: 'PAN', PAN: 'FRR',
+};
+
+const CRISIS_R2 = [
+  { num: 1, title: 'Geheim Overleg Uitgelekt!', text: 'De Informateur wijst twee partijen aan die stiekem samen gezien zijn. Zij moeten 2 minuten samen staan en hun "geheime plan" verzinnen en presenteren. De rest mag boe roepen.' },
+  { num: 2, title: 'De Koning Belt!', text: 'De partij met de meeste zetels moet binnen 30 seconden uitleggen hoe het gaat. Onvoldoende (groep stemt)? Die partij verliest 2 zetels.' },
+  { num: 3, title: 'Peiling Alert!', text: 'Gooi een dobbelsteen: EVEN = kleinste partij +3 zetels. ONEVEN = grootste partij -3 zetels. Pas de zetelverdeling aan!' },
+  { num: 4, title: 'Schandaal in de Kantine!', text: 'Willekeurige partij betrapt op stelen van bitterballen! Straf: -2 zetels ÉN excuus-speech van 30 seconden. Hoe dramatischer, hoe beter.' },
+  { num: 5, title: 'Twitterstorm!', text: 'Informateur kiest partij. Die heeft per ongeluk een extreem dom bericht op X gezet. 30 sec standpunt verdedigen terwijl ALLE anderen "BOE!" en "AFTREDEN!" roepen.' },
+  { num: 6, title: 'Dubbelagent!', text: 'Één partij heeft stiekem met de oppositie gesproken! Die mag 2 minuten met IEDEREEN tegelijk onderhandelen — in het openbaar. Alle deals liggen op tafel.' },
+  { num: 7, title: 'De Telegraaf Lekt!', text: 'Alle lopende geheime afspraken worden NU hardop voorgelezen! Daarna mag iedereen 2 minuten van partner wisselen.' },
+  { num: 8, title: 'Motie Tegen de Informateur!', text: 'Bij meerderheid wordt de Informateur 5 minuten vervangen door de speler met de MINSTE zetels. Die is nu tijdelijk de baas.' },
+  { num: 9, title: 'Koningshuis in Crisis!', text: 'De Koning dreigt af te treden als er niet binnen 5 minuten een doorbraak is! Alle partijen moeten NU in dezelfde ruimte blijven — onderhandel in het openbaar!' },
+  { num: 10, title: 'Wildcard!', text: 'De Informateur bedenkt TER PLEKKE een crisiskaart! Mag alles zijn, zolang het grappig en eerlijk is. Geen genade.' },
+];
+
+const CRISIS_R4 = [
+  { num: '1/6', severity: 'MILD', title: 'De Bonnetjesaffaire', text: 'De Minister van Financiën heeft voor €47.000 aan bitterballen gedeclareerd op de staatsrekening. "Het was een werkdiner," verklaart hij. "Alle 47 avonden."' },
+  { num: '2/6', severity: 'MEDIUM', title: 'Het Appjes-lek', text: 'Een journalist publiceert appjes van de MP. Daarin noemt de MP de oppositie "een stel circusclowns zonder tent" en de eigen coalitiepartners "noodzakelijk kwaad."' },
+  { num: '3/6', severity: 'MEDIUM', title: 'Het Begrotingsgat', text: 'Het CPB rekent het coalitieakkoord door: er mist 6 miljard euro. Iemand heeft de komma verkeerd gezet. De pers gaat los.' },
+  { num: '4/6', severity: 'ZWAAR', title: 'De Overstap', text: 'De grootste oppositiepartij biedt aan toe te treden — maar alleen als de MP opstapt. De Informateur wijst aan welke partijen dit betreft.' },
+  { num: '5/6', severity: 'ZWAAR', title: 'Het Gebroken Belofte', text: 'Een interne memo lekt uit: het belangrijkste punt uit het coalitieakkoord zou nooit echt uitgevoerd worden. De Informateur kiest welk punt dit is.' },
+  { num: '6/6', severity: 'EXTREEM', title: 'De Nacht van...', text: 'De Koning ontbiedt de MP. Het parlement is in rep en roer. EXTRA: De Informateur mag voor deze stemming de geheime agenda van één speler onthullen!' },
+];
+
+const LAWS = [
+  { num: 1, title: 'De Nationale Snackwet', text: 'BTW op alle traditionele Nederlandse snacks (bitterballen, frikandellen, kroketten, kaassoufflés) wordt verlaagd naar 0%.', hint: 'VBB/KKB/DDP waarschijnlijk vóór. PPP waarschijnlijk tegen (ongezond, dierlijk). FBL neutraal. FRR wil "verantwoord snackbeleid".' },
+  { num: 2, title: 'Wet Digitale Grondrechten', text: 'Gratis WiFi wordt als grondrecht opgenomen in de Grondwet. Elke Nederlander heeft recht op een basisniveau gratis internet.', hint: 'WIFI/DDP/KCV waarschijnlijk vóór. FRR waarschijnlijk tegen (meer schermtijd). PAN misschien vóór (gratis spul).' },
+  { num: 3, title: 'De Nationale Siësta Act', text: 'Verplichte middagpauze van 14:00 tot 15:30 voor alle werknemers. Werkgevers die bellen of mailen tijdens de siësta worden beboet.', hint: 'FBL/VBB vóór (rust en borrel!). DDP/FRR sterk tegen. PPP vóór (minder produceren). PAN: "Afschaffen van de middag!"' },
+  { num: 4, title: 'De Groene Woensdag', text: 'Elke woensdag wordt autovrij in heel Nederland. Alle niet-essentiële winkels zijn dicht. Iedereen besteedt de dag aan natuur en gemeenschap.', hint: 'PPP sterk vóór, FBL vóór (vrije dag!). DDP/VBB sterk tegen (economie, horeca dicht!). KKB: "Kaasmarkten dan ook dicht?!"' },
+  { num: 5, title: 'Kaas als Strategische Reserve', text: 'Nederland legt een nationale kaasvoorraad aan van 10 miljoen kilo, vergelijkbaar met de strategische oliereserve.', hint: 'KKB in tranen van geluk. VBB vóór. DDP ziet investering. PPP sterk tegen (zuivelindustrie).' },
+  { num: 6, title: 'De Grote Cultuurwet', text: 'De cultuurbegroting wordt verdubbeld. Daarnaast wordt een verplicht kunstvak ingevoerd voor alle volwassenen: 20 uur per jaar.', hint: 'KCV extatisch. FBL vóór. DDP sterk tegen (kosten). VBB: "Mag het kookkunst zijn?"' },
+  { num: 7, title: 'Wet Afschaffing Eigen Risico', text: 'Het eigen risico in de zorg wordt volledig afgeschaft. Kosten gedekt door verhoging inkomensbelasting met 1,5%.', hint: 'PPP/FBL/KCV/PAN vóór. DDP sterk tegen. FRR: "Eigen verantwoordelijkheid!" DAM: "Misschien halveren?"' },
+  { num: 8, title: 'De Nationale Efficiëntiewet', text: 'Alle overheidsvergaderingen maximaal 30 minuten. Alle formulieren en communicatie uitsluitend digitaal.', hint: 'WIFI/DDP vóór. FRR deels (efficiënt = goed, digitaal = eng). DAM sterk tegen ("Werkgroepen hebben TIJD nodig!"). PAN vóór (minder overheid).' },
+];
+
+const AGENDA_DISTRIBUTION = {
+  6:  ['LOYALIST','LOYALIST','OPSTANDELING','OPSTANDELING','OPPORTUNIST','KINGMAKER'],
+  7:  ['LOYALIST','LOYALIST','LOYALIST','OPSTANDELING','OPSTANDELING','OPPORTUNIST','KINGMAKER'],
+  8:  ['LOYALIST','LOYALIST','LOYALIST','OPSTANDELING','OPSTANDELING','OPSTANDELING','OPPORTUNIST','KINGMAKER'],
+  9:  ['LOYALIST','LOYALIST','LOYALIST','OPSTANDELING','OPSTANDELING','OPSTANDELING','OPPORTUNIST','OPPORTUNIST','KINGMAKER'],
+  10: ['LOYALIST','LOYALIST','LOYALIST','OPSTANDELING','OPSTANDELING','OPSTANDELING','OPPORTUNIST','OPPORTUNIST','KINGMAKER','KINGMAKER'],
+};
+const AGENDA_TYPES = AGENDA_DISTRIBUTION[10]; // backwards compat
+
+const TUTORIAL_SLIDES = [
+  {
+    icon: '⚖',
+    title: 'Welkom bij De Formatie',
+    subtitle: 'Een politieke spellenavond voor 11 spelers',
+    type: 'bullets',
+    content: [
+      '10 spelers vertegenwoordigen elk een politieke partij',
+      '1 speler is de Informateur — de spelleider van de avond',
+      'Doel: zoveel mogelijk punten scoren via slimme onderhandelingen',
+      'De avond duurt 4 rondes: Campagne → Formatie → Regeerperiode → Kabinetscrisis',
+      'Alles wat je nodig hebt staat op je partijkaart en objectievenkaart',
+    ],
+  },
+  {
+    icon: '🎯',
+    title: 'Hoe win je punten?',
+    subtitle: 'Meerdere wegen naar de overwinning',
+    type: 'grid',
+    content: [
+      ['In de coalitie', '+5 pt'],
+      ['Must-have in akkoord', '+5 pt'],
+      ['Geheime bonus behaald', '+3 pt'],
+      ['Dealbreaker geschonden', '−5 pt'],
+      ['Per wet aan winnende kant', '+1 pt'],
+      ['Amendement overgenomen', '+2 pt'],
+      ['Geheime agenda behaald', '+3 pt'],
+      ['MP overleeft alle 6 crises', '+2 pt'],
+    ],
+  },
+  {
+    icon: '🏛',
+    title: 'De tien partijen',
+    subtitle: 'Elk met 15 zetels, elk met een eigen karakter',
+    type: 'grid',
+    content: [
+      ['PPP', 'Partij voor Plant en Planeet'],
+      ['FBL', 'Front voor Betaalbaar Luieren'],
+      ['KCV', 'Kunst, Cultuur en Vlaai'],
+      ['WIFI', 'Werkelijk Innovatief Fantastisch Internet'],
+      ['DAM', 'De Absolute Middenpartij'],
+      ['VBB', 'Verbond voor Bitterballen en Borrel'],
+      ['KKB', 'De Koninklijke Kaasbeweging'],
+      ['DDP', 'De Dikke Portemonnee'],
+      ['FRR', 'Front voor Rust, Regels en Regelmaat'],
+      ['PAN', 'Partij Absoluut Niks'],
+    ],
+  },
+  {
+    icon: '🃏',
+    title: 'Jouw partijkaart',
+    subtitle: 'Lees hem goed — dit is jouw speelgids voor de avond',
+    type: 'bullets',
+    content: [
+      '🏅 Lijsttrekker — jouw personage-naam voor de avond',
+      '💎 Kroonjuweel — jouw must-have voor het coalitieakkoord (+5 pt als het erin staat)',
+      '🚫 Dealbreaker — met welke partij je NOOIT in coalitie mag (−5 pt als je het tóch doet)',
+      '🎭 Karakter-quirk — grappige gedragsregel die je de hele avond speelt',
+      '🔒 Objectievenkaart — geheime bonusdoel voor extra +3 punten (houd geheim!)',
+    ],
+  },
+  {
+    icon: '📣',
+    title: 'Ronde 1 — Campagne',
+    subtitle: '30 minuten · Debat en stemming',
+    type: 'bullets',
+    content: [
+      '① Elke partij houdt een campagnepitch van 1 minuut',
+      '② Speed-debat: 2 willekeurige partijen confronteren elkaar (telkens 2 min)',
+      '③ Zetelstemming: alle spelers verplaatsen stemfiches op basis van de pitches',
+      '④ De Informateur telt de zetels en past de zetelverdeling aan',
+      '⚡ Zetels bepalen jouw onderhandelingsmacht in Ronde 2!',
+    ],
+  },
+  {
+    icon: '🤝',
+    title: 'Ronde 2 — Formatie',
+    subtitle: '45 minuten · Onderhandelen en een coalitie vormen',
+    type: 'bullets',
+    content: [
+      'Partijen onderhandelen vrij over een coalitie (meerderheid = 76+ zetels)',
+      'De Informateur begeleidt het proces in 5 fases',
+      'Crisiskaarten kunnen de onderhandelingen verstoren — wees voorbereid!',
+      'De Informateur heeft superkrachten: tijdstop, geheime info, veto, enz.',
+      'Resultaat: een coalitie met een ondertekend coalitieakkoord',
+    ],
+  },
+  {
+    icon: '📋',
+    title: 'Het Coalitieakkoord',
+    subtitle: 'Het contract van de coalitie — hier worden punten verdiend',
+    type: 'bullets',
+    content: [
+      'De coalitie schrijft samen een akkoord met programmapunten',
+      'Elk kroonjuweel dat erin staat = +5 punten voor die partij',
+      'Dealbreaker-partij in de coalitie = −5 punten (ook als je tekent!)',
+      'Geheime bonussen kunnen gekoppeld zijn aan titels en ministeries',
+      'De Informateur toont het akkoord live op het TV-scherm',
+    ],
+  },
+  {
+    icon: '📜',
+    title: 'Ronde 3 — Regeerperiode',
+    subtitle: '30 minuten · 8 wetsvoorstellen behandelen',
+    type: 'bullets',
+    content: [
+      '8 wetsvoorstellen worden één voor één behandeld',
+      'Iedereen stemt: VOOR of TEGEN (met groene/rode kaart)',
+      'Aangenomen bij 76+ zetels aan de VOOR-kant',
+      '+1 punt voor elke partij aan de winnende kant',
+      'Amendement indienen? Zeg het aan de Informateur — bij goedkeuring +2 punten',
+    ],
+  },
+  {
+    icon: '💥',
+    title: 'Ronde 4 — Kabinetscrisis',
+    subtitle: '20 minuten · 6 crises, oplopend in ernst',
+    type: 'bullets',
+    content: [
+      '6 crisiskaarten worden één voor één onthuld (oplopend in ernst)',
+      'Na elke crisis stemt de Kamer: overleeft de MP (Minister-President)?',
+      'Als de MP alle 6 crises overleeft: +2 bonuspunten voor de coalitie',
+      'Na alle crises: geheime agenda\'s onthullen — wie heeft zijn doel behaald?',
+      'Dan volgt de eindstand — wie heeft de meeste punten gescoord?',
+    ],
+  },
+  {
+    icon: '🎭',
+    title: 'Geheime agenda\'s',
+    subtitle: 'Willekeurig verdeeld — niemand weet wie welke heeft',
+    type: 'grid',
+    content: [
+      ['LOYALIST (3×)', 'Overleef met de MP alle 6 crises — stem nooit tegen hem'],
+      ['OPSTANDELING (3×)', 'Stem minimaal 2× TEGEN de MP bij een crisis'],
+      ['OPPORTUNIST (2×)', 'Zit in de coalitie én stem minimaal 1× TEGEN de MP'],
+      ['KINGMAKER (2×)', 'Zit NIET in de coalitie maar MP overleeft toch alle crises'],
+    ],
+  },
+  {
+    icon: '🚀',
+    title: 'Klaar om te spelen!',
+    subtitle: 'Pak je partijkaart en veel succes!',
+    type: 'closing',
+    content: [
+      '🎭 Blijf in karakter — speel je quirk gedurende de hele avond',
+      '🤫 Houd je geheime objectief voor jezelf',
+      '🤝 Onderhandel slim — niet alles wat je belooft hoef je te houden',
+      '⚖ De Informateur is de baas — luister naar zijn aanwijzingen',
+      '🍀 Veel succes en een fantastische spellenavond!',
+    ],
+  },
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  selectedPartyIds: [],
+  gameStarted: false,
+  seats: {},
+  coalition: {},
+  scores: {},
+  votes: {},
+  lawResults: {},
+  agendas: {},
+  currentLaw: 1,
+  crisisRevealed: {},
+  agendaRevealed: {},
+  superpowersUsed: {},
+  superpowerLog: [],
+  timerSeconds: 120,
+  timerRunning: false,
+  timerLabel: 'Klaar om te starten',
+  timerDefault: 120,
+  players: [],
+  assignments: {},
+  coalitie: { titel: '', premier: '', ministeries: {}, punten: ['', '', '', '', '', ''] },
+  amendementen: {},
+};
+
+// Load opgeslagen state (als die bestaat)
+(function() {
+  try {
+    const saved = localStorage.getItem('formatie_state');
+    if (saved) Object.assign(state, JSON.parse(saved));
+  } catch(e) {}
+})();
+
+// ============================================================
+// GAME INIT
+// ============================================================
+function initGameState() {
+  const active = getActiveParties();
+  active.forEach(p => {
+    if (!(p.id in state.seats)) state.seats[p.id] = p.seats;
+    if (!(p.id in state.coalition)) state.coalition[p.id] = false;
+    if (!state.scores[p.id]) state.scores[p.id] = { coalition: 0, mustHave: 0, bonus: 0, dealbreaker: 0, regeer: 0, agenda: 0, mp: 0, amendement: 0 };
+    if (state.scores[p.id] && state.scores[p.id].amendement === undefined) state.scores[p.id].amendement = 0;
+    if (!(p.id in state.votes)) state.votes[p.id] = null;
+  });
+  // Players array: exactly one slot per active party
+  if (!state.players || state.players.length !== active.length) {
+    state.players = Array(active.length).fill('').map((_, i) => (state.players || [])[i] || '');
+  }
+  // Random agenda-toewijzing alleen als nog niet gedaan
+  if (Object.keys(state.agendas).length === 0) {
+    const dist = AGENDA_DISTRIBUTION[active.length] || AGENDA_DISTRIBUTION[10];
+    const shuffled = [...dist].sort(() => Math.random() - 0.5);
+    active.forEach((p, i) => { state.agendas[p.id] = shuffled[i]; });
+    saveState();
+  }
+}
+
+if (state.gameStarted && state.selectedPartyIds.length >= 6) {
+  initGameState();
+}
+
+// ============================================================
+// STATE PERSISTENTIE
+// ============================================================
+function saveState() {
+  try {
+    localStorage.setItem('formatie_state', JSON.stringify({ ...state, timerRunning: false }));
+  } catch(e) {}
+}
+
+// ============================================================
+// BROADCAST TO TV (localStorage)
+// ============================================================
+function broadcast(type, data) {
+  localStorage.setItem('formatie_event', JSON.stringify({ type, data, ts: Date.now() }));
+}
+
+// ============================================================
+// GELUID (Web Audio API)
+// ============================================================
+function playSound(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const sounds = {
+      timer: (ctx) => {
+        // 3x hoog-laag alarm
+        [0, 0.35, 0.7].forEach(offset => {
+          const o = ctx.createOscillator(); const g = ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.frequency.setValueAtTime(880, ctx.currentTime + offset);
+          o.frequency.setValueAtTime(550, ctx.currentTime + offset + 0.15);
+          g.gain.setValueAtTime(0.4, ctx.currentTime + offset);
+          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + 0.3);
+          o.start(ctx.currentTime + offset); o.stop(ctx.currentTime + offset + 0.3);
+        });
+      },
+      crisis: (ctx) => {
+        // Dramatische lage dreun
+        const o = ctx.createOscillator(); const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type = 'sawtooth'; o.frequency.setValueAtTime(110, ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(55, ctx.currentTime + 0.8);
+        g.gain.setValueAtTime(0.5, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+        o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.8);
+      },
+      superpower: (ctx) => {
+        // Oplopend powerup-geluid
+        const o = ctx.createOscillator(); const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.setValueAtTime(330, ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(990, ctx.currentTime + 0.25);
+        g.gain.setValueAtTime(0.3, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.3);
+      },
+      winner: (ctx) => {
+        // Stijgende fanfare: 5 noten
+        const notes = [523, 659, 784, 1047, 1319];
+        notes.forEach((freq, i) => {
+          const o = ctx.createOscillator(); const g = ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.frequency.value = freq;
+          const t = ctx.currentTime + i * 0.15;
+          g.gain.setValueAtTime(0.35, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+          o.start(t); o.stop(t + 0.4);
+        });
+      },
+    };
+    if (sounds[type]) sounds[type](ctx);
+  } catch(e) {}
+}
+
+// ============================================================
+// TUTORIAL
+// ============================================================
+let currentTutorialSlide = -1;
+
+function startTutorial() {
+  currentTutorialSlide = 0;
+  sendTutorialSlide(0);
+}
+
+function sendTutorialSlide(n) {
+  const slide = TUTORIAL_SLIDES[n];
+  broadcast('tutorial', {
+    slideIndex: n,
+    total: TUTORIAL_SLIDES.length,
+    icon: slide.icon,
+    title: slide.title,
+    subtitle: slide.subtitle,
+    type: slide.type,
+    content: slide.content,
+  });
+  updateTutorialControls();
+}
+
+function prevTutorialSlide() {
+  if (currentTutorialSlide > 0) {
+    currentTutorialSlide--;
+    sendTutorialSlide(currentTutorialSlide);
+  }
+}
+
+function nextTutorialSlide() {
+  if (currentTutorialSlide < TUTORIAL_SLIDES.length - 1) {
+    currentTutorialSlide++;
+    sendTutorialSlide(currentTutorialSlide);
+  }
+}
+
+function closeTutorial() {
+  currentTutorialSlide = -1;
+  broadcast('tutorial', { close: true });
+  updateTutorialControls();
+}
+
+function updateTutorialControls() {
+  const indicator = document.getElementById('tutorial-indicator');
+  const prev = document.getElementById('tutorial-prev');
+  const next = document.getElementById('tutorial-next');
+  if (!indicator) return;
+  if (currentTutorialSlide < 0) {
+    indicator.textContent = '— niet gestart —';
+    prev.disabled = true;
+    next.disabled = true;
+  } else {
+    const slide = TUTORIAL_SLIDES[currentTutorialSlide];
+    indicator.textContent = `Dia ${currentTutorialSlide + 1} / ${TUTORIAL_SLIDES.length}: ${slide.title}`;
+    prev.disabled = currentTutorialSlide === 0;
+    next.disabled = currentTutorialSlide === TUTORIAL_SLIDES.length - 1;
+  }
+}
+
+function broadcastSeats() {
+  broadcast('seats', { seats: state.seats, coalition: state.coalition });
+  notify('Zetelverdeling verzonden naar TV');
+}
+
+function broadcastScore() {
+  broadcast('scores', { scores: state.scores, parties: getActiveParties() });
+  notify('Scorebord verzonden naar TV');
+}
+
+function broadcastWinner() {
+  const ranked = [...getActiveParties()].sort((a, b) => totalScore(b.id) - totalScore(a.id));
+  playSound('winner');
+  broadcast('winner', { winner: ranked[0], scores: state.scores, parties: getActiveParties() });
+  notify('Winnaar onthuld op TV!');
+}
+
+function broadcastAkkoord() {
+  broadcast('coalitie', { coalitie: state.coalitie, coalition: state.coalition, parties: getActiveParties() });
+  notify('Coalitieakkoord verzonden naar TV');
+}
+
+function exportAkkoord() {
+  const c = state.coalitie;
+  const titel = c.titel || 'Coalitieakkoord van Nederland';
+  const coalitiePartijen = getActiveParties().filter(p => state.coalition[p.id]).map(p => p.full).join(', ') || '—';
+  const premier = c.premier ? (PARTY_LEADERS[c.premier] || c.premier) + ` (${c.premier})` : '—';
+  const ministeries = getActiveParties().filter(p => state.coalition[p.id] && c.ministeries[p.id])
+    .map(p => `  ${p.name}: ${c.ministeries[p.id]}`).join('\n') || '  —';
+  const punten = (c.punten || []).filter(Boolean).map((p, i) => `  ${i + 1}. ${p}`).join('\n') || '  —';
+  const tekst = [
+    `=== ${titel} ===`,
+    ``,
+    `COALITIE: ${coalitiePartijen}`,
+    `MINISTER-PRESIDENT: ${premier}`,
+    ``,
+    `MINISTERIES:`,
+    ministeries,
+    ``,
+    `PROGRAMMAPUNTEN:`,
+    punten,
+  ].join('\n');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(tekst).then(() => notify('Akkoord gekopieerd naar klembord!'));
+  } else {
+    prompt('Kopieer het akkoord:', tekst);
+  }
+}
+
+// ============================================================
+// RESET SPEL
+// ============================================================
+function resetGame() {
+  if (!confirm('⚠️ Weet je zeker dat je het gehele spel wilt resetten?\n\nAlle scores, zetels, stemmen en voortgang worden gewist. Dit kan niet ongedaan worden gemaakt.')) return;
+  localStorage.removeItem('formatie_state');
+  localStorage.removeItem('formatie_event');
+  location.reload();
+}
+
+let exitPollParties = [];
+let exitPollReveal = 0;
+
+function broadcastExitPoll() {
+  exitPollParties = [...getActiveParties()]
+    .map(p => ({ id: p.id, name: p.name, full: p.full, seats: state.seats[p.id], inCoalition: state.coalition[p.id] }))
+    .sort((a, b) => a.seats - b.seats);
+  exitPollReveal = 0;
+  broadcast('exitpoll', { parties: [], allParties: exitPollParties });
+  updateExitPollBtn();
+  notify('Exit poll gestart — klik op "Volgende" om partijen te onthullen');
+}
+
+function revealNextExitPoll() {
+  if (exitPollReveal >= exitPollParties.length) return;
+  exitPollReveal++;
+  broadcast('exitpoll', { parties: exitPollParties.slice(0, exitPollReveal), allParties: exitPollParties });
+  updateExitPollBtn();
+  const p = exitPollParties[exitPollReveal - 1];
+  notify(`Onthuld: ${p.id} — ${p.seats} zetels (${exitPollReveal}/${exitPollParties.length})`);
+}
+
+function updateExitPollBtn() {
+  const btn = document.getElementById('ep-reveal-btn');
+  if (!btn) return;
+  if (exitPollParties.length === 0) {
+    btn.style.display = 'none';
+    return;
+  }
+  btn.style.display = 'block';
+  if (exitPollReveal >= exitPollParties.length) {
+    btn.textContent = '✓ Alle partijen onthuld';
+    btn.disabled = true;
+  } else {
+    btn.textContent = `▶ Onthul volgende partij (${exitPollReveal}/${exitPollParties.length})`;
+    btn.disabled = false;
+  }
+}
+
+function getCombinations(arr, size) {
+  if (size === 1) return arr.map(x => [x]);
+  return arr.flatMap((item, i) =>
+    getCombinations(arr.slice(i + 1), size - 1).map(rest => [item, ...rest])
+  );
+}
+
+// ===== COALITIE VERKENNER (HEMICYCLE) =====
+const HEMI_COLORS_IDX = {
+  PPP: '#27ae60', FBL: '#8e44ad', KCV: '#e67e22', WIFI: '#2980b9',
+  DAM: '#95a5a6', VBB: '#f1c40f', KKB: '#c9a84c', DDP: '#16a085',
+  FRR: '#546e8a', PAN: '#c0392b'
+};
+let hemicycleSelected = new Set();
+
+function renderHemiBuilder() {
+  const grid = document.getElementById('hemi-builder-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const active = getActiveParties();
+  const cols = active.length <= 6 ? 3 : active.length <= 8 ? 4 : 5;
+  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  active.forEach(p => {
+    const isSel = hemicycleSelected.has(p.id);
+    const color = HEMI_COLORS_IDX[p.id] || '#666';
+    const btn = document.createElement('button');
+    btn.className = 'hemi-party-btn' + (isSel ? ' selected' : '');
+    if (isSel) btn.style.background = color;
+    btn.innerHTML = `<span class="hpb-abbr">${p.name}</span><span class="hpb-seats">${state.seats[p.id]}z</span>`;
+    btn.onclick = () => {
+      if (hemicycleSelected.has(p.id)) hemicycleSelected.delete(p.id);
+      else hemicycleSelected.add(p.id);
+      renderHemiBuilder();
+      broadcastCoalities();
+    };
+    grid.appendChild(btn);
+  });
+
+  const total = [...hemicycleSelected].reduce((s, id) => s + (state.seats[id] || 0), 0);
+  const totalEl = document.getElementById('hemi-builder-total');
+  if (totalEl) {
+    totalEl.textContent = `${total} / ${getTotalSeats()}`;
+    totalEl.style.color = total >= getMajorityThreshold() ? 'var(--green)' : 'var(--gold)';
+  }
+}
+
+function broadcastCoalities() {
+  const parties = getActiveParties().map(p => ({
+    id: p.id, name: p.name, full: p.full, seats: state.seats[p.id], inCoalition: state.coalition[p.id]
+  }));
+  const selected = [...hemicycleSelected];
+  broadcast('coalitions', { parties, selected });
+  notify(`Hemicycle bijgewerkt — ${selected.length} partijen geselecteerd`);
+}
+
+// ============================================================
+// COALITIEAKKOORD FORMULIER
+// ============================================================
+function renderAkkoordForm() {
+  const premierEl = document.getElementById('akkoord-premier');
+  const ministeriesEl = document.getElementById('akkoord-ministeries');
+  const puntenEl = document.getElementById('akkoord-punten');
+  if (!premierEl) return;
+
+  // Init coalitie object in state if missing keys
+  if (!state.coalitie) state.coalitie = { titel: '', premier: '', ministeries: {}, punten: ['', '', '', '', '', ''] };
+
+  const coalitionParties = getActiveParties().filter(p => state.coalition[p.id]);
+
+  // Sync titel input value
+  const titelEl = document.getElementById('akkoord-titel');
+  if (titelEl && titelEl.value !== state.coalitie.titel) titelEl.value = state.coalitie.titel || '';
+
+  // Premier dropdown
+  const prevPremier = premierEl.value;
+  premierEl.innerHTML = '<option value="">— Kies coalitielid —</option>';
+  coalitionParties.forEach(p => {
+    const leaders = {
+      PPP:'Bloem Windmolen-de Vries', FBL:'Sjaak van de Hangmat', KCV:'Floris-Jan van het Podium',
+      WIFI:'Byte van Dijkstra', DAM:'Jan-Willem Gemiddeld', VBB:'Henk Krokansen',
+      KKB:'Gouda van Leerdammer', DDP:'Maximiliansen van Cashflow III', FRR:'Gerrit Klokslag',
+      PAN:'Nihil "Nelis" van Niansen'
+    };
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = `${p.name} — ${leaders[p.id]}`;
+    if (state.coalitie.premier === p.id) opt.selected = true;
+    premierEl.appendChild(opt);
+  });
+  if (prevPremier && coalitionParties.find(p => p.id === prevPremier)) premierEl.value = prevPremier;
+
+  // Ministeries grid
+  if (coalitionParties.length === 0) {
+    ministeriesEl.innerHTML = '<div class="akkoord-no-coalition">Nog geen coalitie geselecteerd in Zetelverdeling.</div>';
+  } else {
+    ministeriesEl.innerHTML = '';
+    coalitionParties.forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'akkoord-ministerie-row';
+      const currentVal = state.coalitie.ministeries[p.id] || '';
+      row.innerHTML = `
+        <div class="akkoord-ministerie-label">${p.name}</div>
+        <input class="akkoord-input" type="text" placeholder="Ministerie van ..." value="${currentVal.replace(/"/g,'&quot;')}"
+          oninput="state.coalitie.ministeries['${p.id}']=this.value;saveState()">
+      `;
+      ministeriesEl.appendChild(row);
+    });
+  }
+
+  // Programmapunten
+  if (!Array.isArray(state.coalitie.punten) || state.coalitie.punten.length < 6) {
+    state.coalitie.punten = Array(6).fill('').map((_, i) => (state.coalitie.punten || [])[i] || '');
+  }
+  puntenEl.innerHTML = '';
+  state.coalitie.punten.forEach((punt, i) => {
+    const row = document.createElement('div');
+    row.className = 'akkoord-punt-row';
+    row.innerHTML = `
+      <div class="akkoord-punt-num">${i + 1}.</div>
+      <input class="akkoord-input" type="text" placeholder="Afspraak ${i + 1}..." value="${punt.replace(/"/g,'&quot;')}"
+        oninput="state.coalitie.punten[${i}]=this.value;saveState()">
+    `;
+    puntenEl.appendChild(row);
+  });
+}
+
+// ============================================================
+// AMENDEMENT TRACKING
+// ============================================================
+function renderAmendementPanel() {
+  const sel = document.getElementById('amendement-select');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Geen amendement —</option>';
+  getActiveParties().forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = `${p.name} — ${p.full}`;
+    sel.appendChild(opt);
+  });
+  const current = state.amendementen[state.currentLaw];
+  sel.value = current || '';
+}
+
+function setAmendement(partyId) {
+  const lawNum = state.currentLaw;
+  const prev = state.amendementen[lawNum];
+
+  // Remove points from previous if any
+  if (prev && state.scores[prev]) {
+    state.scores[prev].amendement = Math.max(0, (state.scores[prev].amendement || 0) - 2);
+  }
+
+  if (partyId && partyId !== prev) {
+    state.amendementen[lawNum] = partyId;
+    if (state.scores[partyId]) {
+      state.scores[partyId].amendement = (state.scores[partyId].amendement || 0) + 2;
+    }
+    notify(`Amendement van ${partyId} op Wet ${lawNum} geregistreerd (+2)`);
+  } else {
+    state.amendementen[lawNum] = null;
+    if (partyId) notify(`Amendement op Wet ${lawNum} verwijderd`);
+  }
+
+  renderScoreSidebar();
+  renderScoreboardDetail();
+  renderLawSelector();
+  saveState();
+}
+
+function totalScore(id) {
+  const s = state.scores[id];
+  return (s.coalition||0) + (s.mustHave||0) + (s.bonus||0) + (s.dealbreaker||0) + (s.regeer||0) + (s.agenda||0) + (s.mp||0) + (s.amendement||0);
+}
+
+// ============================================================
+// TIMER
+// ============================================================
+let timerInterval = null;
+let timerCurrentSeconds = 120;
+let timerDefaultSeconds = 120;
+
+function startTimer(seconds, label) {
+  clearInterval(timerInterval);
+  timerDefaultSeconds = seconds;
+  timerCurrentSeconds = seconds;
+  state.timerLabel = label;
+  state.timerRunning = false;
+  updateTimerDisplay();
+  document.getElementById('timer-toggle').textContent = '▶ Start';
+  broadcast('timer', { seconds, label, running: false });
+  saveState();
+}
+
+function toggleTimer() {
+  if (state.timerRunning) {
+    clearInterval(timerInterval);
+    state.timerRunning = false;
+    document.getElementById('timer-toggle').textContent = '▶ Start';
+    broadcast('timer', { seconds: timerCurrentSeconds, label: state.timerLabel, running: false });
+  } else {
+    state.timerRunning = true;
+    document.getElementById('timer-toggle').textContent = '⏸ Pauze';
+    timerInterval = setInterval(() => {
+      timerCurrentSeconds--;
+      updateTimerDisplay();
+      broadcast('timer', { seconds: timerCurrentSeconds, label: state.timerLabel, running: true });
+      if (timerCurrentSeconds <= 0) {
+        clearInterval(timerInterval);
+        state.timerRunning = false;
+        document.getElementById('timer-toggle').textContent = '▶ Start';
+        document.getElementById('timer-display').textContent = '0:00';
+        playSound('timer');
+        broadcast('timer', { seconds: 0, label: state.timerLabel, running: false, done: true });
+      }
+    }, 1000);
+  }
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  state.timerRunning = false;
+  timerCurrentSeconds = timerDefaultSeconds;
+  document.getElementById('timer-toggle').textContent = '▶ Start';
+  updateTimerDisplay();
+  broadcast('timer', { seconds: timerCurrentSeconds, label: state.timerLabel, running: false });
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerCurrentSeconds / 60);
+  const s = timerCurrentSeconds % 60;
+  const el = document.getElementById('timer-display');
+  el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  el.className = 'timer-time';
+  if (timerCurrentSeconds <= 10) el.classList.add('danger');
+  else if (timerCurrentSeconds <= 30) el.classList.add('warning');
+  document.getElementById('timer-label').textContent = state.timerLabel;
+}
+
+// ============================================================
+// PARTY GRID
+// ============================================================
+function renderPartyGrid() {
+  const el = document.getElementById('party-grid');
+  el.innerHTML = '';
+  const sorted = [...getActiveParties()].sort((a,b) => state.seats[b.id] - state.seats[a.id]);
+  sorted.forEach(p => {
+    const inCoal = state.coalition[p.id];
+    const barW = Math.round((state.seats[p.id] / getTotalSeats()) * 100);
+    const row = document.createElement('div');
+    row.className = `party-row${inCoal ? ' coalition' : ''}`;
+    row.innerHTML = `
+      <button class="coalition-toggle${inCoal ? ' in' : ''}" onclick="toggleCoalition('${p.id}',this)" title="Coalitie"></button>
+      <div class="party-name">${p.name}</div>
+      <div class="party-bar-wrap"><div class="party-bar" style="width:${barW}%"></div></div>
+      <input class="party-seats-input" type="number" min="0" max="150" value="${state.seats[p.id]}" onchange="setSeats('${p.id}', this.value)" onclick="this.select()">
+      <div class="seat-adj">
+        <button class="seat-btn" onclick="adjustSeats('${p.id}',-1)">−</button>
+        <button class="seat-btn" onclick="adjustSeats('${p.id}',+1)">+</button>
+      </div>
+      <button class="party-tv-btn" onclick="showPartyCard('${p.id}')" title="Toon partijkaart op TV">📺</button>
+    `;
+    el.appendChild(row);
+  });
+  updateCoalitionTotal();
+}
+
+function adjustSeats(id, delta) {
+  state.seats[id] = Math.max(0, state.seats[id] + delta);
+  renderPartyGrid();
+  renderVoteRows();
+  renderScoreSidebar();
+  saveState();
+}
+
+function setSeats(id, value) {
+  const n = parseInt(value, 10);
+  if (!isNaN(n) && n >= 0 && n <= 150) {
+    state.seats[id] = n;
+    renderPartyGrid();
+    renderVoteRows();
+    renderScoreSidebar();
+    saveState();
+  }
+}
+
+function toggleCoalition(id, btn) {
+  const wasIn = state.coalition[id];
+  state.coalition[id] = !wasIn;
+  state.scores[id].coalition += wasIn ? -5 : 5;
+  renderPartyGrid();
+  renderScoreSidebar();
+  renderScoreboardDetail();
+  renderAkkoordForm();
+  saveState();
+  broadcastSeats();
+}
+
+function updateCoalitionTotal() {
+  const total = getActiveParties().reduce((sum, p) => sum + (state.coalition[p.id] ? state.seats[p.id] : 0), 0);
+  const el = document.getElementById('coalition-total');
+  el.textContent = total;
+  const maj = getMajorityThreshold();
+  el.className = 'seats-number ' + (total >= maj ? 'majority' : total >= Math.floor(maj / 2) ? 'minority' : 'low');
+}
+
+function showPartyCard(id) {
+  const p = PARTIES.find(pp => pp.id === id); // Use full PARTIES (always available)
+  if (!p) return;
+  broadcast('partycard', {
+    id: p.id,
+    name: p.name,
+    full: p.full,
+    leader: PARTY_LEADERS[id],
+    crown: PARTY_CROWN_JEWELS[id],
+    quirk: PARTY_QUIRKS[id],
+    dealbreaker: PARTY_DEALBREAKERS[id] || null,
+  });
+}
+
+function broadcastAllParties() {
+  broadcast('allParties', {});
+  notify('Alle partijen weergegeven op TV');
+}
+
+function showQRCode() {
+  const base = window.location.href.replace(/index\.html[^]*$/, '').replace(/[^/]*\.html[^]*$/, '');
+  const tvUrl = base + 'tv.html';
+  broadcast('qrcode', { url: tvUrl });
+  notify('QR-code zichtbaar op TV — sluit met standby-knop');
+}
+
+// ============================================================
+// VOTE
+// ============================================================
+function renderVoteRows() {
+  const el = document.getElementById('vote-rows');
+  el.innerHTML = '';
+  getActiveParties().forEach(p => {
+    const vote = state.votes[p.id];
+    const row = document.createElement('div');
+    row.className = 'vote-row';
+    row.innerHTML = `
+      <div class="vote-party">${p.name}</div>
+      <div class="vote-seats-label">${state.seats[p.id]}z</div>
+      <div class="vote-btns">
+        <button class="vote-btn voor${vote==='voor'?' active':''}" onclick="setVote('${p.id}','voor',this)">GROEN</button>
+        <button class="vote-btn tegen${vote==='tegen'?' active':''}" onclick="setVote('${p.id}','tegen',this)">ROOD</button>
+      </div>
+    `;
+    el.appendChild(row);
+  });
+  updateVoteResult();
+}
+
+function setVote(id, choice, btn) {
+  state.votes[id] = state.votes[id] === choice ? null : choice;
+  renderVoteRows();
+  updateVoteResult();
+  saveState();
+}
+
+function updateVoteResult() {
+  let voor = 0, tegen = 0;
+  getActiveParties().forEach(p => {
+    if (state.votes[p.id] === 'voor') voor += state.seats[p.id];
+    if (state.votes[p.id] === 'tegen') tegen += state.seats[p.id];
+  });
+  document.getElementById('vote-voor').textContent = voor;
+  document.getElementById('vote-tegen').textContent = tegen;
+  const verdict = document.getElementById('vote-verdict');
+  const maj = getMajorityThreshold();
+  if (voor === 0 && tegen === 0) { verdict.textContent = '—'; verdict.className = 'vote-verdict'; }
+  else if (voor >= maj) { verdict.textContent = '✓ AANGENOMEN'; verdict.className = 'vote-verdict pass'; }
+  else { verdict.textContent = '✗ VERWORPEN'; verdict.className = 'vote-verdict fail'; }
+}
+
+function publishVote() {
+  let voor = 0, tegen = 0;
+  getActiveParties().forEach(p => {
+    if (state.votes[p.id] === 'voor') voor += state.seats[p.id];
+    if (state.votes[p.id] === 'tegen') tegen += state.seats[p.id];
+  });
+  const maj = getMajorityThreshold();
+  broadcast('vote', { voor, tegen, result: voor >= maj ? 'pass' : 'fail', majority: maj });
+  notify('Stemresultaat gepubliceerd op TV');
+}
+
+function resetVote() {
+  getActiveParties().forEach(p => { state.votes[p.id] = null; });
+  renderVoteRows();
+  saveState();
+}
+
+function recordLawResult(result) {
+  state.lawResults[state.currentLaw] = result;
+  // Give points: winner side gets +1
+  getActiveParties().forEach(p => {
+    const v = state.votes[p.id];
+    if ((result === 'passed' && v === 'voor') || (result === 'rejected' && v === 'tegen')) {
+      state.scores[p.id].regeer += 1;
+    }
+  });
+  renderLawSelector();
+  renderScoreSidebar();
+  notify(result === 'passed' ? '✓ Wet aangenomen! +1 punt voor winnaars' : '✗ Wet verworpen! +1 punt voor winnaars');
+  saveState();
+}
+
+// ============================================================
+// LAWS
+// ============================================================
+function renderLawSelector() {
+  const el = document.getElementById('law-selector');
+  el.innerHTML = '';
+  LAWS.forEach(law => {
+    const res = state.lawResults[law.num];
+    const hasAmendement = !!state.amendementen[law.num];
+    const btn = document.createElement('button');
+    btn.className = `law-btn${state.currentLaw === law.num ? ' active' : ''}${res === 'passed' ? ' passed' : res === 'rejected' ? ' rejected' : ''}`;
+    btn.innerHTML = `WET ${law.num}${hasAmendement ? '<span class="amendement-badge">A</span>' : ''}`;
+    btn.onclick = () => { state.currentLaw = law.num; renderLawSelector(); renderLawDisplay(); resetVote(); renderAmendementPanel(); saveState(); };
+    el.appendChild(btn);
+  });
+  renderLawDisplay();
+}
+
+function renderLawDisplay() {
+  const law = LAWS.find(l => l.num === state.currentLaw);
+  const res = state.lawResults[law.num];
+  document.getElementById('law-display-area').innerHTML = `
+    <div class="law-display">
+      <div class="law-header">
+        <div class="law-num">Wetsvoorstel ${law.num} ${res ? (res==='passed'?'✓ AANGENOMEN':'✗ VERWORPEN') : ''}</div>
+        <div class="law-title">${law.title}</div>
+      </div>
+      <div class="law-body">
+        <div class="law-text">${law.text}</div>
+        <div class="law-hint">👁 Informateur hint: ${law.hint}</div>
+      </div>
+    </div>
+  `;
+  broadcast('law', { law });
+}
+
+// ============================================================
+// CRISIS CARDS
+// ============================================================
+function renderCrisisCards(cards, containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = '';
+  cards.forEach(card => {
+    const key = `${containerId}_${card.num}`;
+    const revealed = state.crisisRevealed[key];
+    const div = document.createElement('div');
+    div.className = `crisis-card${revealed ? ' revealed' : ''}`;
+    div.innerHTML = `
+      <div class="crisis-card-header" onclick="toggleCrisis('${key}', '${containerId}')">
+        <span class="crisis-badge">${card.severity || ('#' + card.num)}</span>
+        <span class="crisis-title-text">${revealed ? card.title : '???'}</span>
+        <button class="reveal-btn" onclick="event.stopPropagation();toggleCrisis('${key}', '${containerId}')">
+          ${revealed ? 'Verbergen' : '⚡ Onthul'}
+        </button>
+      </div>
+      ${revealed ? `<div class="crisis-body">${card.text}</div>` : ''}
+    `;
+    el.appendChild(div);
+  });
+}
+
+function toggleCrisis(key, containerId) {
+  state.crisisRevealed[key] = !state.crisisRevealed[key];
+  saveState();
+  if (containerId === 'crisis-deck-r2') {
+    renderCrisisCards(CRISIS_R2, 'crisis-deck-r2');
+    const cardNum = parseInt(key.split('_')[1]);
+    const card = CRISIS_R2.find(c => c.num === cardNum);
+    if (state.crisisRevealed[key] && card) { playSound('crisis'); broadcast('crisis', { card }); }
+  } else {
+    renderCrisisCards(CRISIS_R4, 'crisis-deck-r4');
+    const cardNum = key.split('_')[1];
+    const card = CRISIS_R4.find(c => String(c.num) === String(cardNum));
+    if (state.crisisRevealed[key] && card) { playSound('crisis'); broadcast('crisis', { card }); }
+  }
+}
+
+function revealRandomCrisis() {
+  const unrevealed = CRISIS_R2.filter(c => !state.crisisRevealed[`crisis-deck-r2_${c.num}`]);
+  if (!unrevealed.length) { notify('Alle crisiskaarten al onthuld!'); return; }
+  const card = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+  const key = `crisis-deck-r2_${card.num}`;
+  state.crisisRevealed[key] = true;
+  renderCrisisCards(CRISIS_R2, 'crisis-deck-r2');
+  playSound('crisis');
+  broadcast('crisis', { card });
+  notify(`Crisis onthuld: ${card.title}`);
+}
+
+// ============================================================
+// AGENDAS
+// ============================================================
+function renderAgendaGrid() {
+  const el = document.getElementById('agenda-grid');
+  if (!el) return;
+  el.innerHTML = '';
+  getActiveParties().forEach(p => {
+    const revealed = state.agendaRevealed[p.id];
+    const type = state.agendas[p.id];
+    const div = document.createElement('div');
+    div.className = `agenda-card${revealed ? ' revealed' : ''}`;
+    div.innerHTML = `
+      <div class="agenda-party">${p.name}</div>
+      <div class="agenda-type ${revealed ? type.toLowerCase() : 'hidden'}">${revealed ? type : '???'}</div>
+      <button class="agenda-reveal-btn" onclick="revealAgenda('${p.id}')">${revealed ? 'Verbergen' : 'Onthul'}</button>
+    `;
+    el.appendChild(div);
+  });
+}
+
+function revealAgenda(id) {
+  state.agendaRevealed[id] = !state.agendaRevealed[id];
+  renderAgendaGrid();
+  saveState();
+  if (state.agendaRevealed[id]) {
+    broadcast('agenda', { party: id, type: state.agendas[id] });
+    notify(`Agenda onthuld: ${id} is ${state.agendas[id]}`);
+  }
+}
+
+function revealAllAgendas() {
+  getActiveParties().forEach(p => { state.agendaRevealed[p.id] = true; });
+  renderAgendaGrid();
+  saveState();
+  broadcast('agendaAll', { agendas: state.agendas });
+  notify('Alle geheime agenda\'s onthuld!');
+}
+
+// ============================================================
+// SCOREBOARD
+// ============================================================
+function renderScoreSidebar() {
+  const el = document.getElementById('score-grid-sidebar');
+  if (!el) return;
+  const sorted = [...getActiveParties()].sort((a,b) => totalScore(b.id) - totalScore(a.id));
+  el.innerHTML = '';
+  sorted.forEach((p, i) => {
+    const total = totalScore(p.id);
+    const row = document.createElement('div');
+    row.className = `score-row${i === 0 ? ' leader' : ''}`;
+    row.innerHTML = `
+      <div class="score-rank">${i + 1}.</div>
+      <div class="score-party">${p.name}</div>
+      <div style="flex:1"></div>
+      <div class="score-total">${total}</div>
+    `;
+    el.appendChild(row);
+  });
+}
+
+function renderScoreboardDetail() {
+  const el = document.getElementById('scoreboard-detail');
+  if (!el) return;
+  const sorted = [...getActiveParties()].sort((a,b) => totalScore(b.id) - totalScore(a.id));
+  el.innerHTML = '';
+
+  const cats = [
+    { key: 'coalition', label: 'Coalitie (+5)' },
+    { key: 'mustHave', label: 'Must-have (+5)' },
+    { key: 'bonus', label: 'Bonus (+3)' },
+    { key: 'dealbreaker', label: 'Dealbreaker (-5)' },
+    { key: 'regeer', label: 'Regeerperiode' },
+    { key: 'amendement', label: 'Amendementen (+2)' },
+    { key: 'agenda', label: 'Geheime agenda (+3)' },
+    { key: 'mp', label: 'MP bonus (+2)' },
+  ];
+
+  sorted.forEach((p, i) => {
+    const s = state.scores[p.id];
+    const total = totalScore(p.id);
+    const div = document.createElement('div');
+    div.style.cssText = `border:1px solid var(--border);border-radius:2px;margin-bottom:8px;overflow:hidden;`;
+    div.innerHTML = `
+      <div style="background:var(--navy-light);padding:10px 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid ${i===0?'var(--gold-dim)':'var(--border)'};cursor:pointer;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+        <div style="font-family:'Oswald',sans-serif;font-size:0.8rem;color:var(--text-dim);width:20px;">${i+1}.</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:1rem;font-weight:700;color:${i===0?'var(--gold)':'var(--cream)'};flex:1;">${p.name} — ${p.full}</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:${i===0?'var(--gold)':'var(--cream)'};">${total}</div>
+      </div>
+      <div style="display:none;padding:12px 14px;">
+        ${cats.map(cat => `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+            <div style="font-size:0.82rem;color:var(--text-dim);">${cat.label}</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button style="padding:2px 6px;border:1px solid var(--border);background:none;color:var(--text-dim);font-family:'Oswald';font-size:0.7rem;cursor:pointer;border-radius:1px;" onclick="adjustScore('${p.id}','${cat.key}',-1)">−</button>
+              <div style="font-family:'Oswald',sans-serif;font-size:0.9rem;color:${s[cat.key]<0?'var(--red)':s[cat.key]>0?'var(--green)':'var(--text-dim)'};">${s[cat.key] > 0 ? '+' : ''}${s[cat.key]}</div>
+              <button style="padding:2px 6px;border:1px solid var(--border);background:none;color:var(--text-dim);font-family:'Oswald';font-size:0.7rem;cursor:pointer;border-radius:1px;" onclick="adjustScore('${p.id}','${cat.key}',+1)">+</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    el.appendChild(div);
+  });
+}
+
+function adjustScore(id, cat, delta) {
+  state.scores[id][cat] += delta;
+  renderScoreSidebar();
+  renderScoreboardDetail();
+  saveState();
+}
+
+// ============================================================
+// SUPERPOWERS
+// ============================================================
+function useSuperpower(id) {
+  if (state.superpowersUsed[id]) return;
+  state.superpowersUsed[id] = true;
+  const el = document.getElementById(id);
+  if (el) el.classList.add('used');
+  const names = { 'sp-bonus': '10 Bonuszetels', 'sp-veto': 'Veto', 'sp-marriage': 'Gedwongen Huwelijk', 'sp-press': 'De Pers Bellen' };
+  const name = names[id] || id;
+  if (!state.superpowerLog) state.superpowerLog = [];
+  state.superpowerLog.push({ id, name, ts: Date.now() });
+  renderSuperpowerLog();
+  playSound('superpower');
+  notify(`Superkracht gebruikt: ${name}`);
+  broadcast('superpower', { id, name });
+  saveState();
+}
+
+function renderSuperpowerLog() {
+  const el = document.getElementById('superpower-log');
+  if (!el) return;
+  const log = state.superpowerLog || [];
+  const icons = { 'sp-bonus': '🎖', 'sp-veto': '🛑', 'sp-marriage': '💍', 'sp-press': '📰' };
+  if (log.length === 0) { el.innerHTML = '<div class="sp-log-empty">Nog geen superkrachten gebruikt.</div>'; return; }
+  el.innerHTML = log.map(entry => {
+    const t = new Date(entry.ts);
+    const time = `${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}`;
+    const icon = icons[entry.id] || '⚡';
+    return `<div class="sp-log-entry"><span class="sp-log-time">${time}</span><span class="sp-log-icon">${icon}</span><span class="sp-log-name">${entry.name}</span></div>`;
+  }).join('');
+}
+
+function broadcastSuperpowerLog() {
+  const log = state.superpowerLog || [];
+  if (log.length === 0) { notify('Nog geen superkrachten gebruikt.'); return; }
+  broadcast('superpowerLog', { log });
+  notify('Superkrachten-log verzonden naar TV');
+}
+
+// ============================================================
+// NAVIGATION & STEPS
+// ============================================================
+function setPhase(phase) {
+  document.querySelectorAll('.phase-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.phase-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(`phase-${phase}`).classList.add('active');
+  event.target.classList.add('active');
+  broadcast('phase', { phase });
+
+  if (phase === 'r3') { renderLawSelector(); renderVoteRows(); renderAmendementPanel(); }
+  if (phase === 'r2') { renderCrisisCards(CRISIS_R2, 'crisis-deck-r2'); renderAkkoordForm(); }
+  if (phase === 'r4') { renderCrisisCards(CRISIS_R4, 'crisis-deck-r4'); renderAgendaGrid(); }
+  if (phase === 'score') { renderScoreboardDetail(); }
+}
+
+function toggleStep(el) {
+  if (el.classList.contains('done')) {
+    el.classList.remove('done');
+  } else {
+    el.classList.add('done');
+  }
+}
+
+// ============================================================
+// TV WINDOW
+// ============================================================
+function openTV() {
+  window.open('tv.html', 'formatie_tv', 'width=1280,height=720');
+  notify('TV-scherm geopend!');
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+function notify(msg) {
+  const el = document.getElementById('notification');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// SPELERS & TOEWIJZINGEN
+// ============================================================
+function renderPlayersGrid() {
+  const grid = document.getElementById('players-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const active = getActiveParties();
+  for (let i = 0; i < active.length; i++) {
+    const row = document.createElement('div');
+    row.className = 'player-input-row';
+    row.innerHTML = `
+      <span class="player-num">${i + 1}.</span>
+      <input class="player-input" type="text" placeholder="Naam speler ${i + 1}"
+        value="${state.players[i] || ''}"
+        oninput="state.players[${i}] = this.value.trim(); renderAssignmentOverview(); renderAnnouncementList(); saveState();">
+    `;
+    grid.appendChild(row);
+  }
+}
+
+function randomizeAssignments() {
+  const names = state.players.filter(n => n.trim());
+  const needed = getActiveParties().length;
+  if (names.length < needed) {
+    notify(`Vul eerst alle ${needed} spelersnamen in (nu: ${names.length})`);
+    return;
+  }
+  const partyIds = getActiveParties().map(p => p.id);
+  const shuffled = [...partyIds].sort(() => Math.random() - 0.5);
+  state.assignments = {};
+  shuffled.forEach((id, i) => { state.assignments[id] = state.players[i]; });
+  renderAssignmentOverview();
+  renderAnnouncementList();
+  notify('Toewijzingen gerandomiseerd');
+  saveState();
+}
+
+function clearAssignments() {
+  state.assignments = {};
+  renderAssignmentOverview();
+  renderAnnouncementList();
+  notify('Toewijzingen gewist');
+  saveState();
+}
+
+function renderAssignmentOverview() {
+  const el = document.getElementById('assignment-overview');
+  if (!el) return;
+  el.innerHTML = '';
+  const active = getActiveParties();
+  const cols = active.length <= 6 ? 3 : active.length <= 8 ? 4 : 5;
+  el.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  active.forEach(p => {
+    const player = state.assignments[p.id] || '';
+    const chip = document.createElement('div');
+    chip.className = 'assignment-chip' + (player ? ' assigned' : '');
+    chip.innerHTML = `
+      <div class="assignment-chip-party">${p.name}</div>
+      <div class="assignment-chip-player">${player || '—'}</div>
+    `;
+    el.appendChild(chip);
+  });
+}
+
+// ============================================================
+// PARTIJPRESENTATIES
+// ============================================================
+function renderAnnouncementList() {
+  const el = document.getElementById('announcement-list');
+  if (!el) return;
+  el.innerHTML = '';
+  const availablePlayers = state.players.filter(n => n.trim());
+  getActiveParties().forEach(p => {
+    const assignedPlayer = state.assignments[p.id] || '';
+    const hasAssignment = !!assignedPlayer;
+    // Build manual player select options
+    const playerOptions = availablePlayers.map(name =>
+      `<option value="${name}" ${name === assignedPlayer ? 'selected' : ''}>${name}</option>`
+    ).join('');
+    const showSelect = availablePlayers.length > 0;
+
+    const row = document.createElement('div');
+    row.className = 'announce-row';
+    row.innerHTML = `
+      <div class="announce-row-header">
+        <div class="announce-party-abbr">${p.name}</div>
+        <div class="announce-party-full">${p.full}</div>
+        ${showSelect ? `<select class="announce-player-select" onchange="setAssignment('${p.id}', this.value)">
+          <option value="">— geen speler —</option>
+          ${playerOptions}
+        </select>` : ''}
+        ${hasAssignment ? `<span class="announce-assigned-badge">👤 ${assignedPlayer}</span>` : ''}
+        <button class="announce-toon-btn" onclick="announceParty('${p.id}')">📺 Toon op TV</button>
+        <button class="announce-assign-btn" onclick="revealAssignment('${p.id}')" ${!hasAssignment ? 'disabled' : ''}>🎰 Onthul toewijzing</button>
+      </div>
+    `;
+    el.appendChild(row);
+  });
+}
+
+function setAssignment(partyId, playerName) {
+  if (playerName) {
+    state.assignments[partyId] = playerName;
+  } else {
+    delete state.assignments[partyId];
+  }
+  renderAssignmentOverview();
+  renderAnnouncementList();
+  saveState();
+}
+
+function revealAssignment(id) {
+  const playerName = state.assignments[id];
+  if (!playerName) { notify(`Geen toewijzing voor ${id}`); return; }
+  const p = getActiveParties().find(p => p.id === id);
+  const allPlayers = state.players.filter(n => n.trim());
+  broadcast('partyAssign', {
+    partyId: id,
+    partyName: p.name,
+    partyFull: p.full,
+    playerName: playerName,
+    allPlayers: allPlayers.length >= 2 ? allPlayers : [playerName],
+  });
+  notify(`Toewijzing van ${id} onthuld op TV`);
+}
+
+function announceParty(id) {
+  const p = getActiveParties().find(p => p.id === id);
+  if (!p) return;
+  broadcast('partyAnnounce', {
+    partyId: id,
+    name: p.name,
+    full: p.full,
+    leader: PARTY_LEADERS[id] || '',
+    quirk: PARTY_QUIRKS[id] || '',
+    intro: PARTY_INTROS[id] || '',
+    close: false,
+  });
+  notify(`${id} aangekondigd op TV`);
+}
+
+function closeAnnouncement() {
+  broadcast('partyAnnounce', { close: true });
+  notify('Aankondiging gesloten — TV terug naar standby');
+}
+
+// ============================================================
+// SETUP SCHERM
+// ============================================================
+let _pendingSetupIds = PARTIES.map(p => p.id);
+
+function renderSetupScreen() {
+  const grid = document.getElementById('setup-party-grid');
+  grid.innerHTML = '';
+  PARTIES.forEach(p => {
+    const isSelected = _pendingSetupIds.includes(p.id);
+    const label = document.createElement('label');
+    label.className = 'setup-party-check' + (isSelected ? ' selected' : '');
+    label.innerHTML = `
+      <input type="checkbox" value="${p.id}" ${isSelected ? 'checked' : ''} onchange="toggleSetupParty('${p.id}', this.checked)">
+      <div class="setup-party-abbr">${p.name}</div>
+      <div class="setup-party-full">${p.full}</div>
+    `;
+    grid.appendChild(label);
+  });
+  updateSetupCounter();
+}
+
+function toggleSetupParty(id, checked) {
+  if (checked) {
+    if (!_pendingSetupIds.includes(id)) _pendingSetupIds.push(id);
+  } else {
+    _pendingSetupIds = _pendingSetupIds.filter(x => x !== id);
+  }
+  // Sync visual state
+  document.querySelectorAll('#setup-party-grid .setup-party-check').forEach(el => {
+    const cb = el.querySelector('input[type=checkbox]');
+    el.classList.toggle('selected', cb.checked);
+  });
+  updateSetupCounter();
+}
+
+function updateSetupCounter() {
+  const n = _pendingSetupIds.length;
+  const counter = document.getElementById('setup-counter');
+  const btn = document.getElementById('setup-start-btn');
+  const valid = n >= 6 && n <= 10;
+  counter.textContent = `${n} partij${n === 1 ? '' : 'en'} geselecteerd`;
+  counter.className = 'setup-counter ' + (valid ? 'valid' : 'invalid');
+  if (btn) btn.disabled = !valid;
+}
+
+function confirmSetup() {
+  const n = _pendingSetupIds.length;
+  if (n < 6 || n > 10) return;
+  // Preserve PARTIES order
+  state.selectedPartyIds = PARTIES.filter(p => _pendingSetupIds.includes(p.id)).map(p => p.id);
+  state.gameStarted = true;
+  initGameState();
+  saveState();
+  // Broadcast setup to TV
+  const active = getActiveParties();
+  broadcast('setup', {
+    parties: active.map(p => ({ id: p.id, name: p.name, full: p.full })),
+    totalSeats: active.length * 15,
+    majority: getMajorityThreshold(),
+  });
+  document.getElementById('setup-screen').classList.add('hidden');
+  renderAll();
+}
+
+function renderAll() {
+  renderPartyGrid();
+  renderVoteRows();
+  renderScoreSidebar();
+  renderCrisisCards(CRISIS_R2, 'crisis-deck-r2');
+  renderPlayersGrid();
+  renderAssignmentOverview();
+  renderAnnouncementList();
+  renderAkkoordForm();
+  renderAmendementPanel();
+  renderHemiBuilder();
+  renderScoreboardDetail();
+  renderAgendaGrid();
+  renderLawSelector();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+if (state.gameStarted && state.selectedPartyIds.length >= 6) {
+  // Spel al geconfigureerd — sla setup-scherm over
+  renderAll();
+} else {
+  // Toon setup-scherm
+  _pendingSetupIds = PARTIES.map(p => p.id);
+  document.getElementById('setup-screen').classList.remove('hidden');
+  renderSetupScreen();
+}
+
+// Herstel superkracht-UI vanuit opgeslagen state
+Object.keys(state.superpowersUsed).forEach(id => {
+  if (state.superpowersUsed[id]) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('used');
+  }
+});
+renderSuperpowerLog();
+
+// Herstel timer-label
+document.getElementById('timer-label').textContent = state.timerLabel;
+</script>
+</body>
+</html>

@@ -1,0 +1,2907 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>DE FORMATIE — TV Scherm</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Oswald:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #080f1e;
+    --navy-mid: #0f1c36;
+    --navy-light: #1a2f5a;
+    --gold: #c9a84c;
+    --gold-light: #e8c96a;
+    --gold-dim: #6a5228;
+    --red: #c0392b;
+    --green: #27ae60;
+    --cream: #f0e8d0;
+    --text: #d8c8a8;
+    --border: #1e2f50;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: 'EB Garamond', serif;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== DECORATIVE BACKGROUND ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 50%, rgba(201,168,76,0.03) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== HEADER BAR ===== */
+  .tv-header {
+    background: linear-gradient(90deg, var(--navy-mid) 0%, var(--navy-light) 50%, var(--navy-mid) 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 0 48px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.6);
+  }
+
+  .tv-logo {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tv-logo-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 6px;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .tv-logo-sub {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .tv-phase-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 4px;
+    color: var(--text);
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .tv-timer-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .tv-timer {
+    font-family: 'Oswald', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 3px;
+    line-height: 1;
+  }
+  .tv-timer.warning { color: #e67e22; }
+  .tv-timer.danger { color: var(--red); animation: blink 0.5s infinite; }
+
+  .tv-timer-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+  }
+
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* ===== MAIN CONTENT ===== */
+  .tv-main {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ===== VIEWS ===== */
+  .tv-view {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s;
+  }
+  .tv-view.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ===== STANDBY / DEFAULT VIEW ===== */
+  #view-standby {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .standby-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 10px;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1;
+  }
+
+  .standby-sub {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.6rem;
+    font-style: italic;
+    color: var(--text);
+    text-align: center;
+    letter-spacing: 2px;
+  }
+
+  .standby-quote {
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--gold-dim);
+    text-align: center;
+    max-width: 600px;
+    line-height: 1.8;
+    letter-spacing: 1px;
+  }
+
+  .gold-line {
+    width: 200px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 0 auto;
+  }
+
+  /* ===== SEATS VIEW ===== */
+  #view-seats {
+    padding: 40px 60px;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .seats-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--gold);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .seats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    flex: 1;
+  }
+
+  .seat-card {
+    background: rgba(15, 28, 54, 0.8);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: all 0.5s;
+    position: relative;
+    overflow: hidden;
+  }
+  .seat-card.coalition {
+    border-color: var(--gold-dim);
+    background: rgba(201,168,76,0.07);
+  }
+  .seat-card.coalition::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--gold);
+  }
+
+  .seat-card-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .seat-card-full {
+    font-size: 0.72rem;
+    color: var(--gold-dim);
+    letter-spacing: 0.5px;
+    line-height: 1.3;
+  }
+
+  .seat-card-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1;
+    margin-top: auto;
+  }
+
+  .seat-card-bar-wrap {
+    height: 3px;
+    background: var(--navy-light);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .seat-card-bar {
+    height: 100%;
+    background: var(--gold-dim);
+    transition: width 0.6s;
+    border-radius: 1px;
+  }
+  .seat-card.coalition .seat-card-bar { background: var(--gold); }
+
+  .coalition-badge {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 1px;
+    display: inline-block;
+    width: fit-content;
+  }
+
+  .majority-bar {
+    text-align: center;
+    margin-top: 16px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+  }
+
+  .coalition-total-display {
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  .coalition-total-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 700;
+    display: inline-block;
+  }
+  .coalition-total-num.majority { color: var(--green); }
+  .coalition-total-num.minority { color: #e67e22; }
+  .coalition-total-num.low { color: var(--red); }
+
+  .coalition-total-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    color: var(--text);
+    margin-left: 10px;
+    text-transform: uppercase;
+  }
+
+  /* ===== CRISIS VIEW ===== */
+  #view-crisis {
+    padding: 60px;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .crisis-reveal-badge {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 4px;
+    color: var(--red);
+    text-transform: uppercase;
+    text-align: center;
+    animation: fadeIn 0.5s;
+  }
+
+  .crisis-reveal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--cream);
+    text-align: center;
+    line-height: 1.1;
+    animation: slideUp 0.6s;
+    max-width: 900px;
+  }
+
+  .crisis-reveal-text {
+    font-size: 1.5rem;
+    color: var(--text);
+    text-align: center;
+    line-height: 1.7;
+    max-width: 800px;
+    animation: fadeIn 0.8s 0.3s both;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ===== VOTE VIEW ===== */
+  #view-vote {
+    padding: 40px 60px;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .vote-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--gold);
+    text-align: center;
+    letter-spacing: 2px;
+  }
+
+  .vote-bars {
+    display: flex;
+    gap: 60px;
+    align-items: flex-end;
+    justify-content: center;
+    height: 200px;
+  }
+
+  .vote-bar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .vote-bar-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    font-weight: 700;
+  }
+  .vote-bar-num.voor { color: var(--green); }
+  .vote-bar-num.tegen { color: var(--red); }
+
+  .vote-bar-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .vote-verdict-big {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    text-align: center;
+    letter-spacing: 4px;
+    animation: slideUp 0.5s;
+  }
+  .vote-verdict-big.pass { color: var(--green); }
+  .vote-verdict-big.fail { color: var(--red); }
+
+  /* ===== AGENDA VIEW ===== */
+  #view-agenda {
+    flex-direction: column;
+    gap: 20px;
+    padding: 40px 60px;
+  }
+
+  .agenda-reveal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-align: center;
+    letter-spacing: 4px;
+    animation: slideUp 0.5s;
+  }
+
+  .agenda-reveal-party {
+    font-family: 'Oswald', sans-serif;
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--cream);
+    text-align: center;
+    animation: slideUp 0.6s;
+  }
+
+  .agenda-reveal-type {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    font-weight: 700;
+    text-align: center;
+    animation: slideUp 0.7s;
+    padding: 12px 40px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .agenda-reveal-type.loyalist { color: var(--green); border: 2px solid var(--green); background: rgba(39,174,96,0.1); }
+  .agenda-reveal-type.opstandeling { color: var(--red); border: 2px solid var(--red); background: rgba(192,57,43,0.1); }
+  .agenda-reveal-type.opportunist { color: var(--gold); border: 2px solid var(--gold); background: rgba(201,168,76,0.1); }
+  .agenda-reveal-type.kingmaker { color: #9b8de8; border: 2px solid #9b8de8; background: rgba(155,141,232,0.1); }
+
+  /* ===== WINNER VIEW ===== */
+  #view-winner {
+    flex-direction: column;
+    gap: 24px;
+    padding: 40px;
+  }
+
+  .winner-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 6px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    text-align: center;
+    animation: fadeIn 0.5s;
+  }
+
+  .winner-party {
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    font-weight: 900;
+    color: var(--gold);
+    text-align: center;
+    letter-spacing: 4px;
+    line-height: 1;
+    animation: slideUp 0.6s;
+  }
+
+  .winner-sub {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.5rem;
+    font-style: italic;
+    color: var(--text);
+    text-align: center;
+    animation: fadeIn 0.8s 0.3s both;
+  }
+
+  .winner-score-table {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 600px;
+    width: 100%;
+    animation: fadeIn 1s 0.5s both;
+  }
+
+  .winner-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: rgba(15,28,54,0.6);
+  }
+  .winner-row.first { border-color: var(--gold); background: rgba(201,168,76,0.1); }
+
+  .winner-row-rank {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    color: var(--text-dim);
+    width: 24px;
+  }
+  .winner-row.first .winner-row-rank { color: var(--gold); font-weight: 700; }
+
+  .winner-row-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--cream);
+    flex: 1;
+  }
+  .winner-row.first .winner-row-name { color: var(--gold); }
+
+  .winner-row-pts {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  /* ===== SCOREBOARD VIEW ===== */
+  #view-scores {
+    padding: 40px 60px;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .score-tv-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--gold);
+    letter-spacing: 4px;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .score-tv-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 900px;
+  }
+
+  .score-tv-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 20px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: rgba(15,28,54,0.7);
+    animation: slideUp 0.4s;
+  }
+  .score-tv-row.leader { border-color: var(--gold-dim); background: rgba(201,168,76,0.07); }
+
+  .score-tv-rank {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    color: var(--text-dim);
+    width: 28px;
+  }
+  .score-tv-row.leader .score-tv-rank { color: var(--gold); font-weight: 700; }
+
+  .score-tv-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--cream);
+    flex: 1;
+  }
+
+  .score-tv-bar-wrap {
+    width: 300px;
+    height: 8px;
+    background: var(--navy-light);
+    border-radius: 1px;
+  }
+  .score-tv-bar {
+    height: 100%;
+    background: var(--gold-dim);
+    border-radius: 1px;
+    transition: width 0.8s;
+  }
+  .score-tv-row.leader .score-tv-bar { background: var(--gold); }
+
+  .score-tv-pts {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--gold);
+    width: 50px;
+    text-align: right;
+  }
+
+  /* ===== LAW VIEW ===== */
+  #view-law {
+    flex-direction: column;
+    gap: 24px;
+    padding: 60px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .law-tv-num {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 4px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    text-align: center;
+    animation: fadeIn 0.5s;
+  }
+
+  .law-tv-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--cream);
+    text-align: center;
+    line-height: 1.2;
+    animation: slideUp 0.6s;
+  }
+
+  .law-tv-text {
+    font-size: 1.3rem;
+    color: var(--text);
+    text-align: center;
+    line-height: 1.8;
+    animation: fadeIn 0.8s 0.3s both;
+  }
+
+  /* ===== FOOTER BAR ===== */
+  .tv-footer {
+    height: 36px;
+    background: var(--navy-mid);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+  }
+
+  .ticker {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    white-space: nowrap;
+    animation: ticker 30s linear infinite;
+  }
+
+  @keyframes ticker {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-200%); }
+  }
+
+  /* ===== PARTIJANNOUNCEMENT VIEW ===== */
+  #view-party-announce {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 60px;
+    overflow: hidden;
+  }
+  .pa-card {
+    display: flex;
+    gap: 56px;
+    align-items: center;
+    max-width: 1400px;
+    width: 100%;
+  }
+  .pa-poster-col {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pa-poster {
+    width: 380px;
+    max-height: 560px;
+    object-fit: contain;
+    border: 2px solid var(--gold-dim);
+    box-shadow: 0 0 40px rgba(201,168,76,0.2);
+  }
+  .pa-poster-placeholder {
+    width: 380px;
+    height: 480px;
+    border: 2px dashed var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .pa-info-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .pa-gold-line {
+    width: 100%;
+    max-width: 480px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    margin: 14px 0;
+    flex-shrink: 0;
+  }
+  .pa-abbr {
+    font-family: 'Playfair Display', serif;
+    font-size: 5.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+    letter-spacing: 4px;
+    text-shadow: 0 0 60px rgba(201,168,76,0.4);
+  }
+  .pa-full {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.7rem;
+    color: var(--cream);
+    margin-top: 6px;
+    letter-spacing: 1px;
+  }
+  .pa-leader {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    color: var(--gold-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 8px;
+  }
+  .pa-intro {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.2rem;
+    color: var(--cream);
+    line-height: 1.65;
+    margin-top: 14px;
+    max-width: 600px;
+  }
+  .pa-quirk-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.7rem;
+    color: var(--gold-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 16px;
+  }
+  .pa-quirk {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.05rem;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-top: 4px;
+    line-height: 1.5;
+    max-width: 580px;
+  }
+
+  /* ===== PARTIJ TOEWIJZING VIEW (SLOTMACHINE) ===== */
+  #view-party-assign {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    padding: 40px 80px;
+  }
+  .pas-party-header {
+    text-align: center;
+  }
+  .pas-party-abbr {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 4px;
+    text-shadow: 0 0 60px rgba(201,168,76,0.4);
+    line-height: 1;
+  }
+  .pas-party-full {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.5rem;
+    color: var(--cream);
+    margin-top: 6px;
+    letter-spacing: 1px;
+  }
+  .pas-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    color: var(--gold-dim);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .pas-drum {
+    border: 2px solid var(--gold-dim);
+    background: rgba(10,22,40,0.8);
+    min-width: 520px;
+    min-height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 0 40px rgba(201,168,76,0.15), inset 0 0 30px rgba(0,0,0,0.5);
+  }
+  .pas-drum::before,
+  .pas-drum::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.6;
+  }
+  .pas-drum::before { top: 0; }
+  .pas-drum::after { bottom: 0; }
+  .pas-slot-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem;
+    color: var(--cream);
+    text-align: center;
+    padding: 0 40px;
+    transition: opacity 0.04s;
+  }
+  .pas-slot-name.final {
+    color: var(--gold);
+    font-size: 4.5rem;
+    text-shadow: 0 0 40px rgba(201,168,76,0.7);
+    animation: revealPop 0.7s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  .pas-result-line {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    color: var(--gold-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.5s;
+    min-height: 1.6em;
+  }
+  .pas-result-line.visible {
+    opacity: 1;
+  }
+  @keyframes revealPop {
+    0%   { transform: scale(0.6); opacity: 0; }
+    70%  { transform: scale(1.08); }
+    100% { transform: scale(1);   opacity: 1; }
+  }
+
+  /* COALITIEAKKOORD VIEW */
+  #view-coalitie { padding: 40px 60px; overflow-y: auto; }
+  .akkoord-tv-header { text-align: center; margin-bottom: 32px; }
+  .akkoord-tv-badge { font-family: 'Oswald', sans-serif; font-size: 0.85rem; color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px; }
+  .akkoord-tv-title { font-family: 'Playfair Display', serif; font-size: 2.6rem; font-weight: 700; color: var(--cream); line-height: 1.2; }
+  .akkoord-tv-goldline { width: 120px; height: 2px; background: var(--gold); margin: 16px auto; }
+  .akkoord-tv-body { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .akkoord-tv-col {}
+  .akkoord-tv-section-title { font-family: 'Oswald', sans-serif; font-size: 0.8rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; border-bottom: 1px solid var(--gold-dim); padding-bottom: 6px; }
+  .akkoord-tv-premier { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--cream); margin-bottom: 4px; }
+  .akkoord-tv-premier-party { font-family: 'Oswald', sans-serif; font-size: 0.9rem; color: var(--gold); }
+  .akkoord-tv-ministerie-row { display: flex; gap: 10px; align-items: baseline; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .akkoord-tv-ministerie-party { font-family: 'Oswald', sans-serif; font-size: 0.85rem; color: var(--gold); width: 48px; flex-shrink: 0; }
+  .akkoord-tv-ministerie-name { font-family: 'EB Garamond', serif; font-size: 0.95rem; color: var(--cream); }
+  .akkoord-tv-punt-row { display: flex; gap: 10px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .akkoord-tv-punt-num { font-family: 'Oswald', sans-serif; font-size: 0.8rem; color: var(--text-dim); width: 20px; flex-shrink: 0; text-align: right; }
+  .akkoord-tv-punt-text { font-family: 'EB Garamond', serif; font-size: 1rem; color: var(--cream); line-height: 1.4; }
+  .akkoord-tv-coalitie-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .akkoord-tv-badge-party { background: var(--gold-dim); color: var(--cream); font-family: 'Oswald', sans-serif; font-size: 0.85rem; padding: 3px 10px; border-radius: 1px; }
+
+  /* ===== EXIT POLL ===== */
+  .ep-header { text-align: center; padding: 18px 0 10px; flex-shrink: 0; }
+  .ep-nos-bar {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--navy);
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    padding: 6px 32px;
+    border-radius: 2px;
+    margin-bottom: 6px;
+  }
+  .ep-subtitle { font-family: 'Oswald', sans-serif; font-size: 0.95rem; color: var(--text-dim); letter-spacing: 0.06em; }
+  .ep-bars-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    padding: 6px 60px 6px 20px;
+    overflow: hidden;
+  }
+  @keyframes ep-row-in {
+    0%   { opacity: 0; transform: translateX(-60px) scale(0.97); }
+    40%  { opacity: 0.8; transform: translateX(6px) scale(1.01); }
+    100% { opacity: 1; transform: translateX(0) scale(1); }
+  }
+  @keyframes ep-bar-grow {
+    0%   { width: 0; }
+    70%  { width: var(--target-width); }
+    82%  { width: calc(var(--target-width) + 8px); }
+    100% { width: var(--target-width); }
+  }
+  @keyframes ep-bar-glow {
+    0%   { box-shadow: 0 0 0 rgba(201,168,76,0); }
+    50%  { box-shadow: 0 0 28px rgba(201,168,76,0.55), inset 0 0 14px rgba(201,168,76,0.12); }
+    100% { box-shadow: 0 0 6px rgba(201,168,76,0.15); }
+  }
+  @keyframes ep-flash {
+    0%   { background: rgba(201,168,76,0); }
+    15%  { background: rgba(201,168,76,0.08); }
+    100% { background: transparent; }
+  }
+  .ep-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    animation: ep-row-in 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+  .ep-row.ep-static {
+    opacity: 1;
+    animation: none;
+  }
+  .ep-label-col {
+    width: 52px;
+    text-align: right;
+    flex-shrink: 0;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.03em;
+  }
+  .ep-bar-wrap {
+    flex: 1;
+    position: relative;
+    height: 36px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: visible;
+  }
+  .ep-bar {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 0;
+    background: var(--navy-light);
+    border-right: 2px solid var(--border);
+    animation: ep-bar-grow 1.4s cubic-bezier(0.22, 0.61, 0.36, 1) forwards,
+               ep-bar-glow 1.8s ease forwards;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    min-width: 36px;
+  }
+  .ep-bar.ep-static {
+    width: var(--target-width);
+    animation: none;
+    box-shadow: none;
+  }
+  .ep-bar.ep-coalition {
+    background: linear-gradient(90deg, var(--navy-light) 0%, rgba(201,168,76,0.22) 100%);
+    border-right-color: var(--gold);
+  }
+  .ep-seats-num {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+    opacity: 0;
+    animation: ep-num-in 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) 1.35s forwards;
+  }
+  .ep-bar.ep-static .ep-seats-num {
+    opacity: 1;
+    animation: none;
+  }
+  @keyframes ep-num-in {
+    0%   { opacity: 0; transform: scale(0.7); }
+    60%  { opacity: 1; transform: scale(1.15); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .ep-coalition-star {
+    position: absolute;
+    left: calc(var(--target-width) + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    color: var(--gold);
+    font-family: 'Oswald', sans-serif;
+    white-space: nowrap;
+    opacity: 0;
+    animation: ep-row-in 0.5s ease 1.4s forwards;
+  }
+  .ep-coalition-star.ep-static {
+    opacity: 1;
+    animation: none;
+  }
+  .ep-total-bar {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 10px 0 12px;
+    border-top: 1px solid var(--border);
+    font-family: 'Oswald', sans-serif;
+  }
+  .ep-total-label { font-size: 0.85rem; color: var(--text-dim); letter-spacing: 0.04em; }
+  .ep-total-num { font-size: 1.4rem; font-weight: 700; color: var(--gold); }
+
+  /* ===== COALITIE VERKENNER (HEMICYCLE) ===== */
+  #view-coalitions {
+    padding: 0;
+    overflow: hidden;
+  }
+  .hemi-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 10px 20px 0;
+  }
+  .hemi-header {
+    text-align: center;
+    flex-shrink: 0;
+    padding: 8px 0 4px;
+  }
+  .hemi-nos-bar {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--navy);
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    padding: 5px 28px;
+    border-radius: 2px;
+    margin-bottom: 4px;
+  }
+  .hemi-subtitle {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+  }
+  .hemi-svg-wrap {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+  #hemi-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .hemi-legend {
+    flex-shrink: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 14px;
+    padding: 6px 20px 4px;
+    border-top: 1px solid var(--border);
+  }
+  .hemi-leg-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+    transition: opacity 0.3s;
+  }
+  .hemi-leg-item.dim { opacity: 0.3; }
+  .hemi-leg-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .hemi-leg-name { color: var(--text); }
+  .hemi-leg-seats { color: var(--text-dim); }
+  .hemi-stats {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 6px 0 10px;
+    font-family: 'Oswald', sans-serif;
+  }
+  .hemi-stat-num {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--gold);
+    transition: color 0.4s;
+    line-height: 1;
+  }
+  .hemi-stat-num.majority { color: var(--green); }
+  .hemi-stat-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+  }
+  .hemi-divider {
+    width: 1px;
+    height: 36px;
+    background: var(--border);
+  }
+  .hemi-progress-wrap {
+    width: 280px;
+  }
+  .hemi-progress-track {
+    height: 8px;
+    background: var(--navy-light);
+    border-radius: 4px;
+    overflow: visible;
+    position: relative;
+  }
+  .hemi-progress-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(0.22,0.61,0.36,1), background 0.4s;
+    max-width: 100%;
+  }
+  .hemi-progress-fill.majority { background: var(--green); }
+  .hemi-progress-marker {
+    position: absolute;
+    top: -4px;
+    width: 2px;
+    height: 16px;
+    background: var(--text-dim);
+    border-radius: 1px;
+  }
+  .hemi-coalition-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    padding-bottom: 4px;
+  }
+  .hemi-coalition-chip {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid;
+    opacity: 0;
+    transform: translateY(4px);
+    animation: chipIn 0.3s ease forwards;
+  }
+  @keyframes chipIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== COALITION METER OVERLAY ===== */
+  #coalition-meter {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    z-index: 100;
+    background: rgba(8, 15, 30, 0.92);
+    border: 1px solid var(--gold-dim);
+    border-radius: 3px;
+    padding: 10px 16px;
+    min-width: 220px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.6);
+    transition: border-color 0.4s;
+  }
+  #coalition-meter.hidden { display: none; }
+  #coalition-meter.majority { border-color: var(--green); }
+  #coalition-meter.minority { border-color: #e67e22; }
+  #coalition-meter.low { border-color: var(--red); }
+
+  #cm-label-wrap {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    display: flex;
+    gap: 5px;
+    align-items: baseline;
+    margin-bottom: 7px;
+  }
+  #cm-seats {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1;
+  }
+  #coalition-meter.majority #cm-seats { color: var(--green); }
+  #coalition-meter.minority #cm-seats { color: #e67e22; }
+  #coalition-meter.low #cm-seats { color: var(--red); }
+
+  #cm-bar-wrap {
+    position: relative;
+    height: 6px;
+    background: var(--navy-light);
+    border-radius: 3px;
+    overflow: visible;
+    margin-bottom: 6px;
+  }
+  #cm-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease, background-color 0.4s;
+    background: var(--red);
+  }
+  #coalition-meter.majority #cm-bar { background: var(--green); }
+  #coalition-meter.minority #cm-bar { background: #e67e22; }
+
+  #cm-marker76 {
+    position: absolute;
+    top: -3px;
+    left: calc(76 / 150 * 100%);
+    width: 2px;
+    height: 12px;
+    background: var(--gold);
+    border-radius: 1px;
+  }
+  #cm-marker76::after {
+    content: '76';
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.6rem;
+    color: var(--gold-dim);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  #cm-status {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-top: 14px;
+  }
+  #coalition-meter.majority #cm-status { color: var(--green); }
+  #coalition-meter.minority #cm-status { color: #e67e22; }
+  #coalition-meter.low #cm-status { color: var(--red); }
+
+  /* ===== PARTY CARD VIEW ===== */
+  #view-partycard {
+    padding: 50px 80px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .pc-badge {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 5px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .pc-layout {
+    display: flex;
+    gap: 0;
+    width: 100%;
+    max-width: 1200px;
+    align-items: stretch;
+  }
+
+  .pc-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-right: 60px;
+  }
+
+  .pc-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding-left: 60px;
+    border-left: 1px solid var(--gold-dim);
+  }
+
+  .pc-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 5rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 8px;
+    line-height: 1;
+  }
+
+  .pc-full {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.4rem;
+    color: var(--text);
+    font-style: italic;
+    letter-spacing: 1px;
+    margin-top: -16px;
+  }
+
+  .pc-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .pc-section-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+  }
+
+  .pc-section-value {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.5rem;
+    color: var(--cream);
+    line-height: 1.4;
+  }
+
+  .pc-crown-section .pc-section-label { color: var(--gold); }
+
+  .pc-crown-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--gold-light);
+  }
+
+  .pc-quirk-value {
+    font-style: italic;
+    color: var(--text);
+    font-size: 1.2rem;
+    line-height: 1.55;
+  }
+
+  .pc-deal-section .pc-section-label {
+    color: #e05a5a;
+    letter-spacing: 3px;
+  }
+
+  .pc-deal-value {
+    color: #f08080;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 3px;
+  }
+
+  /* QR CODE VIEW */
+  #view-qr {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .qr-badge {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 5px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .qr-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    color: var(--gold);
+    margin-bottom: 20px;
+  }
+
+  .qr-goldline {
+    width: 200px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    margin-bottom: 32px;
+  }
+
+  .qr-img {
+    width: 280px;
+    height: 280px;
+    border: 3px solid var(--gold-dim);
+    padding: 12px;
+    background: #fff;
+    margin-bottom: 28px;
+  }
+
+  .qr-url {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    color: var(--cream);
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    word-break: break-all;
+    text-align: center;
+    max-width: 700px;
+  }
+
+  .qr-hint {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.1rem;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* ===== TUTORIAL VIEW ===== */
+  #view-tutorial {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 32px 80px 28px;
+    overflow-y: auto;
+    gap: 0;
+  }
+
+  .tut-slide-num {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    align-self: flex-end;
+    margin-bottom: 4px;
+  }
+
+  .tut-icon {
+    font-size: 3rem;
+    margin-bottom: 8px;
+    line-height: 1;
+  }
+
+  .tut-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+
+  .tut-subtitle {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--text-dim);
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .tut-goldline {
+    width: 280px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    margin-bottom: 20px;
+    flex-shrink: 0;
+  }
+
+  /* bullets */
+  .tut-bullets {
+    list-style: none;
+    width: 100%;
+    max-width: 820px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tut-bullets li {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.3rem;
+    color: var(--text);
+    padding: 10px 18px;
+    background: rgba(201,168,76,0.06);
+    border-left: 3px solid var(--gold-dim);
+    border-radius: 2px;
+    line-height: 1.4;
+  }
+
+  /* grid (2 columns) */
+  .tut-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 24px;
+    width: 100%;
+    max-width: 860px;
+  }
+
+  .tut-grid-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 16px;
+    background: rgba(201,168,76,0.06);
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+
+  .tut-grid-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .tut-grid-value {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.1rem;
+    color: var(--text);
+    text-align: right;
+    font-style: italic;
+  }
+
+  /* closing slide */
+  .tut-closing {
+    list-style: none;
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .tut-closing li {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.35rem;
+    color: var(--cream);
+    text-align: center;
+    padding: 8px 0;
+    line-height: 1.4;
+  }
+
+  /* progress dots */
+  .tut-progress {
+    display: flex;
+    gap: 6px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .tut-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+
+  .tut-dot.active {
+    background: var(--gold);
+    box-shadow: 0 0 6px rgba(201,168,76,0.6);
+  }
+
+  .tut-dot.done {
+    background: var(--gold-dim);
+  }
+
+  /* ===== ALLE PARTIJEN OVERZICHT ===== */
+  .ap-badge { font-family: 'Oswald', sans-serif; font-size: 0.75rem; letter-spacing: 3px; color: var(--gold-dim); text-transform: uppercase; margin-bottom: 4px; }
+  .ap-title { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; color: var(--cream); }
+  .ap-goldline { width: 80px; height: 2px; background: var(--gold); margin: 10px auto 18px; }
+  .ap-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; width: 100%; max-width: 1100px; }
+  .ap-card { background: var(--navy-mid); border: 1px solid var(--border); border-radius: 3px; padding: 12px 10px; display: flex; flex-direction: column; gap: 4px; }
+  .ap-card-abbr { font-family: 'Oswald', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--gold); }
+  .ap-card-full { font-family: 'EB Garamond', serif; font-size: 0.75rem; color: var(--text-dim); line-height: 1.3; }
+  .ap-card-divider { height: 1px; background: var(--border); margin: 5px 0; }
+  .ap-card-leader { font-family: 'EB Garamond', serif; font-size: 0.82rem; color: var(--cream); font-style: italic; }
+  .ap-card-quirk { font-family: 'EB Garamond', serif; font-size: 0.75rem; color: var(--text-dim); line-height: 1.3; }
+
+  /* ===== SUPERKRACHTEN LOG TV ===== */
+  .splog-badge { font-family: 'Oswald', sans-serif; font-size: 0.75rem; letter-spacing: 3px; color: var(--gold-dim); text-transform: uppercase; margin-bottom: 4px; }
+  .splog-title { font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; color: var(--cream); }
+  .splog-goldline { width: 80px; height: 2px; background: var(--gold); margin: 10px auto 24px; }
+  .splog-list { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 600px; }
+  .splog-entry { display: flex; align-items: center; gap: 18px; background: var(--navy-mid); border: 1px solid var(--border); border-radius: 3px; padding: 14px 20px; }
+  .splog-entry-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .splog-entry-name { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--cream); flex: 1; }
+  .splog-entry-time { font-family: 'Oswald', sans-serif; font-size: 0.85rem; color: var(--text-dim); flex-shrink: 0; }
+  .splog-empty { font-family: 'EB Garamond', serif; font-size: 1.2rem; color: var(--text-dim); font-style: italic; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="tv-header">
+  <div class="tv-logo">
+    <div class="tv-logo-title">⚖ De Formatie</div>
+    <div class="tv-logo-sub">Politieke Spellenavond</div>
+  </div>
+  <div class="tv-phase-label" id="tv-phase-label">Welkom</div>
+  <div class="tv-timer-box">
+    <div class="tv-timer" id="tv-timer">—</div>
+    <div class="tv-timer-label" id="tv-timer-label">Timer</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="tv-main">
+
+  <!-- STANDBY -->
+  <div class="tv-view active" id="view-standby">
+    <div class="gold-line"></div>
+    <div class="standby-title">De Formatie</div>
+    <div class="standby-sub">Politieke Spellenavond</div>
+    <div class="standby-quote">"Formeren is laveren" — Iedereen die ooit een kabinet heeft proberen te vormen</div>
+    <div class="gold-line"></div>
+  </div>
+
+  <!-- PARTIJANNOUNCEMENT -->
+  <div class="tv-view" id="view-party-announce">
+    <div class="pa-card">
+      <div class="pa-poster-col">
+        <img class="pa-poster" id="pa-poster" src="" alt="" style="display:none;">
+        <div class="pa-poster-placeholder" id="pa-poster-placeholder">Geen poster</div>
+      </div>
+      <div class="pa-info-col">
+        <div class="pa-gold-line"></div>
+        <div class="pa-abbr" id="pa-abbr"></div>
+        <div class="pa-full" id="pa-full"></div>
+        <div class="pa-leader" id="pa-leader"></div>
+        <div class="pa-intro" id="pa-intro"></div>
+        <div class="pa-quirk-label">Karaktertrek</div>
+        <div class="pa-quirk" id="pa-quirk"></div>
+        <div class="pa-gold-line"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARTIJ TOEWIJZING (SLOTMACHINE) -->
+  <div class="tv-view" id="view-party-assign">
+    <div class="pas-party-header">
+      <div class="pas-party-abbr" id="pas-party-abbr"></div>
+      <div class="pas-party-full" id="pas-party-full"></div>
+    </div>
+    <div class="pas-label">wordt gespeeld door...</div>
+    <div class="pas-drum">
+      <div class="pas-slot-name" id="pas-slot-name">???</div>
+    </div>
+    <div class="pas-result-line" id="pas-result-line"></div>
+  </div>
+
+  <!-- ZETELVERDELING -->
+  <div class="tv-view" id="view-seats">
+    <div class="seats-title">Zetelverdeling — 150 Kamerzetels</div>
+    <div class="seats-grid" id="tv-seats-grid"></div>
+    <div class="coalition-total-display">
+      <span class="coalition-total-num" id="tv-coalition-num">0</span>
+      <span class="coalition-total-label">coalitiezetels — 76 nodig voor meerderheid</span>
+    </div>
+  </div>
+
+  <!-- EXIT POLL -->
+  <div class="tv-view" id="view-exitpoll">
+    <div class="ep-header">
+      <div class="ep-nos-bar">UITSLAG STEMRONDE</div>
+      <div class="ep-subtitle">Zetels per partij — 150 Kamerzetels</div>
+    </div>
+    <div class="ep-bars-container" id="exitpoll-bars"></div>
+    <div class="ep-total-bar">
+      <span class="ep-total-label">Coalitiezetels: </span>
+      <span class="ep-total-num" id="ep-coalition-num">—</span>
+      <span class="ep-total-label"> &nbsp;|&nbsp; Meerderheid: 76 zetels</span>
+    </div>
+  </div>
+
+  <!-- COALITIE VERKENNER (HEMICYCLE) -->
+  <div class="tv-view" id="view-coalitions">
+    <div class="hemi-layout">
+      <div class="hemi-header">
+        <div class="hemi-nos-bar">COALITIE VERKENNER</div>
+        <div class="hemi-subtitle" id="hemi-subtitle">Selecteer partijen op het informateur-paneel</div>
+      </div>
+      <div class="hemi-svg-wrap">
+        <svg id="hemi-svg" viewBox="0 0 900 420" preserveAspectRatio="xMidYMax meet">
+          <defs>
+            <filter id="glow-sm" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="glow-lg" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="7" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+        </svg>
+      </div>
+      <div class="hemi-coalition-chips" id="hemi-chips"></div>
+      <div class="hemi-stats">
+        <div style="text-align:center">
+          <div class="hemi-stat-num" id="hemi-total">0</div>
+          <div class="hemi-stat-label">GESELECTEERDE ZETELS</div>
+        </div>
+        <div class="hemi-divider"></div>
+        <div style="text-align:center">
+          <div class="hemi-progress-wrap">
+            <div class="hemi-progress-track">
+              <div class="hemi-progress-fill" id="hemi-fill" style="width:0%"></div>
+              <div class="hemi-progress-marker" id="hemi-marker" style="left:50.67%"></div>
+            </div>
+          </div>
+          <div class="hemi-stat-label" style="margin-top:4px;" id="hemi-majority-label">76 zetels nodig voor meerderheid</div>
+        </div>
+        <div class="hemi-divider"></div>
+        <div style="text-align:center">
+          <div class="hemi-stat-num" id="hemi-remain">76</div>
+          <div class="hemi-stat-label">NOG NODIG</div>
+        </div>
+      </div>
+      <div class="hemi-legend" id="hemi-legend"></div>
+    </div>
+  </div>
+
+  <!-- CRISIS -->
+  <div class="tv-view" id="view-crisis">
+    <div class="crisis-reveal-badge">⚠️ CRISIS</div>
+    <div class="crisis-reveal-title" id="tv-crisis-title">Crisis</div>
+    <div class="crisis-reveal-text" id="tv-crisis-text"></div>
+  </div>
+
+  <!-- STEMMING -->
+  <div class="tv-view" id="view-vote">
+    <div class="vote-title" id="tv-vote-title">Stemming</div>
+    <div class="vote-bars">
+      <div class="vote-bar-item">
+        <div class="vote-bar-num voor" id="tv-vote-voor">0</div>
+        <div class="vote-bar-label">🟢 Vóór</div>
+      </div>
+      <div class="vote-bar-item">
+        <div class="vote-bar-num tegen" id="tv-vote-tegen">0</div>
+        <div class="vote-bar-label">🔴 Tegen</div>
+      </div>
+    </div>
+    <div class="vote-verdict-big" id="tv-vote-verdict"></div>
+  </div>
+
+  <!-- AGENDA ONTHULLING -->
+  <div class="tv-view" id="view-agenda">
+    <div class="agenda-reveal-title">Geheime Agenda Onthuld!</div>
+    <div class="agenda-reveal-party" id="tv-agenda-party"></div>
+    <div class="agenda-reveal-type" id="tv-agenda-type"></div>
+  </div>
+
+  <!-- WETSVOORSTEL -->
+  <div class="tv-view" id="view-law">
+    <div class="law-tv-num" id="tv-law-num"></div>
+    <div class="law-tv-title" id="tv-law-title"></div>
+    <div class="law-tv-text" id="tv-law-text"></div>
+  </div>
+
+  <!-- SCOREBOARD -->
+  <div class="tv-view" id="view-scores">
+    <div class="score-tv-title">Tussenstand</div>
+    <div class="score-tv-grid" id="tv-score-grid"></div>
+  </div>
+
+  <!-- WINNER -->
+  <div class="tv-view" id="view-winner">
+    <div class="winner-label">🏆 Winnaar van de Avond</div>
+    <div class="winner-party" id="tv-winner-party"></div>
+    <div class="winner-sub" id="tv-winner-sub"></div>
+    <div class="gold-line"></div>
+    <div class="winner-score-table" id="tv-winner-table"></div>
+  </div>
+
+  <!-- PARTIJKAART -->
+  <div class="tv-view" id="view-partycard">
+    <div class="pc-badge">Partijkaart</div>
+    <div class="pc-layout">
+      <div class="pc-left">
+        <div class="pc-name" id="pc-name"></div>
+        <div class="pc-full" id="pc-full"></div>
+        <div class="pc-section">
+          <div class="pc-section-label">Lijsttrekker</div>
+          <div class="pc-section-value" id="pc-leader"></div>
+        </div>
+        <div class="pc-section pc-deal-section" id="pc-deal-section">
+          <div class="pc-section-label">⚠ Dealbreaker</div>
+          <div class="pc-section-value pc-deal-value" id="pc-deal"></div>
+        </div>
+      </div>
+      <div class="pc-right">
+        <div class="pc-section pc-crown-section">
+          <div class="pc-section-label">★ Kroonjuweel</div>
+          <div class="pc-section-value pc-crown-value" id="pc-crown"></div>
+        </div>
+        <div class="pc-section">
+          <div class="pc-section-label">Karakter-quirk</div>
+          <div class="pc-section-value pc-quirk-value" id="pc-quirk"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR CODE -->
+  <div class="tv-view" id="view-qr">
+    <div class="qr-badge">Meekijken op je telefoon</div>
+    <div class="qr-title">Scan de QR-code</div>
+    <div class="qr-goldline"></div>
+    <img class="qr-img" id="qr-img" src="" alt="QR Code">
+    <div class="qr-url" id="qr-url"></div>
+    <div class="qr-hint">Open tv.html op hetzelfde wifi-netwerk als dit apparaat</div>
+  </div>
+
+  <!-- COALITIEAKKOORD -->
+  <div class="tv-view" id="view-coalitie">
+    <div class="akkoord-tv-header">
+      <div class="akkoord-tv-badge">— Officieel Document —</div>
+      <div class="akkoord-tv-title" id="tv-akkoord-titel">Coalitieakkoord van Nederland</div>
+      <div class="akkoord-tv-goldline"></div>
+    </div>
+    <div class="akkoord-tv-coalitie-badges" id="tv-akkoord-coalitie"></div>
+    <div class="akkoord-tv-body">
+      <div class="akkoord-tv-col" id="tv-akkoord-left"></div>
+      <div class="akkoord-tv-col" id="tv-akkoord-right"></div>
+    </div>
+  </div>
+
+  <!-- SPELUITLEG TUTORIAL -->
+  <div class="tv-view" id="view-tutorial">
+    <div class="tut-slide-num" id="tut-slide-num"></div>
+    <div class="tut-icon" id="tut-icon"></div>
+    <h1 class="tut-title" id="tut-title"></h1>
+    <div class="tut-subtitle" id="tut-subtitle"></div>
+    <div class="tut-goldline"></div>
+    <div id="tut-content"></div>
+    <div class="tut-progress" id="tut-progress"></div>
+  </div>
+
+  <!-- ALLE PARTIJEN OVERZICHT -->
+  <div class="tv-view" id="view-all-parties">
+    <div class="ap-badge">Partijenoverzicht</div>
+    <div class="ap-title">De 10 Partijen</div>
+    <div class="ap-goldline"></div>
+    <div class="ap-grid" id="ap-grid"></div>
+  </div>
+
+  <!-- SUPERKRACHTEN LOG -->
+  <div class="tv-view" id="view-superpower-log">
+    <div class="splog-badge">Informateur</div>
+    <div class="splog-title">Gebruikte Superkrachten</div>
+    <div class="splog-goldline"></div>
+    <div class="splog-list" id="tv-splog-list"></div>
+  </div>
+
+</div><!-- end tv-main -->
+
+<!-- COALITION METER OVERLAY -->
+<div id="coalition-meter" class="hidden">
+  <div id="cm-label-wrap">
+    <span class="cm-label-text">Coalitie</span>
+    <span id="cm-seats">0</span>
+    <span class="cm-label-text">/ 150 zetels</span>
+  </div>
+  <div id="cm-bar-wrap">
+    <div id="cm-bar"></div>
+    <div id="cm-marker76" title="76 — meerderheid"></div>
+  </div>
+  <div id="cm-status"></div>
+</div>
+
+<!-- FOOTER TICKER -->
+<div class="tv-footer">
+  <div class="ticker" id="tv-ticker">
+    DE FORMATIE — Politieke Spellenavond &nbsp;&nbsp;&nbsp; ⚖ &nbsp;&nbsp;&nbsp; 150 Kamerzetels &nbsp;&nbsp;&nbsp; 76 zetels voor meerderheid &nbsp;&nbsp;&nbsp; "Formeren is laveren" &nbsp;&nbsp;&nbsp; ⚖ &nbsp;&nbsp;&nbsp; DE FORMATIE — Politieke Spellenavond
+  </div>
+</div>
+
+<script>
+const PARTIES = [
+  { id: 'PPP', name: 'PPP', full: 'Partij voor Plant en Planeet' },
+  { id: 'FBL', name: 'FBL', full: 'Front voor Betaalbaar Luieren' },
+  { id: 'KCV', name: 'KCV', full: 'Kunst, Cultuur en Vlaai' },
+  { id: 'WIFI', name: 'WIFI', full: 'Werkelijk Innovatief Fantastisch Internet' },
+  { id: 'DAM', name: 'DAM', full: 'De Absolute Middenpartij' },
+  { id: 'VBB', name: 'VBB', full: 'Verbond voor Bitterballen en Borrel' },
+  { id: 'KKB', name: 'KKB', full: 'De Koninklijke Kaasbeweging' },
+  { id: 'DDP', name: 'DDP', full: 'De Dikke Portemonnee' },
+  { id: 'FRR', name: 'FRR', full: 'Front voor Rust, Regels en Regelmaat' },
+  { id: 'PAN', name: 'PAN', full: 'Partij Absoluut Niks' },
+];
+
+const PARTY_LEADERS = {
+  PPP:  'Bloem Windmolen-de Vries',
+  FBL:  'Sjaak van de Hangmat',
+  KCV:  'Floris-Jan van het Podium',
+  WIFI: 'Byte van Dijkstra',
+  DAM:  'Jan-Willem Gemiddeld',
+  VBB:  'Henk Krokansen',
+  KKB:  'Gouda van Leerdammer',
+  DDP:  'Maximiliansen van Cashflow III',
+  FRR:  'Gerrit Klokslag',
+  PAN:  'Nihil "Nelis" van Niansen',
+};
+
+const PARTY_QUIRKS = {
+  PPP:  'Mag het woord "economie" niet zeggen → zegt "eco-harmonie" + boom-knuffel-gebaar',
+  FBL:  'Gaapt demonstratief, stelt constant voor om pauze te nemen',
+  KCV:  'Citeert steeds verzonnen dichters en filosofen',
+  WIFI: 'Vervangt alles door Engelse tech-termen ("coalition-API updaten")',
+  DAM:  'Kan nooit ergens definitief voor of tegen zijn, maakt zinnen nooit af',
+  VBB:  'Onderbouwt elk argument met een vergelijking met eten',
+  KKB:  'Relateert werkelijk alles aan kaas',
+  DDP:  'Noemt alles een "investering" of "groeikans"',
+  FRR:  'Houdt iedereen streng aan de tijd, kijkt constant op horloge',
+  PAN:  'Is het automatisch oneens met het laatste wat iemand zei',
+};
+
+const PARTY_CROWN_JEWELS = {
+  PPP:  'Vleesvrije Werkweek',
+  FBL:  '3-daagse werkweek',
+  KCV:  'Nationale Vlaaidag als officiële feestdag',
+  WIFI: 'WiFi als grondrecht',
+  DAM:  'Werkgroep over het woord "draagvlak"',
+  VBB:  'BTW op snacks naar 0%',
+  KKB:  'Ministerie van Zuivel',
+  DDP:  'Belastingverlaging',
+  FRR:  'De avondklok',
+  PAN:  'Minimaal één wet afschaffen',
+};
+
+const PARTY_DEALBREAKERS = {
+  PPP: 'KKB', FBL: 'DDP', KCV: 'PAN', WIFI: 'FRR',
+  DAM: null,   VBB: 'PPP', KKB: 'PPP', DDP: 'FBL', FRR: 'PAN', PAN: 'FRR',
+};
+
+// Dynamische partijenlijst — wordt ingesteld via 'setup' event van de master
+let activeParties = PARTIES.slice();
+let majorityThreshold = 76;
+let totalSeatsCount = 150;
+
+// Herstel opgeslagen configuratie na page reload
+(function() {
+  try {
+    const saved = localStorage.getItem('formatie_active_parties');
+    if (saved) {
+      const ids = JSON.parse(saved);
+      activeParties = PARTIES.filter(p => ids.some(ap => ap.id === p.id));
+      totalSeatsCount = activeParties.length * 15;
+      majorityThreshold = Math.floor(totalSeatsCount / 2) + 1;
+    }
+  } catch(e) {}
+})();
+
+const PHASE_LABELS = {
+  prep: 'Voorbereiding',
+  r1: 'Ronde 1 — Campagne',
+  r2: 'Ronde 2 — Formatie',
+  r3: 'Ronde 3 — Regeerperiode',
+  r4: 'Ronde 4 — Kabinetscrisis',
+  score: 'Eindstand',
+};
+
+function showView(id) {
+  document.querySelectorAll('.tv-view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+function totalScore(scores, id) {
+  const s = scores[id];
+  if (!s) return 0;
+  return (s.coalition||0) + (s.mustHave||0) + (s.bonus||0) + (s.dealbreaker||0) + (s.regeer||0) + (s.agenda||0) + (s.mp||0) + (s.amendement||0);
+}
+
+// ===== HANDLE EVENTS FROM MASTER =====
+function handleEvent(ev) {
+  const { type, data } = ev;
+
+  if (type === 'setup') {
+    activeParties = data.parties.map(ap => PARTIES.find(p => p.id === ap.id) || ap);
+    majorityThreshold = data.majority;
+    totalSeatsCount = data.totalSeats;
+    try { localStorage.setItem('formatie_active_parties', JSON.stringify(data.parties)); } catch(e) {}
+    updateTVLabels(data.totalSeats, data.majority);
+    return;
+  }
+
+  if (type === 'phase') {
+    document.getElementById('tv-phase-label').textContent = PHASE_LABELS[data.phase] || data.phase;
+    showView('view-standby');
+  }
+
+  if (type === 'timer') {
+    const s = data.seconds;
+    const m = Math.floor(Math.abs(s) / 60);
+    const sec = Math.abs(s) % 60;
+    const el = document.getElementById('tv-timer');
+    el.textContent = s <= 0 ? '0:00' : `${m}:${sec.toString().padStart(2,'0')}`;
+    el.className = 'tv-timer' + (s <= 10 ? ' danger' : s <= 30 ? ' warning' : '');
+    document.getElementById('tv-timer-label').textContent = data.label || '';
+    if (data.done) {
+      el.textContent = '⏰ TIJD!';
+      playSound('timer');
+    }
+  }
+
+  if (type === 'seats') {
+    updateCoalitionMeter(data.seats, data.coalition);
+    renderSeats(data.seats, data.coalition);
+    showView('view-seats');
+  }
+
+  if (type === 'crisis') {
+    const card = data.card;
+    document.getElementById('tv-crisis-title').textContent = card.title;
+    document.getElementById('tv-crisis-text').textContent = card.text;
+    playSound('crisis');
+    showView('view-crisis');
+  }
+
+  if (type === 'vote') {
+    document.getElementById('tv-vote-voor').textContent = data.voor;
+    document.getElementById('tv-vote-tegen').textContent = data.tegen;
+    const verdict = document.getElementById('tv-vote-verdict');
+    const maj = data.majority || majorityThreshold;
+    if (data.voor === 0 && data.tegen === 0) { verdict.textContent = ''; verdict.className = 'vote-verdict-big'; }
+    else if (data.voor >= maj) { verdict.textContent = '✓ AANGENOMEN'; verdict.className = 'vote-verdict-big pass'; }
+    else { verdict.textContent = `✗ VERWORPEN`; verdict.className = 'vote-verdict-big fail'; }
+    showView('view-vote');
+  }
+
+  if (type === 'law') {
+    const law = data.law;
+    document.getElementById('tv-law-num').textContent = `Wetsvoorstel ${law.num}`;
+    document.getElementById('tv-law-title').textContent = law.title;
+    document.getElementById('tv-law-text').textContent = law.text;
+    showView('view-law');
+  }
+
+  if (type === 'agenda') {
+    const p = activeParties.find(pp => pp.id === data.party) || PARTIES.find(pp => pp.id === data.party);
+    document.getElementById('tv-agenda-party').textContent = p ? `${p.name} — ${p.full}` : data.party;
+    const typeEl = document.getElementById('tv-agenda-type');
+    typeEl.textContent = data.type;
+    typeEl.className = 'agenda-reveal-type ' + data.type.toLowerCase();
+    showView('view-agenda');
+  }
+
+  if (type === 'agendaAll') {
+    // Show standby when all revealed (transition to scoring)
+    showView('view-standby');
+  }
+
+  if (type === 'scores') {
+    renderScores(data.scores, data.parties || PARTIES);
+    showView('view-scores');
+  }
+
+  if (type === 'winner') {
+    renderWinner(data.winner, data.scores, data.parties || PARTIES);
+    playSound('winner');
+    showView('view-winner');
+  }
+
+  if (type === 'superpower') {
+    // Briefly flash on ticker
+    const ticker = document.getElementById('tv-ticker');
+    const orig = ticker.textContent;
+    ticker.textContent = `⚡ INFORMATEUR GEBRUIKT: ${data.name}! ⚡ ` + orig;
+    setTimeout(() => { ticker.textContent = orig; }, 8000);
+  }
+
+  if (type === 'partyAnnounce') {
+    if (data.close) { showView('view-standby'); return; }
+    renderPartyAnnounce(data);
+    showView('view-party-announce');
+  }
+
+  if (type === 'partyAssign') {
+    renderPartyAssign(data);
+    showView('view-party-assign');
+  }
+
+  if (type === 'coalitie') {
+    renderAkkoord(data.coalitie, data.coalition, data.parties || PARTIES);
+    showView('view-coalitie');
+  }
+
+  if (type === 'exitpoll') {
+    renderExitPoll(data.parties, data.allParties);
+    showView('view-exitpoll');
+  }
+
+  if (type === 'coalitions') {
+    renderHemicycle(data.parties, data.selected);
+    showView('view-coalitions');
+  }
+
+  if (type === 'partycard') {
+    if (data.close) { showView('view-standby'); return; }
+    renderPartyCard(data);
+    showView('view-partycard');
+  }
+
+  if (type === 'qrcode') {
+    const url = encodeURIComponent(data.url);
+    document.getElementById('qr-img').src =
+      `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${url}`;
+    document.getElementById('qr-url').textContent = data.url;
+    showView('view-qr');
+  }
+
+  if (type === 'tutorial') {
+    if (data.close) { showView('view-standby'); return; }
+    renderTutorial(data);
+    showView('view-tutorial');
+  }
+
+  if (type === 'allParties') {
+    renderAllParties();
+    showView('view-all-parties');
+  }
+
+  if (type === 'superpowerLog') {
+    renderSuperpowerLogTV(data.log || []);
+    showView('view-superpower-log');
+  }
+}
+
+function renderTutorial(data) {
+  document.getElementById('tut-slide-num').textContent = `Dia ${data.slideIndex + 1} van ${data.total}`;
+  document.getElementById('tut-icon').textContent = data.icon || '';
+  document.getElementById('tut-title').textContent = data.title || '';
+  document.getElementById('tut-subtitle').textContent = data.subtitle || '';
+
+  const contentEl = document.getElementById('tut-content');
+  if (data.type === 'bullets' || data.type === 'closing') {
+    const cls = data.type === 'closing' ? 'tut-closing' : 'tut-bullets';
+    contentEl.innerHTML = `<ul class="${cls}">${
+      data.content.map(item => `<li>${item}</li>`).join('')
+    }</ul>`;
+  } else if (data.type === 'grid') {
+    contentEl.innerHTML = `<div class="tut-grid">${
+      data.content.map(([label, value]) =>
+        `<div class="tut-grid-row"><span class="tut-grid-label">${label}</span><span class="tut-grid-value">${value}</span></div>`
+      ).join('')
+    }</div>`;
+  }
+
+  // Progress dots
+  const progressEl = document.getElementById('tut-progress');
+  progressEl.innerHTML = Array.from({ length: data.total }, (_, i) => {
+    const cls = i < data.slideIndex ? 'tut-dot done' : i === data.slideIndex ? 'tut-dot active' : 'tut-dot';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function renderAkkoord(coalitie, coalition, parties) {
+  const LEADERS = {
+    PPP:'Bloem Windmolen-de Vries', FBL:'Sjaak van de Hangmat', KCV:'Floris-Jan van het Podium',
+    WIFI:'Byte van Dijkstra', DAM:'Jan-Willem Gemiddeld', VBB:'Henk Krokansen',
+    KKB:'Gouda van Leerdammer', DDP:'Maximiliansen van Cashflow III', FRR:'Gerrit Klokslag',
+    PAN:'Nihil "Nelis" van Niansen'
+  };
+
+  // Titel
+  document.getElementById('tv-akkoord-titel').textContent = coalitie.titel || 'Coalitieakkoord van Nederland';
+
+  // Coalitie badges
+  const coalitionParties = parties.filter(p => coalition[p.id]);
+  const badgesEl = document.getElementById('tv-akkoord-coalitie');
+  badgesEl.innerHTML = coalitionParties.map(p => `<div class="akkoord-tv-badge-party">${p.name}</div>`).join('');
+
+  // Left column: Premier + Ministeries
+  const leftEl = document.getElementById('tv-akkoord-left');
+  const premierParty = parties.find(p => p.id === coalitie.premier);
+  const premierHtml = premierParty ? `
+    <div class="akkoord-tv-section-title">Minister-President</div>
+    <div class="akkoord-tv-premier">${LEADERS[premierParty.id] || premierParty.name}</div>
+    <div class="akkoord-tv-premier-party">${premierParty.name} — ${premierParty.full}</div>
+  ` : '';
+
+  const ministeriesHtml = coalitionParties.length ? `
+    <div class="akkoord-tv-section-title" style="margin-top:20px;">Ministeries</div>
+    ${coalitionParties.map(p => {
+      const min = (coalitie.ministeries || {})[p.id] || '';
+      return `<div class="akkoord-tv-ministerie-row">
+        <div class="akkoord-tv-ministerie-party">${p.name}</div>
+        <div class="akkoord-tv-ministerie-name">${min || '—'}</div>
+      </div>`;
+    }).join('')}
+  ` : '';
+
+  leftEl.innerHTML = premierHtml + ministeriesHtml;
+
+  // Right column: Programmapunten
+  const rightEl = document.getElementById('tv-akkoord-right');
+  const punten = Array.isArray(coalitie.punten) ? coalitie.punten.filter(p => p && p.trim()) : [];
+  rightEl.innerHTML = `
+    <div class="akkoord-tv-section-title">Programmapunten</div>
+    ${punten.length ? punten.map((p, i) => `
+      <div class="akkoord-tv-punt-row">
+        <div class="akkoord-tv-punt-num">${i + 1}.</div>
+        <div class="akkoord-tv-punt-text">${p}</div>
+      </div>
+    `).join('') : '<div style="color:var(--text-dim);font-style:italic;font-size:0.9rem;">Nog geen programmapunten ingevuld.</div>'}
+  `;
+}
+
+function renderPartyAnnounce(data) {
+  document.getElementById('pa-abbr').textContent = data.name || '';
+  document.getElementById('pa-full').textContent = data.full || '';
+  document.getElementById('pa-leader').textContent = data.leader ? `Lijsttrekker: ${data.leader}` : '';
+  document.getElementById('pa-quirk').textContent = data.quirk || '';
+  document.getElementById('pa-intro').textContent = data.intro || '';
+
+  // Poster
+  const poster = document.getElementById('pa-poster');
+  const placeholder = document.getElementById('pa-poster-placeholder');
+  poster.style.display = 'none';
+  placeholder.style.display = '';
+  if (data.partyId) {
+    poster.src = `poster-${data.partyId}.jpg`;
+    poster.onload = () => {
+      poster.style.display = '';
+      placeholder.style.display = 'none';
+    };
+    poster.onerror = () => {
+      poster.style.display = 'none';
+      placeholder.style.display = '';
+    };
+  }
+}
+
+
+let _slotInterval = null;
+
+function renderPartyAssign(data) {
+  // Cancel any running slotmachine
+  if (_slotInterval) { clearInterval(_slotInterval); _slotInterval = null; }
+
+  const abbrEl    = document.getElementById('pas-party-abbr');
+  const fullEl    = document.getElementById('pas-party-full');
+  const slotEl    = document.getElementById('pas-slot-name');
+  const resultEl  = document.getElementById('pas-result-line');
+
+  abbrEl.textContent = data.partyName || '';
+  fullEl.textContent = data.partyFull || '';
+  slotEl.className = 'pas-slot-name';
+  slotEl.textContent = '???';
+  resultEl.className = 'pas-result-line';
+  resultEl.textContent = '';
+
+  const players = data.allPlayers && data.allPlayers.length >= 2
+    ? data.allPlayers
+    : [data.playerName, data.playerName];
+
+  // Slotmachine speed schedule: [delay_ms, repetitions]
+  const schedule = [
+    [55,  8], [80,  6], [110, 5], [150, 4],
+    [200, 4], [270, 3], [360, 3], [460, 2],
+    [580, 2], [700, 2], [880, 1],
+  ];
+
+  let stepIndex = 0;
+  let repCount  = 0;
+  let nameIndex = 0;
+
+  function tick() {
+    if (stepIndex >= schedule.length) {
+      // Final reveal
+      clearInterval(_slotInterval);
+      _slotInterval = null;
+      slotEl.style.opacity = '1';
+      slotEl.textContent = data.playerName;
+      slotEl.className = 'pas-slot-name final';
+      resultEl.textContent = `${data.playerName} speelt ${data.partyName}`;
+      setTimeout(() => { resultEl.className = 'pas-result-line visible'; }, 50);
+      return;
+    }
+
+    const [, reps] = schedule[stepIndex];
+
+    // Show next random name — never show playerName during the spin
+    const pool = players.filter(n => n !== data.playerName);
+    const safePool = pool.length > 0 ? pool : players;
+    nameIndex = (nameIndex + 1 + Math.floor(Math.random() * (safePool.length - 1))) % safePool.length;
+    slotEl.style.opacity = '0';
+    setTimeout(() => {
+      slotEl.textContent = safePool[nameIndex];
+      slotEl.style.opacity = '1';
+    }, 30);
+
+    repCount++;
+    if (repCount >= reps) {
+      repCount = 0;
+      stepIndex++;
+      clearInterval(_slotInterval);
+      if (stepIndex < schedule.length) {
+        _slotInterval = setInterval(tick, schedule[stepIndex][0]);
+      } else {
+        // Wait for the 30ms name-update timeout to finish before final reveal
+        setTimeout(tick, 40);
+      }
+    }
+  }
+
+  // Start with the first delay
+  _slotInterval = setInterval(tick, schedule[0][0]);
+}
+
+function renderSeats(seats, coalition) {
+  const grid = document.getElementById('tv-seats-grid');
+  const sorted = [...activeParties].sort((a,b) => (seats[b.id]||0) - (seats[a.id]||0));
+  const cols = activeParties.length <= 6 ? 3 : activeParties.length <= 8 ? 4 : 5;
+  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  grid.innerHTML = '';
+  sorted.forEach(p => {
+    const s = seats[p.id] || 0;
+    const inCoal = coalition[p.id];
+    const barW = Math.round((s / totalSeatsCount) * 100);
+    const div = document.createElement('div');
+    div.className = `seat-card${inCoal ? ' coalition' : ''}`;
+    div.innerHTML = `
+      ${inCoal ? '<div class="coalition-badge">Coalitie</div>' : ''}
+      <div class="seat-card-name">${p.name}</div>
+      <div class="seat-card-full">${p.full}</div>
+      <div class="seat-card-num">${s}</div>
+      <div class="seat-card-bar-wrap"><div class="seat-card-bar" style="width:${barW}%"></div></div>
+    `;
+    grid.appendChild(div);
+  });
+
+  const coalTotal = activeParties.reduce((sum, p) => sum + (coalition[p.id] ? (seats[p.id]||0) : 0), 0);
+  const numEl = document.getElementById('tv-coalition-num');
+  numEl.textContent = coalTotal;
+  numEl.className = 'coalition-total-num ' + (coalTotal >= majorityThreshold ? 'majority' : coalTotal >= Math.floor(majorityThreshold / 2) ? 'minority' : 'low');
+}
+
+function updateCoalitionMeter(seats, coalition) {
+  const total = activeParties.reduce((sum, p) => sum + (coalition[p.id] ? (seats[p.id] || 0) : 0), 0);
+  const meter = document.getElementById('coalition-meter');
+  if (!meter) return;
+  meter.classList.remove('hidden', 'majority', 'minority', 'low');
+  meter.classList.add(total >= majorityThreshold ? 'majority' : total >= Math.floor(majorityThreshold / 2) ? 'minority' : 'low');
+  document.getElementById('cm-seats').textContent = total;
+  const pct = Math.min(100, (total / totalSeatsCount) * 100);
+  document.getElementById('cm-bar').style.width = pct + '%';
+  document.getElementById('cm-status').textContent =
+    total >= majorityThreshold ? `✓ Meerderheid (${total - majorityThreshold} over)` : `${majorityThreshold - total} zetels tekort voor meerderheid`;
+}
+
+function renderPartyCard(data) {
+  document.getElementById('pc-name').textContent = data.name;
+  document.getElementById('pc-full').textContent = data.full;
+  document.getElementById('pc-leader').textContent = data.leader;
+  document.getElementById('pc-crown').textContent = data.crown;
+  document.getElementById('pc-quirk').textContent = data.quirk;
+  const dealSection = document.getElementById('pc-deal-section');
+  const dealEl = document.getElementById('pc-deal');
+  if (data.dealbreaker) {
+    dealEl.textContent = data.dealbreaker;
+    dealSection.style.display = '';
+  } else {
+    dealSection.style.display = 'none';
+  }
+}
+
+function renderScores(scores, parties) {
+  const grid = document.getElementById('tv-score-grid');
+  const sorted = [...parties].sort((a,b) => totalScore(scores, b.id) - totalScore(scores, a.id));
+  const maxScore = Math.max(1, totalScore(scores, sorted[0].id));
+  grid.innerHTML = '';
+  sorted.forEach((p, i) => {
+    const pts = totalScore(scores, p.id);
+    const barW = Math.round((pts / maxScore) * 100);
+    const row = document.createElement('div');
+    row.className = `score-tv-row${i === 0 ? ' leader' : ''}`;
+    row.innerHTML = `
+      <div class="score-tv-rank">${i+1}.</div>
+      <div class="score-tv-name">${p.name}</div>
+      <div class="score-tv-bar-wrap"><div class="score-tv-bar" style="width:${Math.max(barW,4)}%"></div></div>
+      <div class="score-tv-pts">${pts}</div>
+    `;
+    grid.appendChild(row);
+  });
+}
+
+function renderWinner(winner, scores, parties) {
+  document.getElementById('tv-winner-party').textContent = winner.name;
+  document.getElementById('tv-winner-sub').textContent = `${winner.full} — ${totalScore(scores, winner.id)} punten`;
+
+  const sorted = [...parties].sort((a,b) => totalScore(scores, b.id) - totalScore(scores, a.id));
+  const table = document.getElementById('tv-winner-table');
+  table.innerHTML = '';
+  sorted.slice(0, 5).forEach((p, i) => {
+    const pts = totalScore(scores, p.id);
+    const row = document.createElement('div');
+    row.className = `winner-row${i === 0 ? ' first' : ''}`;
+    row.innerHTML = `
+      <div class="winner-row-rank">${i === 0 ? '🏆' : `${i+1}.`}</div>
+      <div class="winner-row-name">${p.name} — ${p.full}</div>
+      <div class="winner-row-pts">${pts} pt</div>
+    `;
+    table.appendChild(row);
+  });
+}
+
+// ===== EXIT POLL =====
+let exitPollAllParties = []; // full sorted list (for maxSeats calc)
+
+function renderExitPoll(parties, allParties) {
+  const container = document.getElementById('exitpoll-bars');
+
+  // On fresh start (parties empty), clear container
+  if (parties.length === 0) {
+    container.innerHTML = '';
+    exitPollAllParties = allParties || [];
+    const numEl = document.getElementById('ep-coalition-num');
+    numEl.textContent = '—';
+    numEl.style.color = 'var(--gold)';
+    return;
+  }
+
+  // Use allParties for maxSeats so bars scale consistently as more are revealed
+  const reference = (allParties && allParties.length > 0) ? allParties : parties;
+  const maxSeats = Math.max(...reference.map(p => p.seats));
+
+  const currentCount = container.querySelectorAll('.ep-row').length;
+
+  // Make already-rendered rows static (stop re-animating)
+  container.querySelectorAll('.ep-row').forEach(row => {
+    row.classList.add('ep-static');
+    const bar = row.querySelector('.ep-bar');
+    if (bar) bar.classList.add('ep-static');
+    const star = row.querySelector('.ep-coalition-star');
+    if (star) star.classList.add('ep-static');
+  });
+
+  // Add new parties
+  parties.slice(currentCount).forEach(p => {
+    const pct = maxSeats > 0 ? (p.seats / maxSeats) * 92 : 0;
+
+    const row = document.createElement('div');
+    row.className = 'ep-row';
+
+    const coalClass = p.inCoalition ? ' ep-coalition' : '';
+    const starHtml = p.inCoalition
+      ? `<div class="ep-coalition-star">★ coalitie</div>`
+      : '';
+
+    row.innerHTML = `
+      <div class="ep-label-col">${p.id}</div>
+      <div class="ep-bar-wrap">
+        <div class="ep-bar${coalClass}" style="--target-width:${pct}%">
+          <span class="ep-seats-num">${p.seats}</span>
+        </div>
+        ${starHtml}
+      </div>
+    `;
+    container.appendChild(row);
+  });
+
+  const coalitionTotal = parties.filter(p => p.inCoalition).reduce((s, p) => s + p.seats, 0);
+  const numEl = document.getElementById('ep-coalition-num');
+  numEl.textContent = coalitionTotal || '—';
+  numEl.style.color = coalitionTotal >= majorityThreshold ? 'var(--green)' : 'var(--gold)';
+}
+
+// ===== COALITIE EXPLORER =====
+// ===== COALITIE VERKENNER — HEMICYCLE =====
+const HEMI_COLORS = {
+  PPP: '#27ae60', FBL: '#8e44ad', KCV: '#e67e22', WIFI: '#2980b9',
+  DAM: '#95a5a6', VBB: '#f1c40f', KKB: '#c9a84c', DDP: '#16a085',
+  FRR: '#546e8a', PAN: '#c0392b'
+};
+
+// Party order: political left → right (for visual layout)
+const HEMI_ORDER = ['PPP','FBL','KCV','WIFI','DAM','VBB','KKB','DDP','FRR','PAN'];
+
+function polarXY(cx, cy, r, angle) {
+  return { x: cx + r * Math.cos(angle), y: cy - r * Math.sin(angle) };
+}
+
+function donutArcPath(cx, cy, r1, r2, aStart, aEnd, gap = 0.025) {
+  // aStart > aEnd: goes from left (π) toward right (0), decreasing angle
+  const sa = aStart - gap;
+  const ea = aEnd + gap;
+  if (sa <= ea) return null;
+  const o1 = polarXY(cx, cy, r2, sa);
+  const o2 = polarXY(cx, cy, r2, ea);
+  const i1 = polarXY(cx, cy, r1, sa);
+  const i2 = polarXY(cx, cy, r1, ea);
+  const large = (sa - ea) > Math.PI ? 1 : 0;
+  const f = (n) => n.toFixed(2);
+  // outer arc: decreasing angle (left to right through top) = sweep=0 in SVG
+  // inner arc: increasing angle (right to left through top) = sweep=1 in SVG
+  return `M${f(o1.x)},${f(o1.y)} A${r2},${r2} 0 ${large},0 ${f(o2.x)},${f(o2.y)} L${f(i2.x)},${f(i2.y)} A${r1},${r1} 0 ${large},1 ${f(i1.x)},${f(i1.y)} Z`;
+}
+
+function renderHemicycle(parties, selectedIds) {
+  const svg = document.getElementById('hemi-svg');
+  // Keep defs, remove rest
+  const defs = svg.querySelector('defs');
+  svg.innerHTML = '';
+  if (defs) svg.appendChild(defs);
+
+  const selected = new Set(selectedIds);
+  const totalSeats = parties.reduce((s, p) => s + p.seats, 0);
+  if (totalSeats === 0) return;
+
+  const cx = 450, cy = 420;
+  const innerR = 120, outerR = 290;
+  const dotRadius = 7;
+
+  // Sort parties by HEMI_ORDER (left to right)
+  const ordered = [...HEMI_ORDER]
+    .map(id => parties.find(p => p.id === id))
+    .filter(Boolean);
+
+  // Angular ranges per party (π = left, 0 = right)
+  let cum = 0;
+  const ranges = ordered.map(p => {
+    const start = Math.PI - (cum / totalSeats) * Math.PI;
+    cum += p.seats;
+    const end = Math.PI - (cum / totalSeats) * Math.PI;
+    return { id: p.id, start, end, seats: p.seats };
+  });
+
+  // Draw backdrop arc (full semicircle outline)
+  const backdropPath = donutArcPath(cx, cy, innerR - 6, outerR + 6, Math.PI, 0, 0);
+  if (backdropPath) {
+    const backdrop = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    backdrop.setAttribute('d', backdropPath);
+    backdrop.setAttribute('fill', '#0d1f3c');
+    backdrop.setAttribute('stroke', '#1a2f50');
+    backdrop.setAttribute('stroke-width', '1');
+    svg.appendChild(backdrop);
+  }
+
+  // Draw a party segment for each party
+  ranges.forEach(range => {
+    const party = ordered.find(p => p.id === range.id);
+    const color = HEMI_COLORS[range.id] || '#666';
+    const isSel = selected.has(range.id);
+
+    const path = donutArcPath(cx, cy, innerR, outerR, range.start, range.end, 0.018);
+    if (!path) return;
+
+    const seg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    seg.setAttribute('d', path);
+    seg.setAttribute('fill', isSel ? color : '#1a2f50');
+    seg.setAttribute('stroke', isSel ? color : '#243354');
+    seg.setAttribute('stroke-width', isSel ? '1.5' : '1');
+    seg.setAttribute('opacity', isSel ? '1' : '0.55');
+    if (isSel) seg.setAttribute('filter', 'url(#glow-sm)');
+    svg.appendChild(seg);
+
+    // Seat dots: 3 rows
+    const rowConfigs = [
+      { r: innerR + 26, fraction: 0.28 },
+      { r: innerR + 68, fraction: 0.36 },
+      { r: innerR + 110, fraction: 0.36 },
+    ];
+
+    let remaining = range.seats;
+    rowConfigs.forEach((row, ri) => {
+      const rowSeats = ri < rowConfigs.length - 1
+        ? Math.round(range.seats * row.fraction)
+        : remaining;
+      remaining -= rowSeats;
+
+      for (let i = 0; i < rowSeats; i++) {
+        const frac = rowSeats > 1 ? i / (rowSeats - 1) : 0.5;
+        const angle = range.start - frac * (range.start - range.end);
+        const { x, y } = polarXY(cx, cy, row.r, angle);
+
+        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dot.setAttribute('cx', x.toFixed(1));
+        dot.setAttribute('cy', y.toFixed(1));
+        dot.setAttribute('r', dotRadius);
+        dot.setAttribute('fill', isSel ? color : '#0d1f3c');
+        dot.setAttribute('stroke', isSel ? '#fff' : color);
+        dot.setAttribute('stroke-width', isSel ? '1.5' : '0.8');
+        dot.setAttribute('opacity', isSel ? '1' : '0.4');
+        if (isSel) dot.setAttribute('filter', 'url(#glow-sm)');
+        svg.appendChild(dot);
+      }
+    });
+
+    // Party label at mid-angle, just outside outerR
+    const midAngle = (range.start + range.end) / 2;
+    const labelR = outerR + 22;
+    const lp = polarXY(cx, cy, labelR, midAngle);
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', lp.x.toFixed(1));
+    label.setAttribute('y', lp.y.toFixed(1));
+    label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('dominant-baseline', 'middle');
+    label.setAttribute('font-family', 'Oswald, sans-serif');
+    label.setAttribute('font-size', '13');
+    label.setAttribute('font-weight', '700');
+    label.setAttribute('fill', isSel ? color : '#3a5070');
+    label.setAttribute('letter-spacing', '0.5');
+    label.textContent = range.id;
+    svg.appendChild(label);
+
+    // Seat count below label (only when selected)
+    if (isSel) {
+      const seatLabelR = outerR + 38;
+      const slp = polarXY(cx, cy, seatLabelR, midAngle);
+      const seatNum = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      seatNum.setAttribute('x', slp.x.toFixed(1));
+      seatNum.setAttribute('y', slp.y.toFixed(1));
+      seatNum.setAttribute('text-anchor', 'middle');
+      seatNum.setAttribute('dominant-baseline', 'middle');
+      seatNum.setAttribute('font-family', 'Oswald, sans-serif');
+      seatNum.setAttribute('font-size', '11');
+      seatNum.setAttribute('fill', color);
+      seatNum.setAttribute('opacity', '0.9');
+      seatNum.textContent = party.seats;
+      svg.appendChild(seatNum);
+    }
+  });
+
+  // Center label: selected seat total
+  const selectedTotal = ordered
+    .filter(p => selected.has(p.id))
+    .reduce((s, p) => s + p.seats, 0);
+
+  const isMajority = selectedTotal >= majorityThreshold;
+
+  // Bottom center text
+  const centerLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  centerLabel.setAttribute('x', cx);
+  centerLabel.setAttribute('y', cy - 8);
+  centerLabel.setAttribute('text-anchor', 'middle');
+  centerLabel.setAttribute('font-family', 'Oswald, sans-serif');
+  centerLabel.setAttribute('font-size', '38');
+  centerLabel.setAttribute('font-weight', '700');
+  centerLabel.setAttribute('fill', isMajority ? '#27ae60' : '#c9a84c');
+  centerLabel.textContent = selectedTotal > 0 ? selectedTotal : '';
+  svg.appendChild(centerLabel);
+
+  if (selectedTotal > 0) {
+    const centerSub = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    centerSub.setAttribute('x', cx);
+    centerSub.setAttribute('y', cy + 18);
+    centerSub.setAttribute('text-anchor', 'middle');
+    centerSub.setAttribute('font-family', 'Oswald, sans-serif');
+    centerSub.setAttribute('font-size', '11');
+    centerSub.setAttribute('fill', '#8a7a5a');
+    centerSub.setAttribute('letter-spacing', '2');
+    centerSub.textContent = 'ZETELS';
+    svg.appendChild(centerSub);
+  }
+
+  // Majority line tick at majority/totalSeats across bottom
+  const majAngle = Math.PI - (majorityThreshold / totalSeats) * Math.PI;
+  const mt1 = polarXY(cx, cy, innerR - 12, majAngle);
+  const mt2 = polarXY(cx, cy, outerR + 12, majAngle);
+  const majLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  majLine.setAttribute('x1', mt1.x.toFixed(1)); majLine.setAttribute('y1', mt1.y.toFixed(1));
+  majLine.setAttribute('x2', mt2.x.toFixed(1)); majLine.setAttribute('y2', mt2.y.toFixed(1));
+  majLine.setAttribute('stroke', '#8a7a5a');
+  majLine.setAttribute('stroke-width', '1.5');
+  majLine.setAttribute('stroke-dasharray', '4,3');
+  svg.appendChild(majLine);
+
+  const majLabelPt = polarXY(cx, cy, outerR + 48, majAngle);
+  const majText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  majText.setAttribute('x', majLabelPt.x.toFixed(1));
+  majText.setAttribute('y', majLabelPt.y.toFixed(1));
+  majText.setAttribute('text-anchor', 'middle');
+  majText.setAttribute('dominant-baseline', 'middle');
+  majText.setAttribute('font-family', 'Oswald, sans-serif');
+  majText.setAttribute('font-size', '10');
+  majText.setAttribute('fill', '#8a7a5a');
+  majText.setAttribute('letter-spacing', '1');
+  majText.textContent = String(majorityThreshold);
+  svg.appendChild(majText);
+
+  // Update stats below
+  const totalEl = document.getElementById('hemi-total');
+  const fillEl = document.getElementById('hemi-fill');
+  const remainEl = document.getElementById('hemi-remain');
+  const subtitleEl = document.getElementById('hemi-subtitle');
+
+  totalEl.textContent = selectedTotal;
+  totalEl.className = 'hemi-stat-num' + (isMajority ? ' majority' : '');
+
+  const pct = Math.min(100, (selectedTotal / totalSeats) * 100);
+  fillEl.style.width = pct + '%';
+  fillEl.className = 'hemi-progress-fill' + (isMajority ? ' majority' : '');
+
+  remainEl.textContent = Math.max(0, majorityThreshold - selectedTotal);
+  remainEl.className = 'hemi-stat-num' + (isMajority ? ' majority' : '');
+
+  subtitleEl.textContent = selectedTotal === 0
+    ? 'Selecteer partijen op het informateur-paneel'
+    : isMajority
+      ? `✓ Meerderheidscoalitie — ${selectedTotal} van ${totalSeats} zetels`
+      : `${selectedTotal} van ${totalSeats} zetels — nog ${majorityThreshold - selectedTotal} nodig`;
+
+  // Coalition chips
+  const chipsEl = document.getElementById('hemi-chips');
+  chipsEl.innerHTML = '';
+  ordered.filter(p => selected.has(p.id)).forEach((p, i) => {
+    const color = HEMI_COLORS[p.id] || '#666';
+    const chip = document.createElement('div');
+    chip.className = 'hemi-coalition-chip';
+    chip.style.animationDelay = `${i * 60}ms`;
+    chip.style.borderColor = color;
+    chip.style.color = color;
+    chip.style.background = `${color}18`;
+    chip.textContent = `${p.id} ${p.seats}`;
+    chipsEl.appendChild(chip);
+  });
+
+  // Legend
+  const legendEl = document.getElementById('hemi-legend');
+  legendEl.innerHTML = '';
+  ordered.forEach(p => {
+    const color = HEMI_COLORS[p.id] || '#666';
+    const isSel = selected.has(p.id);
+    const item = document.createElement('div');
+    item.className = 'hemi-leg-item' + (isSel ? '' : ' dim');
+    item.innerHTML = `
+      <div class="hemi-leg-dot" style="background:${color}"></div>
+      <span class="hemi-leg-name">${p.id}</span>
+      <span class="hemi-leg-seats">${p.seats}</span>
+    `;
+    legendEl.appendChild(item);
+  });
+}
+
+// ===== ALLE PARTIJEN OVERZICHT =====
+function renderAllParties() {
+  const grid = document.getElementById('ap-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const cols = activeParties.length <= 6 ? 3 : activeParties.length <= 8 ? 4 : 5;
+  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  activeParties.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'ap-card';
+    card.innerHTML = `
+      <div class="ap-card-abbr">${p.name}</div>
+      <div class="ap-card-full">${p.full}</div>
+      <div class="ap-card-divider"></div>
+      <div class="ap-card-leader">${PARTY_LEADERS[p.id] || ''}</div>
+      <div class="ap-card-quirk">${(PARTY_QUIRKS[p.id] || '').split('→')[0].trim()}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ===== SUPERKRACHTEN LOG TV =====
+function renderSuperpowerLogTV(log) {
+  const el = document.getElementById('tv-splog-list');
+  if (!el) return;
+  const icons = { 'sp-bonus': '🎖', 'sp-veto': '🛑', 'sp-marriage': '💍', 'sp-press': '📰' };
+  if (log.length === 0) {
+    el.innerHTML = '<div class="splog-empty">Nog geen superkrachten gebruikt.</div>';
+    return;
+  }
+  el.innerHTML = log.map(entry => {
+    const t = new Date(entry.ts);
+    const time = `${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}`;
+    const icon = icons[entry.id] || '⚡';
+    return `<div class="splog-entry">
+      <div class="splog-entry-icon">${icon}</div>
+      <div class="splog-entry-name">${entry.name}</div>
+      <div class="splog-entry-time">${time}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===== GELUID (Web Audio API) =====
+function playSound(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const sounds = {
+      timer: (ctx) => {
+        [0, 0.35, 0.7].forEach(offset => {
+          const o = ctx.createOscillator(); const g = ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.frequency.setValueAtTime(880, ctx.currentTime + offset);
+          o.frequency.setValueAtTime(550, ctx.currentTime + offset + 0.15);
+          g.gain.setValueAtTime(0.4, ctx.currentTime + offset);
+          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + 0.3);
+          o.start(ctx.currentTime + offset); o.stop(ctx.currentTime + offset + 0.3);
+        });
+      },
+      crisis: (ctx) => {
+        const o = ctx.createOscillator(); const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type = 'sawtooth'; o.frequency.setValueAtTime(110, ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(55, ctx.currentTime + 0.8);
+        g.gain.setValueAtTime(0.5, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+        o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.8);
+      },
+      winner: (ctx) => {
+        const notes = [523, 659, 784, 1047, 1319];
+        notes.forEach((freq, i) => {
+          const o = ctx.createOscillator(); const g = ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.frequency.value = freq;
+          const t = ctx.currentTime + i * 0.15;
+          g.gain.setValueAtTime(0.35, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+          o.start(t); o.stop(t + 0.4);
+        });
+      },
+    };
+    if (sounds[type]) sounds[type](ctx);
+  } catch(e) {}
+}
+
+function updateTVLabels(totalSeats, majority) {
+  const seatsTitleEl = document.querySelector('.seats-title');
+  if (seatsTitleEl) seatsTitleEl.textContent = `Zetelverdeling — ${totalSeats} Kamerzetels`;
+  const coalLabelEl = document.querySelector('.coalition-total-label');
+  if (coalLabelEl) coalLabelEl.textContent = `coalitiezetels — ${majority} nodig voor meerderheid`;
+  const epSubtitleEl = document.querySelector('.ep-subtitle');
+  if (epSubtitleEl) epSubtitleEl.textContent = `Zetels per partij — ${totalSeats} Kamerzetels`;
+  const epTotalLabelEl = document.querySelector('.ep-total-label:last-child');
+  if (epTotalLabelEl) epTotalLabelEl.textContent = ` | Meerderheid: ${majority} zetels`;
+  const majLabelEl = document.getElementById('hemi-majority-label');
+  if (majLabelEl) majLabelEl.textContent = `${majority} zetels nodig voor meerderheid`;
+  const remainEl = document.getElementById('hemi-remain');
+  if (remainEl) remainEl.textContent = String(majority);
+  // Update marker position on coalition meter
+  const marker = document.querySelector('.hemi-progress-marker');
+  if (marker) marker.style.left = `${(majority / totalSeats) * 100}%`;
+}
+
+// Apply persisted values on load (if TV page reloaded after setup)
+(function() {
+  if (activeParties.length < 10) updateTVLabels(totalSeatsCount, majorityThreshold);
+})();
+
+// ===== POLL LOCALSTORAGE =====
+let lastTs = 0;
+setInterval(() => {
+  try {
+    const raw = localStorage.getItem('formatie_event');
+    if (!raw) return;
+    const ev = JSON.parse(raw);
+    if (ev.ts === lastTs) return;
+    lastTs = ev.ts;
+    handleEvent(ev);
+  } catch(e) {}
+}, 300);
+</script>
+</body>
+</html>
