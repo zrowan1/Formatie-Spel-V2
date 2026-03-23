@@ -1029,7 +1029,10 @@
   .setup-counter { font-family:'Oswald',sans-serif;font-size:0.9rem;color:var(--text-dim);margin-bottom:16px;text-align:center; }
   .setup-counter.valid { color:#4ade80; }
   .setup-counter.invalid { color:#f87171; }
+  .setup-actions { display:flex;gap:10px;align-items:center;margin-bottom:16px; }
   .setup-start-btn { min-width:260px;padding:14px 32px;font-size:1rem; }
+  .setup-shuffle-btn { padding:14px 20px;font-size:1rem;background:var(--navy-mid);border:1px solid var(--border);color:var(--gold);font-family:'Oswald',sans-serif;letter-spacing:1px;cursor:pointer;border-radius:2px;transition:all 0.2s; }
+  .setup-shuffle-btn:hover { border-color:var(--gold);background:rgba(201,168,76,0.1); }
   .setup-hint { margin-top:12px;font-size:0.75rem;color:var(--text-dim);text-align:center; }
 </style>
 </head>
@@ -1040,9 +1043,12 @@
   <div class="setup-title">⚖ DE FORMATIE</div>
   <div class="setup-subtitle">Vul de spelersnamen in bij de deelnemende partijen — minimaal 6, maximaal 10</div>
   <div class="setup-party-grid" id="setup-party-grid"></div>
-  <div class="setup-counter" id="setup-counter">10 partijen geselecteerd</div>
-  <button class="btn btn-primary setup-start-btn" id="setup-start-btn" onclick="confirmSetup()">▶ Spel Starten</button>
-  <div class="setup-hint">Laat een partij leeg om die niet mee te laten spelen.</div>
+  <div class="setup-counter" id="setup-counter">0 partijen geselecteerd</div>
+  <div class="setup-actions">
+    <button class="setup-shuffle-btn" onclick="shuffleSetupNames()" title="Verdeel de ingevulde namen willekeurig over de partijen">🎲 Schud namen</button>
+    <button class="btn btn-primary setup-start-btn" id="setup-start-btn" onclick="confirmSetup()" disabled>▶ Spel Starten</button>
+  </div>
+  <div class="setup-hint">Vul namen in per partij, of gebruik 🎲 om namen willekeurig te verdelen.</div>
 </div>
 
 <!-- HEADER -->
@@ -3115,6 +3121,25 @@ function updateSetupCounter() {
   counter.textContent = `${n} partij${n === 1 ? '' : 'en'} geselecteerd`;
   counter.className = 'setup-counter ' + (valid ? 'valid' : 'invalid');
   if (btn) btn.disabled = !valid;
+}
+
+function shuffleSetupNames() {
+  // Collect all non-empty names currently entered
+  const names = PARTIES.map(p => (_pendingPlayerNames[p.id] || '').trim()).filter(n => n);
+  if (names.length < 2) return;
+  // Shuffle names
+  for (let i = names.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [names[i], names[j]] = [names[j], names[i]];
+  }
+  // Pick `names.length` random parties from PARTIES (without replacement)
+  const partyPool = [...PARTIES].sort(() => Math.random() - 0.5).slice(0, names.length);
+  // Clear all current assignments
+  _pendingPlayerNames = {};
+  // Assign shuffled names to random parties
+  partyPool.forEach((p, i) => { _pendingPlayerNames[p.id] = names[i]; });
+  // Re-render the grid to reflect new assignments
+  renderSetupScreen();
 }
 
 function confirmSetup() {
