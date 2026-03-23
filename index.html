@@ -1548,7 +1548,10 @@
             <button class="btn btn-sm" onclick="publishVote()">▶ Publiceer op TV</button>
             <button class="btn btn-success" onclick="recordLawResult('passed')">✓ Aangenomen</button>
             <button class="btn btn-danger" onclick="recordLawResult('rejected')">✗ Verworpen</button>
+            <button class="btn btn-sm" onclick="openVoting('wet_'+state.currentLaw, 'Wetsvoorstel '+state.currentLaw)">📱 Open stemming</button>
+            <button class="btn btn-sm" onclick="closeVoting()">Sluit app-stem</button>
           </div>
+          <div id="vote-app-counter" style="font-family:'Oswald',sans-serif;font-size:0.8rem;color:var(--gold);margin-top:6px;"></div>
         </div>
       </div>
 
@@ -1742,6 +1745,7 @@
 <!-- NOTIFICATION -->
 <div class="notification" id="notification"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
 // DATA
@@ -1906,6 +1910,24 @@ const PARTY_DEALBREAKERS = {
   PPP: 'KKB', FBL: 'DDP', KCV: 'PAN', WIFI: 'FRR',
   DAM: null,   VBB: 'PPP', KKB: 'PPP', DDP: 'FBL', FRR: 'PAN', PAN: 'FRR',
   OMA: 'WIFI', BNB: 'PPP', WOK: 'DDP', KGW: 'FBL', SVB: 'FBL',
+};
+
+const PARTY_BONUSES = {
+  PPP:  'Wordt Minister van Klimaat & Natuur (+3)',
+  FBL:  'Woord "vrij" of "rust" staat in de TITEL van het akkoord (+3)',
+  KCV:  'Nationale Vlaaidag wordt écht feestdag in het akkoord (+3)',
+  WIFI: 'Woord "digitaal", "innovatie" of "tech" staat in het akkoord (+3)',
+  DAM:  'In coalitie zónder dat één DAM-standpunt letterlijk in akkoord staat (+3)',
+  VBB:  'Wordt Minister van Feestelijk Beleid (+3)',
+  KKB:  'Woord "kaas" staat in de TITEL van het akkoord (+3)',
+  DDP:  'Wordt Minister van Financiën (+3)',
+  FRR:  'Minimaal 4 concrete regels/verplichtingen in het akkoord (+3)',
+  PAN:  'Kabinet is een minderheidskabinet (+3)',
+  OMA:  'Woord "pensioen" staat in de TITEL van het akkoord (+3)',
+  BNB:  'Geen enkele milieuregel in het akkoord (+3)',
+  WOK:  'Maximale huurprijs staat letterlijk in het akkoord (+3)',
+  KGW:  'Zondag als rustdag staat in het akkoord (+3)',
+  SVB:  'Woord "sport" of "gezondheid" staat in het akkoord (+3)',
 };
 
 const CRISIS_R2 = [
@@ -2389,6 +2411,9 @@ let state = {
   assignments: {},
   coalitie: { titel: '', premier: '', ministeries: {}, punten: ['', '', '', '', '', ''] },
   amendementen: {},
+  gameId: null,
+  currentVoteTopic: null,
+  currentVoteLabel: '',
 };
 
 // Load opgeslagen state (als die bestaat)
@@ -2398,6 +2423,12 @@ let state = {
     if (saved) Object.assign(state, JSON.parse(saved));
   } catch(e) {}
 })();
+
+// Genereer gameId als die nog niet bestaat
+if (!state.gameId) {
+  state.gameId = Date.now().toString();
+  try { localStorage.setItem('formatie_state', JSON.stringify(state)); } catch(e) {}
+}
 
 // ============================================================
 // GAME INIT
@@ -2444,6 +2475,77 @@ function saveState() {
 // ============================================================
 function broadcast(type, data) {
   localStorage.setItem('formatie_event', JSON.stringify({ type, data, ts: Date.now() }));
+}
+
+// ============================================================
+// SUPABASE
+// ============================================================
+const SUPABASE_URL = 'https://vkfwthueozgcqvadbcfx.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrZnd0aHVlb3pnY3F2YWRiY2Z4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTUyMTgsImV4cCI6MjA4ODI5MTIxOH0.H_QIujPFl2EOhq28AIegZf_9pSTXfyEXsaJzb8WJVQs';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function openVoting(topic, label) {
+  state.currentVoteTopic = topic;
+  state.currentVoteLabel = label;
+  saveState();
+  await supabaseClient.from('game_sessions').upsert({
+    game_id: state.gameId,
+    vote_open: true,
+    vote_topic: topic,
+    vote_label: label,
+    phase: 'r3',
+    active_parties: getActiveParties().map(p => p.id),
+  }, { onConflict: 'game_id' });
+  await refreshVoteCounter();
+  notify('📱 Stemming geopend in speler-app');
+}
+
+async function closeVoting() {
+  state.currentVoteTopic = null;
+  saveState();
+  await supabaseClient.from('game_sessions')
+    .update({ vote_open: false })
+    .eq('game_id', state.gameId);
+  const el = document.getElementById('vote-app-counter');
+  if (el) el.textContent = '';
+  notify('Stemming gesloten');
+}
+
+async function refreshVoteCounter() {
+  if (!state.currentVoteTopic || !state.gameId) return;
+  const { count } = await supabaseClient.from('player_votes')
+    .select('*', { count: 'exact', head: true })
+    .eq('game_id', state.gameId)
+    .eq('vote_topic', state.currentVoteTopic);
+  const total = getActiveParties().length;
+  const el = document.getElementById('vote-app-counter');
+  if (el) el.textContent = `${count ?? 0} / ${total} gestemd via app`;
+}
+
+function startVoteSubscription() {
+  supabaseClient.channel('player_votes_feed')
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'player_votes',
+      filter: `game_id=eq.${state.gameId}`
+    }, (payload) => {
+      const { party_id, choice, vote_topic } = payload.new;
+      if (vote_topic === state.currentVoteTopic) {
+        state.votes[party_id] = choice;
+        renderVoteRows();
+        updateVoteResult();
+        saveState();
+      }
+      refreshVoteCounter();
+    })
+    .subscribe();
+}
+
+function showPlayerQR(partyId) {
+  const base = window.location.href.replace(/index\.html.*$/, '').replace(/[^/]*\.html.*$/, '');
+  const url = `${base}player.html?party=${partyId}&game=${state.gameId}`;
+  const partyName = (PARTIES.find(p => p.id === partyId) || {}).name || partyId;
+  broadcast('playerqr', { partyId, url, partyName });
+  notify(`📱 QR-code voor ${partyName} zichtbaar op TV`);
 }
 
 // ============================================================
@@ -3039,6 +3141,7 @@ function renderPartyGrid() {
         <button class="seat-btn" onclick="adjustSeats('${p.id}',+1)">+</button>
       </div>
       <button class="party-tv-btn" onclick="showPartyCard('${p.id}')" title="Toon partijkaart op TV">📺</button>
+      <button class="party-tv-btn" onclick="showPlayerQR('${p.id}')" title="Toon QR-code voor speler op TV">📱</button>
     `;
     el.appendChild(row);
   });
@@ -3749,6 +3852,9 @@ renderSuperpowerLog();
 
 // Herstel timer-label
 document.getElementById('timer-label').textContent = state.timerLabel;
+
+// Start Supabase realtime subscription
+startVoteSubscription();
 </script>
 </body>
 </html>

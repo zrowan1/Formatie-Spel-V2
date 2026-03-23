@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>De Formatie — Spelersdashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Oswald:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy:      #0a1628;
+      --navy-mid:  #0f1f3d;
+      --navy-card: #132040;
+      --gold:      #c9a84c;
+      --gold-dim:  rgba(201,168,76,0.3);
+      --cream:     #f5f0e8;
+      --text-dim:  rgba(245,240,232,0.55);
+      --border:    rgba(201,168,76,0.18);
+      --green:     #2e7d32;
+      --red:       #c62828;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      min-height: 100%;
+      background: var(--navy);
+      color: var(--cream);
+      font-family: 'EB Garamond', serif;
+      font-size: 16px;
+    }
+
+    /* ── STATUS BAR ── */
+    .status-bar {
+      background: var(--navy-mid);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .status-brand {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.85rem;
+      color: var(--gold);
+      letter-spacing: 0.06em;
+    }
+    .status-vote-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      color: var(--gold);
+      background: rgba(201,168,76,0.12);
+      border: 1px solid var(--gold-dim);
+      border-radius: 4px;
+      padding: 3px 8px;
+      display: none;
+    }
+    .status-vote-label.active { display: block; }
+
+    /* ── PARTY CARD ── */
+    .party-card {
+      max-width: 540px;
+      margin: 0 auto;
+      padding: 20px 16px 120px;
+    }
+    .party-header {
+      text-align: center;
+      padding: 24px 0 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .party-abbr {
+      font-family: 'Oswald', sans-serif;
+      font-size: 3rem;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      line-height: 1;
+    }
+    .party-full {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--cream);
+      margin-top: 6px;
+    }
+    .party-leader {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+      letter-spacing: 0.04em;
+    }
+
+    .section-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .section-value {
+      font-family: 'EB Garamond', serif;
+      font-size: 1rem;
+      color: var(--cream);
+      line-height: 1.5;
+    }
+    .card-section {
+      background: var(--navy-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .crown-jewel {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      color: var(--gold);
+      font-weight: 700;
+    }
+    .dealbreaker-badge {
+      display: inline-block;
+      background: rgba(198,40,40,0.15);
+      border: 1px solid rgba(198,40,40,0.4);
+      color: #ef9a9a;
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-top: 4px;
+    }
+    .intro-text {
+      font-style: italic;
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    /* ── BONUS TOGGLE ── */
+    .bonus-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      margin-top: 4px;
+    }
+    .bonus-toggle:hover { border-color: var(--gold-dim); color: var(--cream); }
+    .bonus-revealed {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: rgba(201,168,76,0.08);
+      border: 1px solid var(--gold-dim);
+      border-radius: 6px;
+      font-family: 'EB Garamond', serif;
+      font-size: 0.95rem;
+      color: var(--gold);
+    }
+    .bonus-revealed.visible { display: block; }
+
+    /* ── VOTE OVERLAY ── */
+    .vote-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10,22,40,0.97);
+      z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+    .vote-overlay.active { display: flex; }
+    .vote-overlay-badge {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      color: var(--gold);
+      letter-spacing: 0.12em;
+      margin-bottom: 10px;
+    }
+    .vote-overlay-topic {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--cream);
+      margin-bottom: 8px;
+    }
+    .vote-overlay-party {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      margin-bottom: 36px;
+    }
+    .vote-btns {
+      display: flex;
+      gap: 16px;
+      width: 100%;
+      max-width: 340px;
+    }
+    .vote-btn {
+      flex: 1;
+      padding: 22px 10px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .vote-btn:active { transform: scale(0.96); }
+    .vote-btn.voor {
+      background: var(--green);
+      color: #fff;
+    }
+    .vote-btn.tegen {
+      background: var(--red);
+      color: #fff;
+    }
+    .vote-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .vote-confirmation {
+      display: none;
+      margin-top: 28px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: var(--gold);
+    }
+    .vote-confirmation.visible { display: block; }
+
+    /* ── ERROR / LOADING ── */
+    .error-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      padding: 32px;
+      text-align: center;
+    }
+    .error-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+    .error-text {
+      font-family: 'EB Garamond', serif;
+      font-size: 1rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="status-brand">⚖ DE FORMATIE</div>
+    <div class="status-vote-label" id="status-vote-label"></div>
+  </div>
+
+  <!-- MAIN CONTENT (filled by JS) -->
+  <div id="main-content"></div>
+
+  <!-- VOTE OVERLAY -->
+  <div class="vote-overlay" id="vote-overlay">
+    <div class="vote-overlay-badge">🗳 STEMMING GEOPEND</div>
+    <div class="vote-overlay-topic" id="vote-overlay-topic"></div>
+    <div class="vote-overlay-party" id="vote-overlay-party"></div>
+    <div class="vote-btns">
+      <button class="vote-btn voor" id="btn-voor" onclick="castVote('voor')">VOOR</button>
+      <button class="vote-btn tegen" id="btn-tegen" onclick="castVote('tegen')">TEGEN</button>
+    </div>
+    <div class="vote-confirmation" id="vote-confirmation"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  // ── PARTY DATA ──────────────────────────────────────────────
+  const PARTIES = [
+    { id: 'PPP',  name: 'PPP',  full: 'Partij voor Plant en Planeet' },
+    { id: 'FBL',  name: 'FBL',  full: 'Front voor Betaalbaar Luieren' },
+    { id: 'KCV',  name: 'KCV',  full: 'Kunst, Cultuur en Vlaai' },
+    { id: 'WIFI', name: 'WIFI', full: 'Werkelijk Innovatief Fantastisch Internet' },
+    { id: 'DAM',  name: 'DAM',  full: 'De Absolute Middenpartij' },
+    { id: 'VBB',  name: 'VBB',  full: 'Verbond voor Bitterballen en Borrel' },
+    { id: 'KKB',  name: 'KKB',  full: 'De Koninklijke Kaasbeweging' },
+    { id: 'DDP',  name: 'DDP',  full: 'De Dikke Portemonnee' },
+    { id: 'FRR',  name: 'FRR',  full: 'Front voor Rust, Regels en Regelmaat' },
+    { id: 'PAN',  name: 'PAN',  full: 'Partij Absoluut Niks' },
+    { id: 'OMA',  name: 'OMA',  full: 'Ouderenzorg, Memoires en Appeltaart' },
+    { id: 'BNB',  name: 'BNB',  full: 'Boer en Nederlandsch Boerenverstand' },
+    { id: 'WOK',  name: 'WOK',  full: 'Wonen of Kraken' },
+    { id: 'KGW',  name: 'KGW',  full: 'Kerk, Gezin en Waarden' },
+    { id: 'SVB',  name: 'SVB',  full: 'Sportief Verbond voor Beweging' },
+  ];
+
+  const PARTY_LEADERS = {
+    PPP:  'Bloem Windmolen-de Vries',
+    FBL:  'Sjaak van de Hangmat',
+    KCV:  'Floris-Jan van het Podium',
+    WIFI: 'Byte van Dijkstra',
+    DAM:  'Jan-Willem Gemiddeld',
+    VBB:  'Henk Krokansen',
+    KKB:  'Gouda van Leerdammer',
+    DDP:  'Maximiliansen van Cashflow III',
+    FRR:  'Gerrit Klokslag',
+    PAN:  'Nihil "Nelis" van Niansen',
+    OMA:  'Tante Riet van de Rolstoel',
+    BNB:  'Kees van den Trekker',
+    WOK:  'Vera van de Wachtlijst',
+    KGW:  'Dominee Adriaan van het Kruispad',
+    SVB:  'Duco Spierenboer-Hardloper',
+  };
+
+  const PARTY_QUIRKS = {
+    PPP:  'Mag het woord "economie" niet zeggen → zegt "eco-harmonie" + boom-knuffel-gebaar',
+    FBL:  'Gaapt demonstratief, stelt constant voor om pauze te nemen',
+    KCV:  'Citeert steeds verzonnen dichters en filosofen',
+    WIFI: 'Vervangt alles door Engelse tech-termen ("coalition-API updaten")',
+    DAM:  'Kan nooit ergens definitief voor of tegen zijn, maakt zinnen nooit af',
+    VBB:  'Onderbouwt elk argument met een vergelijking met eten',
+    KKB:  'Relateert werkelijk alles aan kaas',
+    DDP:  'Noemt alles een "investering" of "groeikans"',
+    FRR:  'Houdt iedereen streng aan de tijd, kijkt constant op horloge',
+    PAN:  'Is het automatisch oneens met het laatste wat iemand zei',
+    OMA:  'Vergeet halverwege wat ze wilde zeggen en vertelt een irrelevant verhaal over 1987',
+    BNB:  'Elke politieke stelling "bewijst" hij met een anekdote over zijn koe Betsie',
+    WOK:  'Elke zin eindigt met "...en mijn wachtlijst staat al op jaar zeven"',
+    KGW:  'Citeert bijbelteksten die totaal niet van toepassing zijn, volkomen serieus',
+    SVB:  'Elk debatpunt begint met "als in topsport..." en eindigt met aanmoedigend "kom op team!"',
+  };
+
+  const PARTY_CROWN_JEWELS = {
+    PPP:  'Vleesvrije Werkweek',
+    FBL:  '3-daagse werkweek',
+    KCV:  'Nationale Vlaaidag als officiële feestdag',
+    WIFI: 'WiFi als grondrecht',
+    DAM:  'Werkgroep over het woord "draagvlak"',
+    VBB:  'BTW op snacks naar 0%',
+    KKB:  'Ministerie van Zuivel',
+    DDP:  'Belastingverlaging',
+    FRR:  'De avondklok',
+    PAN:  'Minimaal één wet afschaffen',
+    OMA:  'Pensioenleeftijd terug naar 60 + gratis stamppot in elk verzorgingstehuis',
+    BNB:  'Alle stikstofregels afgeschaft',
+    WOK:  'Maximale huurprijs €400 per maand',
+    KGW:  'Zondag als verplichte nationale rustdag',
+    SVB:  'Verplicht gym-uur per werkdag voor alle ambtenaren',
+  };
+
+  const PARTY_INTROS = {
+    PPP:  'De enige partij die de planeet boven de portemonnee stelt. Bloem Windmolen-de Vries strijdt voor een vleesvrije werkweek en een groenere toekomst — ook als dat "eco-harmonisch" klinkt.',
+    FBL:  'Rust is een recht, geen luxe. Sjaak van de Hangmat pleit voor de 3-daagse werkweek en betaalbaar niksdoen voor iedereen. Eventueel na de pauze.',
+    KCV:  'Schoonheid, cultuur en gebak als staatszaak. Floris-Jan van het Podium wil de Nationale Vlaaidag invoeren als officiële feestdag. De filosofen zijn het erover eens — ook al bestaan ze niet.',
+    WIFI: 'Internet is een grondrecht. Byte van Dijkstra wil WiFi voor iedereen en innovatie als nationaal speerpunt. De coalition-API moet worden geüpdatet.',
+    DAM:  'Niemand blij, niemand boos. Jan-Willem Gemiddeld zoekt draagvlak, vormt werkgroepen en houdt zijn opties open. Definitief besluiten doet hij misschien... later.',
+    VBB:  'Gezelligheid is beleid. Henk Krokansen wil de BTW op snacks naar 0% — want een land dat samenkomt bij bitterballen, formeert beter.',
+    KKB:  'Nederland is kaas, kaas is Nederland. Gouda van Leerdammer eist een Ministerie van Zuivel en beschermt de Hollandse identiteit met hart en ziel.',
+    DDP:  'Minder belasting, meer groei. Maximiliansen van Cashflow III ziet in elke uitgave een investering en in elke bezuiniging een groeikans. De markt lost het op.',
+    FRR:  'Orde, structuur en een avondklok. Gerrit Klokslag houdt iedereen aan de tijd en eist concrete regels in elk akkoord. Vergaderen zonder agenda is bij FRR verboden.',
+    PAN:  'Minder is meer. Nihil "Nelis" van Niansen wil wetten schrappen, regels afschaffen en de overheid terugdringen. Hij is het trouwens niet eens met wat net werd gezegd.',
+    OMA:  'Vroeger was alles beter, en dat bewijzen wij met cijfers. Tante Riet van de Rolstoel strijdt voor een eerlijk pensioen en gratis stamppot in elk verzorgingstehuis.',
+    BNB:  'Gewoon boerenverstand, dat is alles wat dit land nodig heeft. Kees van den Trekker laat zijn koe Betsie zien hoe beleid werkt en eist dat alle stikstofregels per direct de prullenbak in gaan.',
+    WOK:  'Een dak boven je hoofd is geen luxe, het is een recht. Vera van de Wachtlijst staat zelf op jaar zeven van de wachtlijst en vecht voor een maximale huurprijs van €400.',
+    KGW:  'Het gezin is de hoeksteen van de samenleving, en de zondag is heilig. Dominee Adriaan van het Kruispad baseert elk standpunt op een passende bijbeltekst.',
+    SVB:  'Een gezond kabinet begint met een gezond lichaam. Duco Spierenboer-Hardloper wil een verplicht gym-uur voor alle ambtenaren en behandelt elke coalitieonderhandeling als een teamwedstrijd. Kom op team!',
+  };
+
+  const PARTY_DEALBREAKERS = {
+    PPP: 'KKB', FBL: 'DDP', KCV: 'PAN', WIFI: 'FRR',
+    DAM: null,   VBB: 'PPP', KKB: 'PPP', DDP: 'FBL', FRR: 'PAN', PAN: 'FRR',
+    OMA: 'WIFI', BNB: 'PPP', WOK: 'DDP', KGW: 'FBL', SVB: 'FBL',
+  };
+
+  const PARTY_BONUSES = {
+    PPP:  'Wordt Minister van Klimaat & Natuur (+3)',
+    FBL:  'Woord "vrij" of "rust" staat in de TITEL van het akkoord (+3)',
+    KCV:  'Nationale Vlaaidag wordt écht feestdag in het akkoord (+3)',
+    WIFI: 'Woord "digitaal", "innovatie" of "tech" staat in het akkoord (+3)',
+    DAM:  'In coalitie zónder dat één DAM-standpunt letterlijk in akkoord staat (+3)',
+    VBB:  'Wordt Minister van Feestelijk Beleid (+3)',
+    KKB:  'Woord "kaas" staat in de TITEL van het akkoord (+3)',
+    DDP:  'Wordt Minister van Financiën (+3)',
+    FRR:  'Minimaal 4 concrete regels/verplichtingen in het akkoord (+3)',
+    PAN:  'Kabinet is een minderheidskabinet (+3)',
+    OMA:  'Woord "pensioen" staat in de TITEL van het akkoord (+3)',
+    BNB:  'Geen enkele milieuregel in het akkoord (+3)',
+    WOK:  'Maximale huurprijs staat letterlijk in het akkoord (+3)',
+    KGW:  'Zondag als rustdag staat in het akkoord (+3)',
+    SVB:  'Woord "sport" of "gezondheid" staat in het akkoord (+3)',
+  };
+
+  // ── SUPABASE ────────────────────────────────────────────────
+  const SUPABASE_URL      = 'https://vkfwthueozgcqvadbcfx.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrZnd0aHVlb3pnY3F2YWRiY2Z4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTUyMTgsImV4cCI6MjA4ODI5MTIxOH0.H_QIujPFl2EOhq28AIegZf_9pSTXfyEXsaJzb8WJVQs';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ── URL PARAMS ──────────────────────────────────────────────
+  const params  = new URLSearchParams(window.location.search);
+  const partyId = params.get('party');
+  const gameId  = params.get('game');
+
+  let currentVoteTopic = null;
+
+  // ── RENDER ERROR ────────────────────────────────────────────
+  function showError(title, text) {
+    document.getElementById('main-content').innerHTML = `
+      <div class="error-screen">
+        <div class="error-title">${title}</div>
+        <div class="error-text">${text}</div>
+      </div>`;
+  }
+
+  // ── RENDER PARTY CARD ────────────────────────────────────────
+  function renderPartyCard() {
+    const party = PARTIES.find(p => p.id === partyId);
+    if (!party) { showError('Onbekende partij', `Partij "${partyId}" bestaat niet.`); return; }
+
+    const db = PARTY_DEALBREAKERS[partyId];
+    const dbParty = db ? PARTIES.find(p => p.id === db) : null;
+    const dbLabel = dbParty ? `Dealbreaker: niet met ${db} (${dbParty.full})` : null;
+
+    document.getElementById('main-content').innerHTML = `
+      <div class="party-card">
+        <div class="party-header">
+          <div class="party-abbr">${party.name}</div>
+          <div class="party-full">${party.full}</div>
+          <div class="party-leader">Lijsttrekker: ${PARTY_LEADERS[partyId] || '—'}</div>
+        </div>
+
+        <div class="card-section">
+          <div class="section-label">Intro</div>
+          <div class="section-value intro-text">${PARTY_INTROS[partyId] || '—'}</div>
+        </div>
+
+        <div class="card-section">
+          <div class="section-label">Kroonjuweel</div>
+          <div class="section-value crown-jewel">${PARTY_CROWN_JEWELS[partyId] || '—'}</div>
+        </div>
+
+        <div class="card-section">
+          <div class="section-label">Karakter-quirk</div>
+          <div class="section-value">${PARTY_QUIRKS[partyId] || '—'}</div>
+        </div>
+
+        ${dbLabel ? `
+        <div class="card-section">
+          <div class="section-label">Coalitie</div>
+          <span class="dealbreaker-badge">⚠ ${dbLabel}</span>
+        </div>` : ''}
+
+        <div class="card-section">
+          <div class="section-label">Geheime bonus</div>
+          <button class="bonus-toggle" onclick="toggleBonus(this)">🔒 Toon geheime bonus (alleen voor jou)</button>
+          <div class="bonus-revealed" id="bonus-text">${PARTY_BONUSES[partyId] || '—'}</div>
+        </div>
+      </div>`;
+  }
+
+  function toggleBonus(btn) {
+    const el = document.getElementById('bonus-text');
+    const visible = el.classList.toggle('visible');
+    btn.textContent = visible ? '🔓 Verberg geheime bonus' : '🔒 Toon geheime bonus (alleen voor jou)';
+  }
+
+  // ── STATUS BAR ───────────────────────────────────────────────
+  function updateStatusBar(voteOpen, voteLabel) {
+    const el = document.getElementById('status-vote-label');
+    if (voteOpen && voteLabel) {
+      el.textContent = `🗳 ${voteLabel}`;
+      el.classList.add('active');
+    } else {
+      el.textContent = '';
+      el.classList.remove('active');
+    }
+  }
+
+  // ── VOTE OVERLAY ─────────────────────────────────────────────
+  function showVoteOverlay(voteTopic, voteLabel) {
+    currentVoteTopic = voteTopic;
+    const overlay = document.getElementById('vote-overlay');
+    document.getElementById('vote-overlay-topic').textContent = voteLabel || voteTopic;
+    document.getElementById('vote-overlay-party').textContent = `Jouw stem als ${partyId}`;
+
+    const alreadyVoted = sessionStorage.getItem(`voted_${voteTopic}`);
+    const btnVoor  = document.getElementById('btn-voor');
+    const btnTegen = document.getElementById('btn-tegen');
+    const conf     = document.getElementById('vote-confirmation');
+
+    if (alreadyVoted) {
+      btnVoor.disabled  = true;
+      btnTegen.disabled = true;
+      conf.textContent  = `Jij stemde: ${alreadyVoted.toUpperCase()} ✓`;
+      conf.classList.add('visible');
+    } else {
+      btnVoor.disabled  = false;
+      btnTegen.disabled = false;
+      conf.classList.remove('visible');
+    }
+
+    overlay.classList.add('active');
+  }
+
+  function hideVoteOverlay() {
+    currentVoteTopic = null;
+    document.getElementById('vote-overlay').classList.remove('active');
+    document.getElementById('vote-confirmation').classList.remove('visible');
+  }
+
+  // ── CAST VOTE ────────────────────────────────────────────────
+  async function castVote(choice) {
+    const topic = currentVoteTopic;
+    if (!topic) return;
+    if (sessionStorage.getItem(`voted_${topic}`)) return;
+
+    document.getElementById('btn-voor').disabled  = true;
+    document.getElementById('btn-tegen').disabled = true;
+
+    const { error } = await sb.from('player_votes').insert({
+      game_id:      gameId,
+      party_id:     partyId,
+      vote_topic:   topic,
+      choice:       choice,
+    });
+
+    if (error) {
+      // Re-enable on failure
+      document.getElementById('btn-voor').disabled  = false;
+      document.getElementById('btn-tegen').disabled = false;
+      alert('Fout bij stemmen. Probeer opnieuw.');
+      return;
+    }
+
+    sessionStorage.setItem(`voted_${topic}`, choice);
+    const conf = document.getElementById('vote-confirmation');
+    conf.textContent = `Jouw stem: ${choice.toUpperCase()} ✓`;
+    conf.classList.add('visible');
+  }
+
+  // ── SESSION HANDLER ──────────────────────────────────────────
+  function updateFromSession(session) {
+    updateStatusBar(session.vote_open, session.vote_label);
+    if (session.vote_open && session.vote_topic) {
+      showVoteOverlay(session.vote_topic, session.vote_label);
+    } else {
+      hideVoteOverlay();
+    }
+  }
+
+  async function loadSession() {
+    const { data } = await sb.from('game_sessions')
+      .select('*')
+      .eq('game_id', gameId)
+      .single();
+    if (data) updateFromSession(data);
+  }
+
+  function subscribeSession() {
+    sb.channel('session_feed_' + gameId)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'game_sessions',
+        filter: `game_id=eq.${gameId}`,
+      }, (payload) => {
+        updateFromSession(payload.new);
+      })
+      .subscribe();
+  }
+
+  // ── INIT ─────────────────────────────────────────────────────
+  (async () => {
+    if (!partyId || !gameId) {
+      showError('Ongeldige link', 'Deze link mist een partij of spel-ID. Vraag de spelleider om een nieuwe QR-code.');
+      return;
+    }
+    const party = PARTIES.find(p => p.id === partyId);
+    if (!party) {
+      showError('Onbekende partij', `"${partyId}" is geen geldige partij.`);
+      return;
+    }
+
+    renderPartyCard();
+    await loadSession();
+    subscribeSession();
+  })();
+  </script>
+</body>
+</html>
