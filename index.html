@@ -1671,6 +1671,11 @@ const PARTIES = [
   { id: 'DDP', name: 'DDP', full: 'De Dikke Portemonnee', seats: 15 },
   { id: 'FRR', name: 'FRR', full: 'Front voor Rust, Regels en Regelmaat', seats: 15 },
   { id: 'PAN', name: 'PAN', full: 'Partij Absoluut Niks', seats: 15 },
+  { id: 'OMA', name: 'OMA', full: 'Ouderenzorg, Memoires en Appeltaart', seats: 15 },
+  { id: 'BNB', name: 'BNB', full: 'Boer en Nederlandsch Boerenverstand', seats: 15 },
+  { id: 'WOK', name: 'WOK', full: 'Wonen of Kraken', seats: 15 },
+  { id: 'KGW', name: 'KGW', full: 'Kerk, Gezin en Waarden', seats: 15 },
+  { id: 'SVB', name: 'SVB', full: 'Sportief Verbond voor Beweging', seats: 15 },
 ];
 
 // ============================================================
@@ -1698,6 +1703,11 @@ const PARTY_LEADERS = {
   DDP:  'Maximiliansen van Cashflow III',
   FRR:  'Gerrit Klokslag',
   PAN:  'Nihil "Nelis" van Niansen',
+  OMA:  'Tante Riet van de Rolstoel',
+  BNB:  'Kees van den Trekker',
+  WOK:  'Vera van de Wachtlijst',
+  KGW:  'Dominee Adriaan van het Kruispad',
+  SVB:  'Duco Spierenboer-Hardloper',
 };
 
 const PARTY_QUIRKS = {
@@ -1711,6 +1721,11 @@ const PARTY_QUIRKS = {
   DDP:  'Noemt alles een "investering" of "groeikans"',
   FRR:  'Houdt iedereen streng aan de tijd, kijkt constant op horloge',
   PAN:  'Is het automatisch oneens met het laatste wat iemand zei',
+  OMA:  'Vergeet halverwege wat ze wilde zeggen en vertelt een irrelevant verhaal over 1987',
+  BNB:  'Elke politieke stelling "bewijst" hij met een anekdote over zijn koe Betsie',
+  WOK:  'Elke zin eindigt met "...en mijn wachtlijst staat al op jaar zeven"',
+  KGW:  'Citeert bijbelteksten die totaal niet van toepassing zijn, volkomen serieus',
+  SVB:  'Elk debatpunt begint met "als in topsport..." en eindigt met aanmoedigend "kom op team!"',
 };
 
 const PARTY_CROWN_JEWELS = {
@@ -1724,6 +1739,11 @@ const PARTY_CROWN_JEWELS = {
   DDP:  'Belastingverlaging',
   FRR:  'De avondklok',
   PAN:  'Minimaal één wet afschaffen',
+  OMA:  'Pensioenleeftijd terug naar 60 + gratis stamppot in elk verzorgingstehuis',
+  BNB:  'Alle stikstofregels afgeschaft',
+  WOK:  'Maximale huurprijs €400 per maand',
+  KGW:  'Zondag als verplichte nationale rustdag',
+  SVB:  'Verplicht gym-uur per werkdag voor alle ambtenaren',
 };
 
 const PARTY_INTROS = {
@@ -1737,11 +1757,17 @@ const PARTY_INTROS = {
   DDP:  'Minder belasting, meer groei. Maximiliansen van Cashflow III ziet in elke uitgave een investering en in elke bezuiniging een groeikans. De markt lost het op. Kroonjuweel: belastingverlaging.',
   FRR:  'Orde, structuur en een avondklok. Gerrit Klokslag houdt iedereen aan de tijd en eist concrete regels in elk akkoord. Vergaderen zonder agenda is bij FRR verboden. Kroonjuweel: de avondklok.',
   PAN:  'Minder is meer. Nihil "Nelis" van Niansen wil wetten schrappen, regels afschaffen en de overheid terugdringen. Hij is het trouwens niet eens met wat net werd gezegd. Kroonjuweel: minimaal één wet afschaffen.',
+  OMA:  'Vroeger was alles beter, en dat bewijzen wij met cijfers. Tante Riet van de Rolstoel strijdt voor een eerlijk pensioen en gratis stamppot in elk verzorgingstehuis. Ze had hier nog iets over te zeggen, maar... waar was ze gebleven? O ja. Kroonjuweel: pensioenleeftijd naar 60.',
+  BNB:  'Gewoon boerenverstand, dat is alles wat dit land nodig heeft. Kees van den Trekker laat zijn koe Betsie zien hoe beleid werkt en eist dat alle stikstofregels per direct de prullenbak in gaan. Kroonjuweel: afschaffen alle stikstofregels.',
+  WOK:  'Een dak boven je hoofd is geen luxe, het is een recht. Vera van de Wachtlijst staat zelf op jaar zeven van de wachtlijst en vecht voor een maximale huurprijs van €400. En haar wachtlijst staat al op jaar zeven. Kroonjuweel: maximale huurprijs €400.',
+  KGW:  'Het gezin is de hoeksteen van de samenleving, en de zondag is heilig. Dominee Adriaan van het Kruispad baseert elk standpunt op een passende bijbeltekst — hoe minder van toepassing, hoe meer overtuiging. Kroonjuweel: verplichte nationale rustdag op zondag.',
+  SVB:  'Een gezond kabinet begint met een gezond lichaam. Duco Spierenboer-Hardloper wil een verplicht gym-uur voor alle ambtenaren en behandelt elke coalitieonderhandeling als een teamwedstrijd. Kom op team! Kroonjuweel: verplicht gym-uur voor ambtenaren.',
 };
 
 const PARTY_DEALBREAKERS = {
   PPP: 'KKB', FBL: 'DDP', KCV: 'PAN', WIFI: 'FRR',
   DAM: null,   VBB: 'PPP', KKB: 'PPP', DDP: 'FBL', FRR: 'PAN', PAN: 'FRR',
+  OMA: 'WIFI', BNB: 'PPP', WOK: 'DDP', KGW: 'FBL', SVB: 'FBL',
 };
 
 const CRISIS_R2 = [
