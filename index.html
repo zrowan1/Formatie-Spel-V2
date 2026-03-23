@@ -1018,10 +1018,12 @@
   .setup-title { font-family:'Playfair Display',serif;font-size:2.4rem;color:var(--gold);letter-spacing:3px;margin-bottom:6px;text-align:center; }
   .setup-subtitle { font-family:'Oswald',sans-serif;font-size:0.85rem;color:var(--text-dim);letter-spacing:2px;margin-bottom:32px;text-transform:uppercase;text-align:center; }
   .setup-party-grid { display:grid;grid-template-columns:repeat(5,1fr);gap:10px;max-width:800px;width:100%;margin-bottom:20px; }
-  .setup-party-check { display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;border:1px solid var(--border);border-radius:2px;cursor:pointer;transition:all 0.2s;background:var(--navy-mid);user-select:none; }
-  .setup-party-check:hover { border-color:rgba(201,168,76,0.5); }
+  .setup-party-check { display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;border:1px solid var(--border);border-radius:2px;transition:all 0.2s;background:var(--navy-mid); }
+  .setup-party-check:focus-within { border-color:rgba(201,168,76,0.5); }
   .setup-party-check.selected { border-color:var(--gold);background:rgba(201,168,76,0.1); }
-  .setup-party-check input[type=checkbox] { display:none; }
+  .setup-name-input { width:100%;padding:4px 6px;font-size:0.72rem;font-family:'Oswald',sans-serif;background:var(--navy);border:1px solid var(--border);border-radius:2px;color:var(--cream);text-align:center;margin-top:2px;box-sizing:border-box; }
+  .setup-name-input:focus { outline:none;border-color:var(--gold); }
+  .setup-name-input::placeholder { color:var(--text-dim);font-size:0.68rem; }
   .setup-party-abbr { font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:700;color:var(--gold); }
   .setup-party-full { font-size:0.62rem;color:var(--text-dim);text-align:center;line-height:1.3; }
   .setup-counter { font-family:'Oswald',sans-serif;font-size:0.9rem;color:var(--text-dim);margin-bottom:16px;text-align:center; }
@@ -1036,11 +1038,11 @@
 <!-- SETUP SCHERM -->
 <div id="setup-screen" class="hidden">
   <div class="setup-title">⚖ DE FORMATIE</div>
-  <div class="setup-subtitle">Selecteer de deelnemende partijen — minimaal 6, maximaal 10</div>
+  <div class="setup-subtitle">Vul de spelersnamen in bij de deelnemende partijen — minimaal 6, maximaal 10</div>
   <div class="setup-party-grid" id="setup-party-grid"></div>
   <div class="setup-counter" id="setup-counter">10 partijen geselecteerd</div>
   <button class="btn btn-primary setup-start-btn" id="setup-start-btn" onclick="confirmSetup()">▶ Spel Starten</button>
-  <div class="setup-hint">Standaard zijn alle 10 partijen geselecteerd. Vink partijen uit om met minder te spelen.</div>
+  <div class="setup-hint">Laat een partij leeg om die niet mee te laten spelen.</div>
 </div>
 
 <!-- HEADER -->
@@ -1116,7 +1118,7 @@
           <div class="step-num">3</div>
           <div class="step-text">
             <span class="step-label">Stemfiches verdelen</span>
-            15 stemfiches per speler — NIET voor de Informateur
+            <span id="chips-hint-prep">15</span> stemfiches per speler — NIET voor de Informateur
           </div>
         </div>
         <div class="step" onclick="toggleStep(this)">
@@ -1219,8 +1221,8 @@
           <div class="step-num">3</div>
           <div class="step-text">
             <span class="step-label">Stemming</span>
-            Elke speler verdeelt 15 stemfiches geheim. Niet op jezelf. Informateur stemt niet. Totaal = 150 zetels = 150 Kamerzetels.
-            <br><span style="color:var(--gold);font-size:0.85rem;margin-top:6px;display:block;">Coalitie heeft 76 zetels nodig!</span>
+            Elke speler verdeelt <span id="chips-hint-r1">15</span> stemfiches geheim. Niet op jezelf. Informateur stemt niet. Totaal = 150 Kamerzetels.
+            <br><span style="color:var(--gold);font-size:0.85rem;margin-top:6px;display:block;">Coalitie heeft <span id="majority-hint">76</span> zetels nodig!</span>
           </div>
         </div>
       </div>
@@ -1971,8 +1973,10 @@ let state = {
 // ============================================================
 function initGameState() {
   const active = getActiveParties();
-  active.forEach(p => {
-    if (!(p.id in state.seats)) state.seats[p.id] = p.seats;
+  const baseSeats = Math.floor(150 / active.length);
+  const remainder = 150 % active.length;
+  active.forEach((p, i) => {
+    if (!(p.id in state.seats)) state.seats[p.id] = baseSeats + (i < remainder ? 1 : 0);
     if (!(p.id in state.coalition)) state.coalition[p.id] = false;
     if (!state.scores[p.id]) state.scores[p.id] = { coalition: 0, mustHave: 0, bonus: 0, dealbreaker: 0, regeer: 0, agenda: 0, mp: 0, amendement: 0 };
     if (state.scores[p.id] && state.scores[p.id].amendement === undefined) state.scores[p.id].amendement = 0;
@@ -2130,7 +2134,12 @@ function updateTutorialControls() {
 }
 
 function broadcastSeats() {
-  broadcast('seats', { seats: state.seats, coalition: state.coalition });
+  const active = getActiveParties();
+  broadcast('seats', {
+    seats: state.seats,
+    coalition: state.coalition,
+    parties: active.map(p => ({ id: p.id, name: p.name, full: p.full })),
+  });
   notify('Zetelverdeling verzonden naar TV');
 }
 
@@ -3070,41 +3079,36 @@ function closeAnnouncement() {
 // ============================================================
 // SETUP SCHERM
 // ============================================================
-let _pendingSetupIds = PARTIES.map(p => p.id);
+let _pendingPlayerNames = {};
 
 function renderSetupScreen() {
   const grid = document.getElementById('setup-party-grid');
   grid.innerHTML = '';
   PARTIES.forEach(p => {
-    const isSelected = _pendingSetupIds.includes(p.id);
-    const label = document.createElement('label');
-    label.className = 'setup-party-check' + (isSelected ? ' selected' : '');
-    label.innerHTML = `
-      <input type="checkbox" value="${p.id}" ${isSelected ? 'checked' : ''} onchange="toggleSetupParty('${p.id}', this.checked)">
+    const name = _pendingPlayerNames[p.id] || '';
+    const card = document.createElement('div');
+    card.className = 'setup-party-check' + (name.trim() ? ' selected' : '');
+    card.id = `setup-card-${p.id}`;
+    card.innerHTML = `
       <div class="setup-party-abbr">${p.name}</div>
       <div class="setup-party-full">${p.full}</div>
+      <input class="setup-name-input" type="text" placeholder="Naam speler" value="${name}"
+        oninput="updatePartyNameInput('${p.id}', this.value)">
     `;
-    grid.appendChild(label);
+    grid.appendChild(card);
   });
   updateSetupCounter();
 }
 
-function toggleSetupParty(id, checked) {
-  if (checked) {
-    if (!_pendingSetupIds.includes(id)) _pendingSetupIds.push(id);
-  } else {
-    _pendingSetupIds = _pendingSetupIds.filter(x => x !== id);
-  }
-  // Sync visual state
-  document.querySelectorAll('#setup-party-grid .setup-party-check').forEach(el => {
-    const cb = el.querySelector('input[type=checkbox]');
-    el.classList.toggle('selected', cb.checked);
-  });
+function updatePartyNameInput(id, value) {
+  _pendingPlayerNames[id] = value;
+  const card = document.getElementById(`setup-card-${id}`);
+  if (card) card.classList.toggle('selected', value.trim() !== '');
   updateSetupCounter();
 }
 
 function updateSetupCounter() {
-  const n = _pendingSetupIds.length;
+  const n = PARTIES.filter(p => (_pendingPlayerNames[p.id] || '').trim()).length;
   const counter = document.getElementById('setup-counter');
   const btn = document.getElementById('setup-start-btn');
   const valid = n >= 6 && n <= 10;
@@ -3114,10 +3118,10 @@ function updateSetupCounter() {
 }
 
 function confirmSetup() {
-  const n = _pendingSetupIds.length;
-  if (n < 6 || n > 10) return;
-  // Preserve PARTIES order
-  state.selectedPartyIds = PARTIES.filter(p => _pendingSetupIds.includes(p.id)).map(p => p.id);
+  const activeIds = PARTIES.filter(p => (_pendingPlayerNames[p.id] || '').trim()).map(p => p.id);
+  if (activeIds.length < 6 || activeIds.length > 10) return;
+  state.selectedPartyIds = activeIds;
+  state.players = activeIds.map(id => _pendingPlayerNames[id].trim());
   state.gameStarted = true;
   initGameState();
   saveState();
@@ -3125,7 +3129,7 @@ function confirmSetup() {
   const active = getActiveParties();
   broadcast('setup', {
     parties: active.map(p => ({ id: p.id, name: p.name, full: p.full })),
-    totalSeats: active.length * 15,
+    totalSeats: 150,
     majority: getMajorityThreshold(),
   });
   document.getElementById('setup-screen').classList.add('hidden');
@@ -3133,6 +3137,17 @@ function confirmSetup() {
 }
 
 function renderAll() {
+  // Update chips-per-player hints
+  const n = getActiveParties().length || 10;
+  const chips = Math.floor(150 / n);
+  const chipsMax = chips + (150 % n > 0 ? 1 : 0);
+  const chipsText = (150 % n > 0) ? `${chips}–${chipsMax}` : `${chips}`;
+  ['chips-hint-prep', 'chips-hint-r1'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = chipsText;
+  });
+  const mjEl = document.getElementById('majority-hint');
+  if (mjEl) mjEl.textContent = getMajorityThreshold();
   renderPartyGrid();
   renderVoteRows();
   renderScoreSidebar();
