@@ -1781,27 +1781,71 @@ const CRISIS_R2 = [
   { num: 8, title: 'Motie Tegen de Informateur!', text: 'Bij meerderheid wordt de Informateur 5 minuten vervangen door de speler met de MINSTE zetels. Die is nu tijdelijk de baas.' },
   { num: 9, title: 'Koningshuis in Crisis!', text: 'De Koning dreigt af te treden als er niet binnen 5 minuten een doorbraak is! Alle partijen moeten NU in dezelfde ruimte blijven — onderhandel in het openbaar!' },
   { num: 10, title: 'Wildcard!', text: 'De Informateur bedenkt TER PLEKKE een crisiskaart! Mag alles zijn, zolang het grappig en eerlijk is. Geen genade.' },
+  { num: 11, title: 'Diplomatiek Incident!', text: 'De minister-president heeft per ongeluk de verkeerde vlag uitgehangen. Een buurland is furieus. Alle partijen bedenken in 1 minuut een diplomatieke oplossing — de groep stemt welke het beste is. Winnaar krijgt +2 zetels.' },
+  { num: 12, title: 'De Locatiecrisis!', text: 'Er is geen vergaderzaal beschikbaar! Alle onderhandelingen vinden de komende 3 minuten STAAND plaats. Wie als eerste gaat zitten, verliest 1 zetel.' },
+  { num: 13, title: 'Journalisten Omsingelen het Gebouw!', text: 'Niemand mag iets zeggen zonder dat een andere partij het direct mag "corrigeren". De Informateur wijst willekeurig een woordvoerder aan voor 2 minuten.' },
+  { num: 14, title: 'Partijfinanciering onder de Loep!', text: 'Willekeurige partij moet in 30 seconden uitleggen hoe ze hun campagne hebben gefinancierd. Klinkt het verdacht (groep stemt)? -1 zetel.' },
+  { num: 15, title: 'Emoji-gate!', text: 'De socialmediamanager van een partij heeft per ongeluk de verkeerde emoji geplaatst. Informateur kiest welke partij. Die moet het in karakter verdedigen — 30 seconden.' },
+  { num: 16, title: 'De Spoeddebat!', text: 'IEDEREEN heeft 30 seconden om zijn meest urgente eis op tafel te leggen. Daarna mag de Informateur één eis van tafel vegen. Die partij mag één minuut protesteren.' },
+  { num: 17, title: 'Meningspijl!', text: 'De Informateur stelt een politieke stelling. Elke partij moet DIRECT kiezen: vóór of tegen. Wie als laatste beslist, verliest 1 zetel. Discussie daarna: 1 minuut.' },
+  { num: 18, title: 'TV-optreden Mislukt!', text: 'De partij met de meeste zetels heeft zich verpratd in een tv-interview. Ze moeten zich in 45 seconden verontschuldigen — en dat IN stijl van hun partij-quirk.' },
+  { num: 19, title: 'Lobbyist in de Hal!', text: 'Er staat een lobbyist van een megabedrijf voor de deur met een koffer. De Informateur bepaalt welke partij er mee mag praten — die partij krijgt +2 zetels maar moet elk standpunt daarna "verantwoorden".' },
+  { num: 20, title: 'Spoedvergadering EU!', text: 'Nederland moet morgen naar Brussel. Alle coalitiegesprekken worden 2 minuten BEVROREN. Daarna moeten er direct twee nieuwe concrete afspraken op tafel.' },
+  { num: 21, title: 'De Interne Rebel!', text: 'Informateur kiest een partij. Een "afsplitser" binnen die partij — de speler links van hen — neemt 1 minuut het woord namens een fictieve splinterpartij. De rest mag reageren.' },
+  { num: 22, title: 'Plenaire Vergadering Overmorgen!', text: 'Tijdsdruk! De Informateur kondigt aan: alle partijen zonder deal verliezen vanaf nu 1 zetel per onthuld crisiskaart. Deals moeten publiekelijk worden aangekondigd.' },
+  { num: 23, title: 'De Vergeten Belofte!', text: 'De Informateur kiest willekeurig een partij. Die moet de groep herinneren aan een eerder gemaakte belofte (verzinnen mag) en uitleggen waarom die nu toch anders ligt. Overtuigend? Groep stemt: ja = +1 zetel, nee = -1 zetel.' },
+  { num: 24, title: 'Brandoefening!', text: 'Iedereen staat op en staat 1 minuut aan de kant van de ruimte. Fluisteren is toegestaan. Na terugkomst mag één partij een nieuwe deal aankondigen die tijdens de "evacuatie" is gesloten.' },
+  { num: 25, title: 'Eindspurt!', text: 'Informateur kondigt aan: nog maar 10 minuten formatie! Elke partij mag exact 1 ultimatum stellen. Geen onderhandelingen meer — alleen ja of nee.' },
 ];
 
+const CRISIS_R4_POOL = [
+  // MILD (3 kaarten)
+  { severity: 'MILD', title: 'De Bonnetjesaffaire', text: 'De Minister van Financiën heeft voor €47.000 aan bitterballen gedeclareerd op de staatsrekening. "Het was een werkdiner," verklaart hij. "Alle 47 avonden."' },
+  { severity: 'MILD', title: 'De Powerpoint-fout', text: 'De minister-president heeft tijdens een EU-top per ongeluk de presentatie van zijn vakantiebestemming getoond. Binnenland: "Zijn ze serieus?" Buitenland: "Charming." MP kiest: excuses of "dat was bewust".' },
+  { severity: 'MILD', title: 'De Verjaardagsuitschuiver', text: 'De woordvoerder van het kabinet heeft alle plannen voor volgend jaar uitgelegd op een verjaardag. De pers belde meteen. Niet dramatisch — maar uiterst gênant. De MP moet het afwimpelen in 30 seconden.' },
+  // MEDIUM (4 kaarten)
+  { severity: 'MEDIUM', title: 'Het Appjes-lek', text: 'Een journalist publiceert appjes van de MP. Daarin noemt de MP de oppositie "een stel circusclowns zonder tent" en de eigen coalitiepartners "noodzakelijk kwaad."' },
+  { severity: 'MEDIUM', title: 'Het Begrotingsgat', text: 'Het CPB rekent het coalitieakkoord door: er mist 6 miljard euro. Iemand heeft de komma verkeerd gezet. De pers gaat los.' },
+  { severity: 'MEDIUM', title: 'De Vertrouwenskwestie', text: 'Een coalitiepartij stelt een vertrouwensvraag aan de MP — niet omdat ze echt twijfelen, maar als drukmiddel. De Informateur kiest welke partij dit is. Die partij moet hun eis in 1 minuut toelichten.' },
+  { severity: 'MEDIUM', title: 'Het Lekken', text: 'Iemand in het kabinet heeft de ministerraadnotulen gefotografeerd en naar de pers gemaild. Niemand bekent. De Informateur wijst willekeurig een verdachte aan — die moet zich verdedigen.' },
+  // ZWAAR (3 kaarten)
+  { severity: 'ZWAAR', title: 'De Overstap', text: 'De grootste oppositiepartij biedt aan toe te treden — maar alleen als de MP opstapt. De Informateur wijst aan welke partijen dit betreft.' },
+  { severity: 'ZWAAR', title: 'Het Gebroken Belofte', text: 'Een interne memo lekt uit: het belangrijkste punt uit het coalitieakkoord zou nooit echt uitgevoerd worden. De Informateur kiest welk punt dit is.' },
+  { severity: 'ZWAAR', title: 'De Coalitiebreuk', text: 'Twee coalitiepartijen zijn publiekelijk met elkaar in conflict gegaan over de begroting. De MP moet kiezen: wie steun je? De niet-gekozen partij overweegt uit de coalitie te stappen.' },
+  // EXTREEM (2 kaarten)
+  { severity: 'EXTREEM', title: 'De Nacht van...', text: 'De Koning ontbiedt de MP. Het parlement is in rep en roer. EXTRA: De Informateur mag voor deze stemming de geheime agenda van één speler onthullen!' },
+  { severity: 'EXTREEM', title: 'De Motie van Wantrouwen', text: 'De voltallige oppositie dient een motie van wantrouwen in. Het kabinet overleeft ALLEEN als alle coalitiepartijen vóór de MP stemmen. Eén "nee" is genoeg voor een volledige kabinetsval.' },
+];
 const CRISIS_R4 = [
-  { num: '1/6', severity: 'MILD', title: 'De Bonnetjesaffaire', text: 'De Minister van Financiën heeft voor €47.000 aan bitterballen gedeclareerd op de staatsrekening. "Het was een werkdiner," verklaart hij. "Alle 47 avonden."' },
-  { num: '2/6', severity: 'MEDIUM', title: 'Het Appjes-lek', text: 'Een journalist publiceert appjes van de MP. Daarin noemt de MP de oppositie "een stel circusclowns zonder tent" en de eigen coalitiepartners "noodzakelijk kwaad."' },
-  { num: '3/6', severity: 'MEDIUM', title: 'Het Begrotingsgat', text: 'Het CPB rekent het coalitieakkoord door: er mist 6 miljard euro. Iemand heeft de komma verkeerd gezet. De pers gaat los.' },
-  { num: '4/6', severity: 'ZWAAR', title: 'De Overstap', text: 'De grootste oppositiepartij biedt aan toe te treden — maar alleen als de MP opstapt. De Informateur wijst aan welke partijen dit betreft.' },
-  { num: '5/6', severity: 'ZWAAR', title: 'Het Gebroken Belofte', text: 'Een interne memo lekt uit: het belangrijkste punt uit het coalitieakkoord zou nooit echt uitgevoerd worden. De Informateur kiest welk punt dit is.' },
-  { num: '6/6', severity: 'EXTREEM', title: 'De Nacht van...', text: 'De Koning ontbiedt de MP. Het parlement is in rep en roer. EXTRA: De Informateur mag voor deze stemming de geheime agenda van één speler onthullen!' },
-];
+  ...CRISIS_R4_POOL.filter(c => c.severity === 'MILD').sort(() => Math.random() - 0.5).slice(0, 1),
+  ...CRISIS_R4_POOL.filter(c => c.severity === 'MEDIUM').sort(() => Math.random() - 0.5).slice(0, 2),
+  ...CRISIS_R4_POOL.filter(c => c.severity === 'ZWAAR').sort(() => Math.random() - 0.5).slice(0, 2),
+  ...CRISIS_R4_POOL.filter(c => c.severity === 'EXTREEM').sort(() => Math.random() - 0.5).slice(0, 1),
+].map((c, i) => ({ ...c, num: `${i + 1}/6` }));
 
-const LAWS = [
-  { num: 1, title: 'De Nationale Snackwet', text: 'BTW op alle traditionele Nederlandse snacks (bitterballen, frikandellen, kroketten, kaassoufflés) wordt verlaagd naar 0%.', hint: 'VBB/KKB/DDP waarschijnlijk vóór. PPP waarschijnlijk tegen (ongezond, dierlijk). FBL neutraal. FRR wil "verantwoord snackbeleid".' },
-  { num: 2, title: 'Wet Digitale Grondrechten', text: 'Gratis WiFi wordt als grondrecht opgenomen in de Grondwet. Elke Nederlander heeft recht op een basisniveau gratis internet.', hint: 'WIFI/DDP/KCV waarschijnlijk vóór. FRR waarschijnlijk tegen (meer schermtijd). PAN misschien vóór (gratis spul).' },
-  { num: 3, title: 'De Nationale Siësta Act', text: 'Verplichte middagpauze van 14:00 tot 15:30 voor alle werknemers. Werkgevers die bellen of mailen tijdens de siësta worden beboet.', hint: 'FBL/VBB vóór (rust en borrel!). DDP/FRR sterk tegen. PPP vóór (minder produceren). PAN: "Afschaffen van de middag!"' },
-  { num: 4, title: 'De Groene Woensdag', text: 'Elke woensdag wordt autovrij in heel Nederland. Alle niet-essentiële winkels zijn dicht. Iedereen besteedt de dag aan natuur en gemeenschap.', hint: 'PPP sterk vóór, FBL vóór (vrije dag!). DDP/VBB sterk tegen (economie, horeca dicht!). KKB: "Kaasmarkten dan ook dicht?!"' },
-  { num: 5, title: 'Kaas als Strategische Reserve', text: 'Nederland legt een nationale kaasvoorraad aan van 10 miljoen kilo, vergelijkbaar met de strategische oliereserve.', hint: 'KKB in tranen van geluk. VBB vóór. DDP ziet investering. PPP sterk tegen (zuivelindustrie).' },
-  { num: 6, title: 'De Grote Cultuurwet', text: 'De cultuurbegroting wordt verdubbeld. Daarnaast wordt een verplicht kunstvak ingevoerd voor alle volwassenen: 20 uur per jaar.', hint: 'KCV extatisch. FBL vóór. DDP sterk tegen (kosten). VBB: "Mag het kookkunst zijn?"' },
-  { num: 7, title: 'Wet Afschaffing Eigen Risico', text: 'Het eigen risico in de zorg wordt volledig afgeschaft. Kosten gedekt door verhoging inkomensbelasting met 1,5%.', hint: 'PPP/FBL/KCV/PAN vóór. DDP sterk tegen. FRR: "Eigen verantwoordelijkheid!" DAM: "Misschien halveren?"' },
-  { num: 8, title: 'De Nationale Efficiëntiewet', text: 'Alle overheidsvergaderingen maximaal 30 minuten. Alle formulieren en communicatie uitsluitend digitaal.', hint: 'WIFI/DDP vóór. FRR deels (efficiënt = goed, digitaal = eng). DAM sterk tegen ("Werkgroepen hebben TIJD nodig!"). PAN vóór (minder overheid).' },
+const LAWS_POOL = [
+  { title: 'De Nationale Snackwet', text: 'BTW op alle traditionele Nederlandse snacks (bitterballen, frikandellen, kroketten, kaassoufflés) wordt verlaagd naar 0%.', hint: 'VBB/KKB/DDP waarschijnlijk vóór. PPP waarschijnlijk tegen (ongezond, dierlijk). FBL neutraal. FRR wil "verantwoord snackbeleid".' },
+  { title: 'Wet Digitale Grondrechten', text: 'Gratis WiFi wordt als grondrecht opgenomen in de Grondwet. Elke Nederlander heeft recht op een basisniveau gratis internet.', hint: 'WIFI/DDP/KCV waarschijnlijk vóór. FRR waarschijnlijk tegen (meer schermtijd). PAN misschien vóór (gratis spul).' },
+  { title: 'De Nationale Siësta Act', text: 'Verplichte middagpauze van 14:00 tot 15:30 voor alle werknemers. Werkgevers die bellen of mailen tijdens de siësta worden beboet.', hint: 'FBL/VBB vóór (rust en borrel!). DDP/FRR sterk tegen. PPP vóór (minder produceren). PAN: "Afschaffen van de middag!"' },
+  { title: 'De Groene Woensdag', text: 'Elke woensdag wordt autovrij in heel Nederland. Alle niet-essentiële winkels zijn dicht. Iedereen besteedt de dag aan natuur en gemeenschap.', hint: 'PPP sterk vóór, FBL vóór (vrije dag!). DDP/VBB sterk tegen (economie, horeca dicht!). KKB: "Kaasmarkten dan ook dicht?!"' },
+  { title: 'Kaas als Strategische Reserve', text: 'Nederland legt een nationale kaasvoorraad aan van 10 miljoen kilo, vergelijkbaar met de strategische oliereserve.', hint: 'KKB in tranen van geluk. VBB vóór. DDP ziet investering. PPP sterk tegen (zuivelindustrie).' },
+  { title: 'De Grote Cultuurwet', text: 'De cultuurbegroting wordt verdubbeld. Daarnaast wordt een verplicht kunstvak ingevoerd voor alle volwassenen: 20 uur per jaar.', hint: 'KCV extatisch. FBL vóór. DDP sterk tegen (kosten). VBB: "Mag het kookkunst zijn?"' },
+  { title: 'Wet Afschaffing Eigen Risico', text: 'Het eigen risico in de zorg wordt volledig afgeschaft. Kosten gedekt door verhoging inkomensbelasting met 1,5%.', hint: 'PPP/FBL/KCV/PAN vóór. DDP sterk tegen. FRR: "Eigen verantwoordelijkheid!" DAM: "Misschien halveren?"' },
+  { title: 'De Nationale Efficiëntiewet', text: 'Alle overheidsvergaderingen maximaal 30 minuten. Alle formulieren en communicatie uitsluitend digitaal.', hint: 'WIFI/DDP vóór. FRR deels (efficiënt = goed, digitaal = eng). DAM sterk tegen ("Werkgroepen hebben TIJD nodig!"). PAN vóór (minder overheid).' },
+  { title: 'De Nationale Slaapwet', text: 'Werknemers hebben wettelijk recht op een middagdutje van 20 minuten. Kantoren zijn verplicht een "dutjeskamer" in te richten.', hint: 'FBL/PPP vóór. DDP/WIFI sterk tegen. FRR: "Tijdverspilling!" KCV: "Dromen is creativiteit!"' },
+  { title: 'Wet op de Vierdaagse Werkweek', text: 'De standaard werkweek wordt teruggebracht naar 4 dagen, 32 uur. Geen loonsverlaging toegestaan.', hint: 'FBL extatisch. DDP/FRR sterk tegen. WIFI: "Async werken is toch al de norm?" DAM: "Misschien 4,5 dag?"' },
+  { title: 'De Nationale Boerenmarktdag', text: 'Elke gemeente is verplicht op zaterdag een lokale boerenmarkt te organiseren. Verkoop van buitenlands seizoensfruit op die dag verboden.', hint: 'BNB/KKB/VBB vóór. WIFI: "Outdated business model." PPP: "Lokaal = goed!" PAN: "Weer een verplichting!"' },
+  { title: 'Wet Verplicht Volkstuintje', text: 'Elke Nederlander heeft recht op een volkstuintje van 10 m². De overheid beheert de wachtlijsten.', hint: 'PPP/WOK vóór. DDP: "Landonteigening!" FRR: "Te veel regels voor te weinig grond." DAM: "Kan ook kleiner?"' },
+  { title: 'De Anti-Vergaderwet', text: 'Vergaderingen zonder agenda zijn verboden. Elke vergadering eindigt na 45 minuten automatisch; deelnemers worden letterlijk gebeld.', hint: 'WIFI/DDP/FRR vóór. DAM sterk tegen ("Werkgroepen hebben SFEER nodig!"). KCV: "Kunst heeft geen agenda!"' },
+  { title: 'Wet Uitbreiding Nationale Feestdagen', text: 'Vier nieuwe nationale feestdagen worden ingesteld: Dag van de Rust, Dag van de Cultuur, Dag van de Natuur en Dag van de Snack.', hint: 'FBL/KCV/VBB extatisch. DDP: "Economische schade!" FRR: "Waarom vier? Liever één maar grondig."' },
+  { title: 'De Zorgpremieverlaging', text: 'De maandelijkse zorgpremie wordt gehalveerd. Dekking via verhoging dividendbelasting.', hint: 'PPP/FBL/WOK vóór. DDP: "Aanslag op ondernemersklimaat!" FRR: "Systeem werkt al." DAM: "Misschien 30% verlaging?"' },
+  { title: 'Wet Duurzame Nieuwbouw', text: 'Alle nieuw te bouwen woningen moeten energieneutraal zijn. Bouw van nieuwe koopwoningen boven €400.000 is verboden.', hint: 'PPP/WOK vóór. DDP/BNB sterk tegen. KGW: "Gezinswoningen moeten betaalbaar blijven!"' },
+  { title: 'De Mediabalans Wet', text: 'Elke omroep is verplicht 30% van de zendtijd te besteden aan Nederlandse cultuurproducties.', hint: 'KCV/OMA vóór. WIFI/DDP/PAN tegen. FRR: "Strenge handhaving nodig." DAM: "Misschien 20%?"' },
+  { title: 'Wet Nationale Fietsinfrastructuur', text: '€5 miljard wordt geïnvesteerd in een landelijk netwerk van fietsbanen. Auto\'s worden geweerd uit alle stadscentra.', hint: 'PPP/FBL/WOK vóór. DDP/BNB sterk tegen. SVB: "Bewegen is topsport!" FRR: "Regels voor fietsers eerst!"' },
+  { title: 'De Transparantiewet Overheid', text: 'Alle ministerraadnotulen worden na 1 jaar openbaar. Lobbycontacten van ministers worden wekelijks gepubliceerd.', hint: 'PAN/PPP/WIFI vóór. DDP/KGW: "Privacy!" FRR: "Ordelijk implementeren." DAM: "Misschien na 2 jaar?"' },
+  { title: 'Wet Gratis Openbaar Vervoer', text: 'Alle treinen, bussen en trams worden gratis voor iedereen. Dekking via hogere brandstofbelasting.', hint: 'FBL/PPP/WOK sterk vóór. DDP/BNB sterk tegen (autorijders). FRR: "Capaciteitsproblemen oplossen eerst!" WIFI: "Smart mobility!"' },
 ];
+const LAWS = [...LAWS_POOL].sort(() => Math.random() - 0.5).slice(0, 8).map((l, i) => ({ ...l, num: i + 1 }));
 
 const AGENDA_DISTRIBUTION = {
   6:  ['LOYALIST','LOYALIST','OPSTANDELING','OPSTANDELING','OPPORTUNIST','KINGMAKER'],
