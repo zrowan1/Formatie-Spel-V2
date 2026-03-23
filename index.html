@@ -1211,12 +1211,13 @@
             <span class="step-label">Speed-debat — Stellingen</span>
             Twee stoelen vooraan. Steeds twee partijen, 30 sec per speler.
             <br><br>
-            <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px;">
-              <div class="hint-box">💬 "Het borreluurtje om 16:00 moet een wettelijk recht worden."</div>
-              <div class="hint-box">💬 "Kaas moet twee keer zo duur worden."</div>
-              <div class="hint-box">💬 "Alle Nederlanders moeten verplicht één dag offline zijn."</div>
-              <div class="hint-box">💬 "De Tweede Kamer vervangen door gelote burgers."</div>
-              <div class="hint-box">💬 "Iedereen boven €100.000 betaalt 75% belasting."</div>
+            <div style="display:flex;gap:8px;margin-bottom:10px;">
+              <button class="btn btn-gold" onclick="generatePairings(event)" style="flex:1;">
+                🎲 Maak paren
+              </button>
+            </div>
+            <div id="pairings-list" style="margin-bottom:10px;">
+              <div style="color:var(--text-dim);font-size:0.85rem;">Klik op "Maak paren" om te beginnen.</div>
             </div>
             <div class="quick-timers" style="margin-top:10px;">
               <button class="quick-btn" onclick="startTimer(30,'Spreektijd')">▶ 30 sec</button>
@@ -1660,6 +1661,58 @@
 // ============================================================
 // DATA
 // ============================================================
+
+const STELLINGEN = [
+  // PPP-relevant (klimaat/natuur/veganistisch)
+  { text: "Vlees moet drie keer zo duur worden als groente.", parties: ['PPP','KKB','VBB'] },
+  { text: "Elke Nederlander plant verplicht één boom per jaar.", parties: ['PPP','FRR'] },
+  { text: "Benzineauto's zijn per 2027 verboden.", parties: ['PPP','DDP'] },
+  { text: "De veestapel wordt gehalveerd om het klimaat te redden.", parties: ['PPP','KKB'] },
+  { text: "Vliegvakanties worden belast met 500 euro klimaattoeslag.", parties: ['PPP','DDP','FBL'] },
+  // FBL-relevant (vrije tijd/luieren/werkweek)
+  { text: "De werkweek wordt wettelijk beperkt tot 3 dagen.", parties: ['FBL','DDP','FRR'] },
+  { text: "Iedereen heeft recht op 8 weken vakantie per jaar.", parties: ['FBL','DDP'] },
+  { text: "Het borreluurtje om 16:00 wordt een wettelijk recht.", parties: ['FBL','VBB','FRR'] },
+  { text: "Overwerken is verboden, tenzij de werknemer er zelf om vraagt.", parties: ['FBL','DDP'] },
+  // KCV-relevant (cultuur/kunst/vlaai)
+  { text: "De overheid besteedt 5% van het BNP aan kunst en cultuur.", parties: ['KCV','DDP'] },
+  { text: "Nationale Vlaaidag wordt een officiële feestdag.", parties: ['KCV','VBB','FRR'] },
+  { text: "Kunstonderwijs wordt verplicht op alle scholen.", parties: ['KCV','WIFI'] },
+  { text: "Museums en theaters zijn voor iedereen gratis.", parties: ['KCV','DDP'] },
+  // WIFI-relevant (tech/internet/digitaal)
+  { text: "Gratis wifi is een grondrecht, net als wonen en eten.", parties: ['WIFI','FRR','DDP'] },
+  { text: "AI mag worden ingezet bij rechterlijke beslissingen.", parties: ['WIFI','PAN','FRR'] },
+  { text: "Alle overheidsdiensten worden volledig gedigitaliseerd.", parties: ['WIFI','FRR'] },
+  { text: "Social media voor kinderen onder 16 wordt verboden.", parties: ['WIFI','PPP','FRR'] },
+  { text: "Elke Nederlander krijgt een digitale identiteitskaart die alles bijhoudt.", parties: ['WIFI','PAN','FRR'] },
+  // DAM-relevant (midden/compromis)
+  { text: "Politici moeten altijd consensus zoeken, nooit extreme standpunten innemen.", parties: ['DAM','PAN'] },
+  { text: "Er moet een permanente burgercommissie komen die alle wetten beoordeelt.", parties: ['DAM','PAN','FRR'] },
+  // VBB-relevant (eten/borrel/snacks)
+  { text: "BTW op bier en bitterballen gaat naar 0%.", parties: ['VBB','DDP','KKB'] },
+  { text: "Elke vergadering moet beginnen met een borrel.", parties: ['VBB','FBL','FRR'] },
+  { text: "Fastfoodrestaurants worden verboden in de buurt van scholen.", parties: ['VBB','PPP','FRR'] },
+  { text: "De nationale feestdag wordt gevierd met een verplicht buffet.", parties: ['VBB','KCV'] },
+  // KKB-relevant (kaas/zuivel)
+  { text: "Kaas wordt het officiële nationale symbool van Nederland.", parties: ['KKB','PAN','KCV'] },
+  { text: "Er komt een Ministerie van Zuivel en Kaasbeleid.", parties: ['KKB','DAM','PAN'] },
+  { text: "Geïmporteerde kaas wordt zwaar belast om Nederlandse kaas te beschermen.", parties: ['KKB','DDP'] },
+  { text: "Plantaardige kaasvervangers mogen geen 'kaas' heten.", parties: ['KKB','PPP'] },
+  // DDP-relevant (belasting/economie/geld)
+  { text: "Iedereen boven €100.000 inkomen betaalt 75% belasting.", parties: ['DDP','FBL','PPP'] },
+  { text: "De erfbelasting wordt volledig afgeschaft.", parties: ['DDP','PPP','FBL'] },
+  { text: "Bedrijven die in Nederland winst maken, betalen hier belasting.", parties: ['DDP','PPP'] },
+  { text: "Het minimumloon wordt verdubbeld.", parties: ['DDP','FBL','PPP'] },
+  // FRR-relevant (regels/orde/tijdstip)
+  { text: "Er komt een avondklok vanaf 23:00 voor iedereen onder 25.", parties: ['FRR','FBL','PAN'] },
+  { text: "Vergaderingen die uitlopen worden automatisch gestraft met een boete.", parties: ['FRR','DAM','FBL'] },
+  { text: "Alle wetten worden eens per 10 jaar automatisch herzien.", parties: ['FRR','PAN'] },
+  // PAN-relevant (afschaffen/tegendraads)
+  { text: "De Tweede Kamer wordt vervangen door gelote burgers.", parties: ['PAN','DAM','FRR'] },
+  { text: "Minimaal één bestaande wet wordt per jaar afgeschaft.", parties: ['PAN','FRR','DDP'] },
+  { text: "Politieke partijen worden verboden; individuele kandidaten lopen.", parties: ['PAN','DAM'] },
+];
+
 const PARTIES = [
   { id: 'PPP', name: 'PPP', full: 'Partij voor Plant en Planeet', seats: 15 },
   { id: 'FBL', name: 'FBL', full: 'Front voor Betaalbaar Luieren', seats: 15 },
@@ -2089,6 +2142,77 @@ function saveState() {
 // ============================================================
 function broadcast(type, data) {
   localStorage.setItem('formatie_event', JSON.stringify({ type, data, ts: Date.now() }));
+}
+
+// ============================================================
+// SPEED-DEBAT: PARTY PAIRINGS & STELLINGEN
+// ============================================================
+let currentPairings = [];
+
+function generatePairings(e) {
+  e.stopPropagation();
+  const ids = Object.keys(state.seats);
+  const shuffled = [...ids].sort(() => Math.random() - 0.5);
+  const usedStellingIndices = new Set();
+  currentPairings = [];
+  for (let i = 0; i + 1 < shuffled.length; i += 2) {
+    const p1 = shuffled[i], p2 = shuffled[i + 1];
+    const idx = findBestStelling(p1, p2, usedStellingIndices);
+    usedStellingIndices.add(idx);
+    currentPairings.push({ party1: p1, party2: p2, stelling: STELLINGEN[idx], debated: false });
+  }
+  renderPairings();
+}
+
+function findBestStelling(p1, p2, used) {
+  // Priority 1: stelling where BOTH parties appear
+  let idx = STELLINGEN.findIndex((s, i) => !used.has(i) && s.parties.includes(p1) && s.parties.includes(p2));
+  if (idx >= 0) return idx;
+  // Priority 2: stelling where at least ONE party appears
+  idx = STELLINGEN.findIndex((s, i) => !used.has(i) && (s.parties.includes(p1) || s.parties.includes(p2)));
+  if (idx >= 0) return idx;
+  // Priority 3: any unused stelling
+  idx = STELLINGEN.findIndex((s, i) => !used.has(i));
+  if (idx >= 0) return idx;
+  // Fallback: random (allow reuse if pool exhausted)
+  return Math.floor(Math.random() * STELLINGEN.length);
+}
+
+function broadcastStelling(pairIndex) {
+  const pair = currentPairings[pairIndex];
+  if (!pair) return;
+  pair.debated = true;
+  broadcast('stelling', {
+    stelling: pair.stelling.text,
+    party1: pair.party1,
+    party2: pair.party2,
+    pairIndex: pairIndex + 1,
+    totalPairs: currentPairings.length
+  });
+  renderPairings();
+}
+
+function renderPairings() {
+  const container = document.getElementById('pairings-list');
+  if (!container) return;
+  if (currentPairings.length === 0) {
+    container.innerHTML = '<div style="color:var(--text-dim);font-size:0.85rem;">Klik op "Maak paren" om te beginnen.</div>';
+    return;
+  }
+  container.innerHTML = currentPairings.map((pair, i) => {
+    const p1 = PARTIES.find(p => p.id === pair.party1);
+    const p2 = PARTIES.find(p => p.id === pair.party2);
+    const dimStyle = pair.debated ? 'opacity:0.45;' : '';
+    return `<div style="margin-bottom:10px;padding:10px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:6px;${dimStyle}">
+      <div style="font-family:'Oswald',sans-serif;font-size:0.9rem;color:var(--gold);margin-bottom:4px;">
+        ${p1 ? p1.name : pair.party1} vs ${p2 ? p2.name : pair.party2}
+      </div>
+      <div style="font-size:0.82rem;color:var(--text-dim);margin-bottom:8px;font-style:italic;">"${pair.stelling.text}"</div>
+      <button class="quick-btn" onclick="broadcastStelling(${i}); event.stopPropagation();" ${pair.debated ? 'disabled' : ''}>
+        📺 ${pair.debated ? 'Gedebatteerd' : 'Toon op TV'}
+      </button>
+    </div>`;
+  }).join('');
 }
 
 // ============================================================
