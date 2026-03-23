@@ -2054,6 +2054,7 @@ function handleEvent(ev) {
   }
 
   if (type === 'seats') {
+    if (data.parties) activeParties = data.parties.map(ap => PARTIES.find(p => p.id === ap.id) || ap);
     updateCoalitionMeter(data.seats, data.coalition);
     renderSeats(data.seats, data.coalition);
     showView('view-seats');
