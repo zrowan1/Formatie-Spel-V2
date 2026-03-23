@@ -1852,12 +1852,12 @@
 
   <!-- QR CODE -->
   <div class="tv-view" id="view-qr">
-    <div class="qr-badge">Meekijken op je telefoon</div>
-    <div class="qr-title">Scan de QR-code</div>
+    <div class="qr-badge" id="qr-badge">Meekijken op je telefoon</div>
+    <div class="qr-title" id="qr-title">Scan de QR-code</div>
     <div class="qr-goldline"></div>
     <img class="qr-img" id="qr-img" src="" alt="QR Code">
     <div class="qr-url" id="qr-url"></div>
-    <div class="qr-hint">Open tv.html op hetzelfde wifi-netwerk als dit apparaat</div>
+    <div class="qr-hint" id="qr-hint">Open tv.html op hetzelfde wifi-netwerk als dit apparaat</div>
   </div>
 
   <!-- COALITIEAKKOORD -->
@@ -2188,6 +2188,20 @@ function handleEvent(ev) {
   }
 
   if (type === 'qrcode') {
+    document.getElementById('qr-badge').textContent = 'Meekijken op je telefoon';
+    document.getElementById('qr-title').textContent = 'Scan de QR-code';
+    document.getElementById('qr-hint').textContent = 'Open tv.html op hetzelfde wifi-netwerk als dit apparaat';
+    const url = encodeURIComponent(data.url);
+    document.getElementById('qr-img').src =
+      `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${url}`;
+    document.getElementById('qr-url').textContent = data.url;
+    showView('view-qr');
+  }
+
+  if (type === 'playerqr') {
+    document.getElementById('qr-badge').textContent = `${data.partyName} — Spelersdashboard`;
+    document.getElementById('qr-title').textContent = 'Scan de QR-code';
+    document.getElementById('qr-hint').textContent = 'Scan om je partijkaart en stemknopppen te openen';
     const url = encodeURIComponent(data.url);
     document.getElementById('qr-img').src =
       `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${url}`;
