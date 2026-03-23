@@ -1936,6 +1936,11 @@ const PARTIES = [
   { id: 'DDP', name: 'DDP', full: 'De Dikke Portemonnee' },
   { id: 'FRR', name: 'FRR', full: 'Front voor Rust, Regels en Regelmaat' },
   { id: 'PAN', name: 'PAN', full: 'Partij Absoluut Niks' },
+  { id: 'OMA', name: 'OMA', full: 'Ouderenzorg, Memoires en Appeltaart' },
+  { id: 'BNB', name: 'BNB', full: 'Boer en Nederlandsch Boerenverstand' },
+  { id: 'WOK', name: 'WOK', full: 'Wonen of Kraken' },
+  { id: 'KGW', name: 'KGW', full: 'Kerk, Gezin en Waarden' },
+  { id: 'SVB', name: 'SVB', full: 'Sportief Verbond voor Beweging' },
 ];
 
 const PARTY_LEADERS = {
@@ -1949,6 +1954,11 @@ const PARTY_LEADERS = {
   DDP:  'Maximiliansen van Cashflow III',
   FRR:  'Gerrit Klokslag',
   PAN:  'Nihil "Nelis" van Niansen',
+  OMA:  'Tante Riet van de Rolstoel',
+  BNB:  'Kees van den Trekker',
+  WOK:  'Vera van de Wachtlijst',
+  KGW:  'Dominee Adriaan van het Kruispad',
+  SVB:  'Duco Spierenboer-Hardloper',
 };
 
 const PARTY_QUIRKS = {
@@ -1962,6 +1972,11 @@ const PARTY_QUIRKS = {
   DDP:  'Noemt alles een "investering" of "groeikans"',
   FRR:  'Houdt iedereen streng aan de tijd, kijkt constant op horloge',
   PAN:  'Is het automatisch oneens met het laatste wat iemand zei',
+  OMA:  'Vergeet halverwege wat ze wilde zeggen en vertelt een irrelevant verhaal over 1987',
+  BNB:  'Elke politieke stelling "bewijst" hij met een anekdote over zijn koe Betsie',
+  WOK:  'Elke zin eindigt met "...en mijn wachtlijst staat al op jaar zeven"',
+  KGW:  'Citeert bijbelteksten die totaal niet van toepassing zijn, volkomen serieus',
+  SVB:  'Elk debatpunt begint met "als in topsport..." en eindigt met aanmoedigend "kom op team!"',
 };
 
 const PARTY_CROWN_JEWELS = {
@@ -1975,11 +1990,17 @@ const PARTY_CROWN_JEWELS = {
   DDP:  'Belastingverlaging',
   FRR:  'De avondklok',
   PAN:  'Minimaal één wet afschaffen',
+  OMA:  'Pensioenleeftijd terug naar 60 + gratis stamppot in elk verzorgingstehuis',
+  BNB:  'Alle stikstofregels afgeschaft',
+  WOK:  'Maximale huurprijs €400 per maand',
+  KGW:  'Zondag als verplichte nationale rustdag',
+  SVB:  'Verplicht gym-uur per werkdag voor alle ambtenaren',
 };
 
 const PARTY_DEALBREAKERS = {
   PPP: 'KKB', FBL: 'DDP', KCV: 'PAN', WIFI: 'FRR',
   DAM: null,   VBB: 'PPP', KKB: 'PPP', DDP: 'FBL', FRR: 'PAN', PAN: 'FRR',
+  OMA: 'WIFI', BNB: 'PPP', WOK: 'DDP', KGW: 'FBL', SVB: 'FBL',
 };
 
 // Dynamische partijenlijst — wordt ingesteld via 'setup' event van de master
@@ -2522,11 +2543,12 @@ function renderExitPoll(parties, allParties) {
 const HEMI_COLORS = {
   PPP: '#27ae60', FBL: '#8e44ad', KCV: '#e67e22', WIFI: '#2980b9',
   DAM: '#95a5a6', VBB: '#f1c40f', KKB: '#c9a84c', DDP: '#16a085',
-  FRR: '#546e8a', PAN: '#c0392b'
+  FRR: '#546e8a', PAN: '#c0392b',
+  OMA: '#e8b87a', BNB: '#8b6914', WOK: '#e84c4c', KGW: '#6c5ce7', SVB: '#00b894'
 };
 
 // Party order: political left → right (for visual layout)
-const HEMI_ORDER = ['PPP','FBL','KCV','WIFI','DAM','VBB','KKB','DDP','FRR','PAN'];
+const HEMI_ORDER = ['WOK','PPP','FBL','OMA','KCV','WIFI','DAM','SVB','VBB','KKB','BNB','DDP','KGW','FRR','PAN'];
 
 function polarXY(cx, cy, r, angle) {
   return { x: cx + r * Math.cos(angle), y: cy - r * Math.sin(angle) };
