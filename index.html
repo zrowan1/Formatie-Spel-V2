@@ -2492,6 +2492,19 @@ const SUPABASE_URL = 'https://vkfwthueozgcqvadbcfx.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrZnd0aHVlb3pnY3F2YWRiY2Z4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTUyMTgsImV4cCI6MjA4ODI5MTIxOH0.H_QIujPFl2EOhq28AIegZf_9pSTXfyEXsaJzb8WJVQs';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+async function pushAgendas() {
+  if (!state.gameId || !state.agendas || Object.keys(state.agendas).length === 0) return;
+  await supabaseClient.from('game_sessions').upsert({
+    game_id: state.gameId,
+    agendas: state.agendas,
+  }, { onConflict: 'game_id' });
+}
+
+// Push agendas op page load als spel al bezig is
+if (state.gameStarted && Object.keys(state.agendas).length > 0) {
+  pushAgendas();
+}
+
 async function openVoting(topic, label) {
   state.currentVoteTopic = topic;
   state.currentVoteLabel = label;
@@ -3893,6 +3906,7 @@ function confirmSetup() {
   state.gameStarted = true;
   initGameState();
   saveState();
+  pushAgendas();
   // Broadcast setup to TV
   const active = getActiveParties();
   broadcast('setup', {

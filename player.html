@@ -163,6 +163,57 @@
     }
     .bonus-revealed.visible { display: block; }
 
+    .agenda-pending {
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+    .agenda-toggle {
+      background: none;
+      border: 1px solid #9b8de8;
+      color: #9b8de8;
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      margin-top: 4px;
+    }
+    .agenda-toggle:hover { border-color: #b8aff0; color: var(--cream); }
+    .agenda-revealed {
+      display: none;
+      margin-top: 10px;
+      padding: 12px;
+      background: rgba(155,141,232,0.08);
+      border: 1px solid #9b8de8;
+      border-radius: 6px;
+    }
+    .agenda-revealed.visible { display: block; }
+    .agenda-type-badge {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      color: #9b8de8;
+      margin-bottom: 6px;
+    }
+    .agenda-definition {
+      font-family: 'EB Garamond', serif;
+      font-size: 0.95rem;
+      color: var(--cream);
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+    .agenda-points {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      color: #9b8de8;
+      letter-spacing: 0.05em;
+    }
+
     /* ── VOTE OVERLAY ── */
     .vote-overlay {
       display: none;
@@ -778,6 +829,15 @@
     SVB:  'Speel SVB als eeuwig optimistisch en teamgericht. Elk conflict is "een kans om als team te groeien". Nooit negatief, altijd in beweging.',
   };
 
+  const AGENDA_DEFINITIONS = {
+    LOYALIST:    { label: '🏛 Loyalist',    text: 'Jij steunt de Minister-President altijd. Stem bij ALLE 6 kabinetscrises VOOR het kabinet (of onthouding). Doe je dit, verdien je +3 punten.',    goal: 'Stem NOOIT tegen het kabinet bij de crises.' },
+    OPSTANDELING:{ label: '✊ Opstandeling', text: 'Jij wil het kabinet ten val brengen. Stem bij minimaal 2 van de 6 crises TEGEN het kabinet. Doe je dit, verdien je +3 punten.',               goal: 'Stem minimaal 2× TEGEN het kabinet.' },
+    OPPORTUNIST: { label: '🎲 Opportunist',  text: 'Jij zit in de coalitie maar saboteert van binnenuit. Zit in de coalitie EN stem minimaal 1× TEGEN het kabinet bij een crisis. Doe je dit, +3 punten.', goal: 'In coalitie + stem minimaal 1× TEGEN.' },
+    KINGMAKER:   { label: '👑 Kingmaker',    text: 'Jij zit NIET in de coalitie, maar de MP overleeft toch alle 6 crises. Als dit lukt zonder jou in de coalitie, verdien je +3 punten.',           goal: 'Niet in coalitie, maar MP overleeft alles.' },
+  };
+
+  let myAgenda = null;
+
   // ── SUPABASE ────────────────────────────────────────────────
   const SUPABASE_URL      = 'https://vkfwthueozgcqvadbcfx.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrZnd0aHVlb3pnY3F2YWRiY2Z4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTUyMTgsImV4cCI6MjA4ODI5MTIxOH0.H_QIujPFl2EOhq28AIegZf_9pSTXfyEXsaJzb8WJVQs';
@@ -880,6 +940,31 @@
           <button class="bonus-toggle" onclick="toggleBonus(this)">🔒 Toon geheime bonus (alleen voor jou)</button>
           <div class="bonus-revealed" id="bonus-text">${PARTY_BONUSES[partyId] || '—'}</div>
         </div>
+
+        <div class="card-section" id="agenda-section">
+          <div class="section-label">Geheime Agenda <span style="font-size:0.7rem;color:var(--text-dim);font-family:'EB Garamond',serif;font-style:italic;">(Ronde 4)</span></div>
+          <div id="agenda-content"><div class="agenda-pending">Wordt ingesteld door de informateur...</div></div>
+        </div>
+      </div>`;
+  }
+
+  function toggleAgenda(btn) {
+    const el = document.getElementById('agenda-text');
+    const visible = el.classList.toggle('visible');
+    btn.textContent = visible ? '🎭 Verberg geheime agenda' : '🎭 Toon jouw geheime agenda';
+  }
+
+  function updateAgendaSection(agendaType) {
+    const def = AGENDA_DEFINITIONS[agendaType];
+    if (!def) return;
+    const el = document.getElementById('agenda-content');
+    if (!el) return;
+    el.innerHTML = `
+      <button class="agenda-toggle" onclick="toggleAgenda(this)">🎭 Toon jouw geheime agenda</button>
+      <div class="agenda-revealed" id="agenda-text">
+        <div class="agenda-type-badge">${def.label}</div>
+        <div class="agenda-definition">${def.text}</div>
+        <div class="agenda-points">Doel: ${def.goal} → +3 punten</div>
       </div>`;
   }
 
@@ -1076,6 +1161,10 @@
 
   // ── SESSION HANDLER ──────────────────────────────────────────
   function updateFromSession(session) {
+    if (session.agendas && session.agendas[partyId] && session.agendas[partyId] !== myAgenda) {
+      myAgenda = session.agendas[partyId];
+      updateAgendaSection(myAgenda);
+    }
     updateStatusBar(session.vote_open, session.vote_label);
     if (session.vote_open && session.vote_topic === 'VERKIEZING') {
       hideVoteOverlay();
