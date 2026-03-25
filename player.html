@@ -819,7 +819,11 @@
       }, (payload) => {
         updateFromSession(payload.new);
       })
-      .subscribe();
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await loadSession();
+        }
+      });
   }
 
   // ── INIT ─────────────────────────────────────────────────────
