@@ -357,6 +357,83 @@
     }
     .election-confirmation.visible { display: block; }
 
+    /* ── STANDPUNTEN LIST ── */
+    .standpunten-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .standpunten-list li {
+      font-family: 'EB Garamond', serif;
+      font-size: 0.95rem;
+      color: var(--cream);
+      line-height: 1.45;
+      padding-left: 18px;
+      position: relative;
+    }
+    .standpunten-list li::before {
+      content: '▶';
+      position: absolute;
+      left: 0;
+      top: 1px;
+      font-size: 0.6rem;
+      color: var(--gold);
+    }
+
+    /* ── MUST-HAVE ── */
+    .must-have-value {
+      font-family: 'EB Garamond', serif;
+      font-size: 1rem;
+      color: #a5d6a7;
+      line-height: 1.5;
+    }
+    .must-have-points {
+      display: inline-block;
+      margin-top: 4px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.7rem;
+      color: #a5d6a7;
+      background: rgba(46,125,50,0.15);
+      border: 1px solid rgba(46,125,50,0.35);
+      border-radius: 4px;
+      padding: 2px 7px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── SPEELTIP TOGGLE ── */
+    .speeltip-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      margin-top: 4px;
+    }
+    .speeltip-toggle:hover { border-color: var(--gold-dim); color: var(--cream); }
+    .speeltip-revealed {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: rgba(201,168,76,0.06);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'EB Garamond', serif;
+      font-size: 0.95rem;
+      color: var(--cream);
+      line-height: 1.5;
+      font-style: italic;
+    }
+    .speeltip-revealed.visible { display: block; }
+
     /* ── ERROR / LOADING ── */
     .error-screen {
       display: flex;
@@ -534,6 +611,173 @@
     SVB:  'Woord "sport" of "gezondheid" staat in het akkoord (+3)',
   };
 
+  const PARTY_STANDPUNTEN = {
+    PPP: [
+      'Nationale Vleesvrije Werkweek: van maandag t/m vrijdag plantaardig eten in kantines en overheidsgebouwen',
+      'Werkweek naar 24 uur — minder produceren betekent minder uitstoot, en gelukkigere mensen',
+      'Groene subsidie: €1.000 per burger voor zonnepanelen, isolatie of een bakfiets',
+      'Verplichte moestuin per huishouden (balkonplantjes tellen mee, cactussen niet)',
+      'Alle schoolreisjes worden vervangen door natuurexcursies met een boswachter',
+      'Investeren in groene defensie: het leger plant bomen in conflictgebieden',
+    ],
+    FBL: [
+      '3-daagse werkweek (dinsdag t/m donderdag). Maandag is te vroeg, vrijdag te laat.',
+      'Siësta als grondrecht: 14:00-16:00 is heilig, werkgevers die bellen worden beboet',
+      'Gratis OV in het weekend — zodat iedereen lekker eropuit kan zonder kosten',
+      'Cultuur- en recreatiebudget van €500 per burger per jaar (concert, pretpark, spa)',
+      'Recht op "ik-heb-er-even-geen-zin-in-verlof": 10 extra dagen per jaar, geen vragen',
+      'Mentale gezondheid als topprioriteit: burn-outpreventie wordt wettelijk verplicht voor werkgevers',
+    ],
+    KCV: [
+      'Verdubbeling van de cultuurbegroting — elke stad verdient een eigen theater en concertzaal',
+      'Creatief denken als verplicht schoolvak, van groep 3 tot universiteit',
+      'Gratis museumtoegang voor iedereen onder de 30 (investering in de toekomst!)',
+      'Nationale Vlaaidag als officiële feestdag, met regionale varianten en een nationale wedstrijd',
+      'Kunstsubsidie voor elke Nederlander: €200 per jaar voor cultuurparticipatie',
+      'Elke nieuwe wet moet eerst getoetst worden op "culturele impact" door een onafhankelijke Kunstraad',
+    ],
+    WIFI: [
+      'Gratis WiFi als grondrecht — vastgelegd in artikel 23b van de Grondwet',
+      'Alle overheidsdiensten volledig digitaliseren: nooit meer in de rij bij het gemeentehuis',
+      'Programmeren als verplicht schoolvak vanaf groep 5',
+      'AI-adviseurs in de ministerraad voor datagedreven besluitvorming',
+      'Cybersecurity als onderdeel van defensie: een digitaal leger naast het fysieke',
+      'Digitale huisarts als eerste aanspreekpunt: 24/7 medisch advies via een app',
+    ],
+    DAM: [
+      '4-daagse werkweek als compromis: niet 3 dagen (te weinig), niet 5 dagen (te veel), maar précies 4',
+      'Voor elk voorstel wordt eerst een werkgroep opgericht die het nader onderzoekt',
+      'Een beetje meer investeren in cultuur, een beetje minder regels — balans!',
+      'Het coalitieakkoord moet minimaal 3x het woord "draagvlak" bevatten',
+      'Iedereen heeft een beetje gelijk, en we gaan kijken hoe we dat kunnen combineren',
+      'Gedeeltelijke verlaging van het eigen risico (niet afschaffen, niet behouden, maar halveren)',
+    ],
+    VBB: [
+      'BTW op alle traditionele Nederlandse snacks naar 0% (bitterballen, frikandellen, kroketten, kaassoufflés)',
+      'Verplicht borreluurtje om 16:00 op alle werkplekken in Nederland',
+      'Steun voor de horeca: minder regels, langere openingstijden, meer terrassen',
+      'Frituurvet als alternatieve biobrandstof (subsidie op friteuses)',
+      'Kookvak als verplicht onderdeel van het basisonderwijs',
+      'Gezelligheid als meetbaar welzijnscriterium in overheidsbeleid: de Bruto Nationaal Geluk-index',
+    ],
+    KKB: [
+      'Oprichten van het Ministerie van Zuivel en Kaasaangelegenheden',
+      'Kaas als officieel geschenk bij alle staatsbezoeken en diplomatieke ontmoetingen',
+      'Minder regelgeving voor boeren en voedselproducenten — laat ze hun werk doen',
+      'Bescherming van Nederlandse tradities en ambachten via een Erfgoedwet',
+      'Kaasexport-subsidie: "Laat de wereld proeven wat wij te bieden hebben"',
+      'Ambachtsonderwijs terug op scholen: leer kinderen écht iets maken met hun handen',
+    ],
+    DDP: [
+      'Belastingverlaging voor bedrijven én ondernemers — meer geld in de economie',
+      'Fors investeren in innovatie en start-ups via een Nationaal Investeringsfonds',
+      'Minder subsidies, meer eigen verantwoordelijkheid — de markt lost het op',
+      'Ondernemerschap als verplicht schoolvak: leer kinderen een businessplan schrijven',
+      'Forse investering in defensie: veiligheid is goed voor het vestigingsklimaat',
+      'Privatisering van niet-essentiële overheidsdiensten (waarom runt de overheid zwembaden?)',
+    ],
+    FRR: [
+      'Avondklok om 21:30 door de weeks (22:00 in het weekend — we zijn geen monsters)',
+      'Verplichte dagplanning voor alle burgers, in te leveren bij de gemeente',
+      'Boete van €50 voor elke minuut te laat komen (ook bij verjaardagen)',
+      'Strikte begrotingsdiscipline: geen cent meer uitgeven dan er binnenkomt',
+      'Verplichte jaarlijkse gezondheidscheck voor alle volwassenen — preventie bespaart kosten',
+      'Discipline en respect als kernvakken op school, inclusief een handdruk-examen',
+    ],
+    PAN: [
+      'Alle wetten ouder dan 20 jaar worden automatisch geschrapt — opnieuw beginnen!',
+      'Het koningshuis vervangen door een random Nederlander die elk jaar via loting wordt gekozen',
+      'Tweede Kamer halveren: 75 zetels is meer dan genoeg voor dit circus',
+      'Elke burger mag één wet per jaar persoonlijk afschaffen (via een app)',
+      'Afschaffing van het eigen risico in de zorg — afschaffen is ons ding!',
+      'Referenda over alles: laat het volk beslissen in plaats van die politici',
+    ],
+    OMA: [
+      'Pensioenleeftijd terug naar 60',
+      'Gratis stamppot in elk verzorgingstehuis',
+      'Meer rustbanken in het centrum',
+      'Geen modernisering van het OV zonder instructiefilmpje',
+    ],
+    BNB: [
+      'Alle stikstofregels onmiddellijk afgeschaft',
+      'Tractoren altijd voorrang op de snelweg',
+      'Subsidie voor boerenmarkten in elke gemeente',
+      'Geen klimaatwet die de veestapel verkleint',
+    ],
+    WOK: [
+      'Maximale huurprijs €400 per maand',
+      '500.000 sociale huurwoningen erbij',
+      'Leegstaande kantoren worden woonruimte',
+      'Verhuurders met meer dan 3 panden betalen dubbele belasting',
+    ],
+    KGW: [
+      'Zondag als verplichte nationale rustdag',
+      'Belastingvoordeel voor gezinnen met meer dan 3 kinderen',
+      'Bijbelonderwijs als keuzevak op elke school',
+      'Geen winkels open op zon- en feestdagen',
+    ],
+    SVB: [
+      'Verplicht gym-uur per werkdag voor alle ambtenaren',
+      'Sportkantine-aftrek voor bedrijven',
+      'Nationaal hardlooppad langs alle snelwegen',
+      'Minister-president doet elke ochtend live workout op NPO 1',
+    ],
+  };
+
+  const PARTY_MUST_HAVE = {
+    PPP:  '"Vleesvrije Werkweek" of "plantaardig" staat in het coalitieakkoord',
+    FBL:  '"3-daagse werkweek" of "minder werken" of "korter werken" staat in het coalitieakkoord',
+    KCV:  '"Nationale Vlaaidag" of "cultuurinvestering" staat in het coalitieakkoord',
+    WIFI: '"WiFi als grondrecht" of "digitalisering" staat in het coalitieakkoord',
+    DAM:  '"Werkgroep" of "draagvlak" staat in het coalitieakkoord',
+    VBB:  '"BTW op snacks naar 0%" of "snacksubsidie" staat in het coalitieakkoord',
+    KKB:  '"Ministerie van Zuivel" of iets kaas-gerelateerds staat in het coalitieakkoord',
+    DDP:  '"Belastingverlaging" in welke vorm dan ook staat in het coalitieakkoord',
+    FRR:  '"Avondklok" of een concrete nieuwe verplichting/regel staat in het coalitieakkoord',
+    PAN:  '"Minimaal één bestaande wet wordt afgeschaft" staat in het coalitieakkoord',
+    OMA:  '"Pensioenleeftijd" of "ouderenzorg" staat in het coalitieakkoord',
+    BNB:  '"Stikstof" of "boerenbeleid" staat in het coalitieakkoord',
+    WOK:  '"Maximale huurprijs" of "sociale huurwoningen" staat in het coalitieakkoord',
+    KGW:  '"Zondag als rustdag" of "zondagsrust" staat in het coalitieakkoord',
+    SVB:  '"Sport" of "gym-uur voor ambtenaren" staat in het coalitieakkoord',
+  };
+
+  const PARTY_RELATIES = {
+    PPP:  'Natuurlijke bondgenoten: FBL (minder werken = minder uitstoot) en KCV (subsidies voor een betere samenleving). WIFI is een mogelijke partner als innovatie groen wordt ingezet.',
+    FBL:  'Natuurlijke bondgenoten: PPP (minder werken = minder uitstoot) en KCV (cultuurbudget, vrije tijd). VBB deelt de liefde voor vrije tijd — borrel om 16:00 past perfect bij de siësta.',
+    KCV:  'Natuurlijke bondgenoten: FBL (cultuurbudget, vrije tijd voor cultuur) en WIFI (innovatie in onderwijs). DAM is een prettige gesprekspartner die tenminste luistert.',
+    WIFI: 'Natuurlijke bondgenoten: KCV (innovatie in onderwijs) en DDP (innovatie = groei). DAM is pragmatisch genoeg om mee te werken.',
+    DAM:  'Iedereen is een beetje bondgenoot — dat is letterlijk het punt. Jij bent de ultieme scharnier: elke coalitie wordt makkelijker met DAM erbij.',
+    VBB:  'Natuurlijke bondgenoten: FBL (vrije tijd = borreltijd) en KKB (Nederlands voedselerfgoed). DDP is oké want minder regels = langere openingstijden.',
+    KKB:  'Natuurlijke bondgenoten: VBB (Nederlands voedselerfgoed) en DDP (minder regelgeving). FRR deelt de liefde voor traditie.',
+    DDP:  'Natuurlijke bondgenoten: WIFI (innovatie = groei) en KKB (minder regelgeving). FRR deelt de liefde voor begrotingsdiscipline.',
+    FRR:  'Natuurlijke bondgenoten: DDP (begrotingsdiscipline, verantwoordelijkheid) en KKB (traditie, respect voor ambacht).',
+    PAN:  'Mogelijke bondgenoten: FBL (minder verplichtingen past wel) en DDP (minder overheid — maar om totaal andere redenen). Verder potentieel met iedereen die iets wil afschaffen.',
+    OMA:  'Mogelijke bondgenoten: KGW (traditionele waarden, respect voor ouderen) en FRR (orde en structuur). Iedereen die het pensioen serieus neemt is welkom.',
+    BNB:  'Mogelijke bondgenoten: KKB (agrarische belangen, voedselerfgoed) en DDP (minder regels voor ondernemers). FRR deelt de liefde voor discipline en hard werken.',
+    WOK:  'Mogelijke bondgenoten: PPP (sociale rechtvaardigheid) en FBL (betaalbaar leven voor iedereen). KCV steunt ook betaalbare woonruimte voor kunstenaars.',
+    KGW:  'Mogelijke bondgenoten: FRR (orde, discipline, respect voor regels) en OMA (traditionele waarden). KKB deelt de verbondenheid met het platteland.',
+    SVB:  'Mogelijke bondgenoten: FRR (discipline en structuur) en DDP (investering in gezondheid = groeikans). VBB deelt de liefde voor een actieve levensstijl.',
+  };
+
+  const PARTY_SPEELTIP = {
+    PPP:  'Als je niet weet wat je moet zeggen: betrek alles terug naar het klimaat. Defensie? "Maar wat doet het leger voor de CO2-uitstoot?" Economie? "Eco-harmonie, bedoel je!"',
+    FBL:  'Geeuw veel. Stel voor om pauze te nemen. Als iemand een complex plan uitlegt, zeg: "Kunnen we dat niet gewoon niet doen? Scheelt een hoop werk."',
+    KCV:  'Verzin ter plekke nep-citaten en nep-dichters. Hoe overtuigender je het brengt, hoe leuker. "Zoals Henriette van der Kwast schreef in 1897..."',
+    WIFI: 'Praat in tech-taal, zelfs als niemand je begrijpt. "Dit voorstel heeft een slechte UX." "Kunnen we deze wet even A/B-testen?"',
+    DAM:  'Maak je punt nooit af. Begin elke zin met iets stelligs en draai halverwege. "Ik vind dat we absoluut moeten... maar laten we eerst kijken of..."',
+    VBB:  'Vergelijk letterlijk alles met eten. Defensie = "de krokante korst die ons beschermt." Onderwijs = "het recept voor de toekomst." Begrotingstekort = "een stamppot zonder rookworst."',
+    KKB:  'Breng ALLES terug naar kaas. Het wordt nooit oud (kaas wordt alleen maar beter met de tijd). Je kunt nooit te veel over kaas praten.',
+    DDP:  'Alles is een investering. Alles is een groeikans. Alles is een markt. Als iemand over gevoel praat, vertaal het naar cijfers.',
+    FRR:  'Kijk constant op je horloge. Onderbreek mensen als ze te lang praten. Tel mee hoeveel seconden iemand over z\'n tijd gaat.',
+    PAN:  'Wees het overal automatisch mee oneens. Als iemand van mening verandert, verander jij ook. Je bent de chaos. Omarm het.',
+    OMA:  'Speel OMA als iemand die het altijd goed bedoelt maar niemand meer volgt. Elk punt begint met "Nou, in mijn tijd..." en eindigt ergens anders dan het begon.',
+    BNB:  'Speel BNB als iemand die diep overtuigd is dat de stad het probleem is. Betsie de koe is altijd het beste argument.',
+    WOK:  'Speel WOK als iemand die persoonlijk geraakt is door elk debatpunt. De wachtlijst van jaar zeven is altijd relevant — ook als het over kaasbeleid gaat.',
+    KGW:  'Speel KGW volkomen serieus. De bijbeltekst is altijd relevant. "Zoals staat geschreven in Spreuken 14:23 — dus daarom is de 3-daagse werkweek een zonde."',
+    SVB:  'Speel SVB als eeuwig optimistisch en teamgericht. Elk conflict is "een kans om als team te groeien". Nooit negatief, altijd in beweging.',
+  };
+
   // ── SUPABASE ────────────────────────────────────────────────
   const SUPABASE_URL      = 'https://vkfwthueozgcqvadbcfx.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrZnd0aHVlb3pnY3F2YWRiY2Z4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTUyMTgsImV4cCI6MjA4ODI5MTIxOH0.H_QIujPFl2EOhq28AIegZf_9pSTXfyEXsaJzb8WJVQs';
@@ -564,6 +808,19 @@
     const dbParty = db ? PARTIES.find(p => p.id === db) : null;
     const dbLabel = dbParty ? `Dealbreaker: niet met ${db} (${dbParty.full})` : null;
 
+    const standpunten = PARTY_STANDPUNTEN[partyId] || [];
+    const standpuntenHtml = standpunten.length
+      ? `<ul class="standpunten-list">${standpunten.map(s => `<li>${s}</li>`).join('')}</ul>`
+      : '<div class="section-value">—</div>';
+
+    const mustHave = PARTY_MUST_HAVE[partyId];
+    const mustHaveHtml = mustHave
+      ? `<div class="must-have-value">${mustHave}</div><span class="must-have-points">+5 punten als dit in het akkoord staat</span>`
+      : '<div class="section-value">—</div>';
+
+    const relaties = PARTY_RELATIES[partyId];
+    const speeltip = PARTY_SPEELTIP[partyId];
+
     document.getElementById('main-content').innerHTML = `
       <div class="party-card">
         <div class="party-header">
@@ -573,14 +830,26 @@
         </div>
 
         <div class="card-section">
-          <div class="section-label">Intro</div>
+          <div class="section-label">Wie zijn jullie?</div>
           <div class="section-value intro-text">${PARTY_INTROS[partyId] || '—'}</div>
         </div>
+
+        ${standpunten.length ? `
+        <div class="card-section">
+          <div class="section-label">Standpunten</div>
+          ${standpuntenHtml}
+        </div>` : ''}
 
         <div class="card-section">
           <div class="section-label">Kroonjuweel</div>
           <div class="section-value crown-jewel">${PARTY_CROWN_JEWELS[partyId] || '—'}</div>
         </div>
+
+        ${mustHave ? `
+        <div class="card-section">
+          <div class="section-label">Must-have voor het akkoord</div>
+          ${mustHaveHtml}
+        </div>` : ''}
 
         <div class="card-section">
           <div class="section-label">Karakter-quirk</div>
@@ -591,6 +860,19 @@
         <div class="card-section">
           <div class="section-label">Coalitie</div>
           <span class="dealbreaker-badge">⚠ ${dbLabel}</span>
+        </div>` : ''}
+
+        ${relaties ? `
+        <div class="card-section">
+          <div class="section-label">Bondgenoten</div>
+          <div class="section-value">${relaties}</div>
+        </div>` : ''}
+
+        ${speeltip ? `
+        <div class="card-section">
+          <div class="section-label">Speeltip</div>
+          <button class="speeltip-toggle" onclick="toggleSpeeltip(this)">💡 Toon speeltip</button>
+          <div class="speeltip-revealed" id="speeltip-text">${speeltip}</div>
         </div>` : ''}
 
         <div class="card-section">
@@ -605,6 +887,12 @@
     const el = document.getElementById('bonus-text');
     const visible = el.classList.toggle('visible');
     btn.textContent = visible ? '🔓 Verberg geheime bonus' : '🔒 Toon geheime bonus (alleen voor jou)';
+  }
+
+  function toggleSpeeltip(btn) {
+    const el = document.getElementById('speeltip-text');
+    const visible = el.classList.toggle('visible');
+    btn.textContent = visible ? '💡 Verberg speeltip' : '💡 Toon speeltip';
   }
 
   // ── STATUS BAR ───────────────────────────────────────────────
