@@ -1262,8 +1262,15 @@
           <div class="step-num">3</div>
           <div class="step-text">
             <span class="step-label">Stemming</span>
-            Elke speler verdeelt <span id="chips-hint-r1">15</span> stemfiches geheim. Niet op jezelf. Informateur stemt niet. Totaal = 150 Kamerzetels.
+            Elke speler verdeelt <span id="chips-hint-r1">15</span> stemfiches geheim via zijn telefoon. Niet op jezelf. Totaal = 150 Kamerzetels.
             <br><span style="color:var(--gold);font-size:0.85rem;margin-top:6px;display:block;">Coalitie heeft <span id="majority-hint">76</span> zetels nodig!</span>
+            <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;" onclick="event.stopPropagation()">
+              <button class="btn btn-gold" id="btn-open-election" onclick="openElection()">📱 Open verkiezingen</button>
+              <div id="election-progress" style="display:none;font-size:0.85rem;color:var(--text-dim);text-align:center;">
+                <span id="election-count">0</span> / <span id="election-total">10</span> stemmen ontvangen
+              </div>
+              <button class="btn" id="btn-close-election" style="display:none;background:rgba(76,175,80,0.15);border:1px solid #4caf50;color:#4caf50;" onclick="closeElection()">✓ Sluit &amp; verwerk stemmen</button>
+            </div>
           </div>
         </div>
       </div>
@@ -2539,6 +2546,101 @@ function startVoteSubscription() {
     })
     .subscribe();
 }
+
+// ── ELECTION ──────────────────────────────────────────────────
+let _electionPollInterval = null;
+
+async function openElection() {
+  const active = getActiveParties();
+  const numPlayers = active.length;
+  const base = Math.floor(150 / numPlayers);
+  const remainder = 150 % numPlayers;
+  const sorted = [...active.map(p => p.id)].sort();
+
+  await supabaseClient.from('game_sessions').upsert({
+    game_id:       state.gameId,
+    vote_open:     true,
+    vote_topic:    'VERKIEZING',
+    vote_label:    'Verkiezingen',
+    phase:         'r1',
+    active_parties: sorted,
+  }, { onConflict: 'game_id' });
+
+  // Update UI
+  const btnOpen = document.getElementById('btn-open-election');
+  if (btnOpen) { btnOpen.textContent = '⏳ Verkiezingen zijn open…'; btnOpen.disabled = true; }
+  const progress = document.getElementById('election-progress');
+  if (progress) progress.style.display = 'block';
+  const btnClose = document.getElementById('btn-close-election');
+  if (btnClose) btnClose.style.display = 'block';
+  const totalEl = document.getElementById('election-total');
+  if (totalEl) totalEl.textContent = numPlayers;
+
+  const hint = `${base}${remainder > 0 ? '–' + (base + 1) : ''}`;
+  document.getElementById('chips-hint-r1').textContent = hint;
+
+  await refreshElectionCounter();
+  _electionPollInterval = setInterval(refreshElectionCounter, 3000);
+  notify(`📱 Verkiezingen geopend — ${numPlayers} spelers kunnen nu stemmen`);
+}
+
+async function refreshElectionCounter() {
+  if (!state.gameId) return;
+  const { data } = await supabaseClient.from('player_votes')
+    .select('party_id')
+    .eq('game_id', state.gameId)
+    .eq('vote_topic', 'VERKIEZING');
+  const unique = new Set((data || []).map(r => r.party_id)).size;
+  const countEl = document.getElementById('election-count');
+  if (countEl) countEl.textContent = unique;
+}
+
+async function closeElection() {
+  clearInterval(_electionPollInterval);
+  _electionPollInterval = null;
+
+  await supabaseClient.from('game_sessions')
+    .update({ vote_open: false })
+    .eq('game_id', state.gameId);
+
+  const btnOpen = document.getElementById('btn-open-election');
+  if (btnOpen) { btnOpen.textContent = '📱 Open verkiezingen'; btnOpen.disabled = false; }
+  const btnClose = document.getElementById('btn-close-election');
+  if (btnClose) btnClose.style.display = 'none';
+
+  await tallyElection();
+}
+
+async function tallyElection() {
+  const { data } = await supabaseClient.from('player_votes')
+    .select('party_id, choice')
+    .eq('game_id', state.gameId)
+    .eq('vote_topic', 'VERKIEZING');
+
+  if (!data || data.length === 0) {
+    notify('⚠ Geen stemmen ontvangen — zetels niet gewijzigd');
+    return;
+  }
+
+  const active = getActiveParties();
+  const newSeats = {};
+  active.forEach(p => { newSeats[p.id] = 0; });
+
+  data.forEach(row => {
+    let dist;
+    try { dist = JSON.parse(row.choice); } catch { return; }
+    Object.entries(dist).forEach(([id, seats]) => {
+      if (id in newSeats) newSeats[id] += Number(seats) || 0;
+    });
+  });
+
+  Object.assign(state.seats, newSeats);
+  saveState();
+  renderPartyGrid();
+  broadcast('seats', { seats: state.seats, coalition: state.coalition, parties: active });
+  notify('✓ Zetels bijgewerkt op basis van verkiezingsuitslag');
+}
+// ──────────────────────────────────────────────────────────────
 
 function showPlayerQR(partyId) {
   const base = window.location.href.replace(/index\.html.*$/, '').replace(/[^/]*\.html.*$/, '');

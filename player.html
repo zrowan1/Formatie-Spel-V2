@@ -236,6 +236,127 @@
     }
     .vote-confirmation.visible { display: block; }
 
+    /* ── ELECTION OVERLAY ── */
+    .election-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10,22,40,0.97);
+      z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 20px;
+      overflow-y: auto;
+    }
+    .election-overlay.active { display: flex; }
+    .election-overlay-badge {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      color: var(--gold);
+      letter-spacing: 0.12em;
+      margin-bottom: 10px;
+      margin-top: 8px;
+    }
+    .election-overlay-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--cream);
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .election-overlay-sub {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .election-counter {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.1rem;
+      color: var(--gold);
+      margin-bottom: 18px;
+      text-align: center;
+    }
+    .election-counter.zero { color: #4caf50; }
+    .election-parties {
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .election-party-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+    .election-party-name {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.95rem;
+      color: var(--cream);
+      flex: 1;
+    }
+    .election-party-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .election-adj-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(201,168,76,0.4);
+      border-radius: 6px;
+      background: rgba(201,168,76,0.1);
+      color: var(--gold);
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .election-adj-btn:active { background: rgba(201,168,76,0.25); }
+    .election-adj-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+    .election-party-count {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.1rem;
+      color: var(--cream);
+      min-width: 24px;
+      text-align: center;
+    }
+    .election-submit-btn {
+      width: 100%;
+      max-width: 380px;
+      padding: 18px;
+      border: none;
+      border-radius: 10px;
+      background: var(--gold);
+      color: var(--navy);
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .election-submit-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .election-confirmation {
+      display: none;
+      margin-top: 20px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: var(--gold);
+      text-align: center;
+    }
+    .election-confirmation.visible { display: block; }
+
     /* ── ERROR / LOADING ── */
     .error-screen {
       display: flex;
@@ -281,6 +402,19 @@
       <button class="vote-btn tegen" id="btn-tegen" onclick="castVote('tegen')">TEGEN</button>
     </div>
     <div class="vote-confirmation" id="vote-confirmation"></div>
+  </div>
+
+  <!-- ELECTION OVERLAY -->
+  <div class="election-overlay" id="election-overlay">
+    <div class="election-overlay-badge">🗳 VERKIEZINGEN</div>
+    <div class="election-overlay-title">Verdeel jouw stemfiches</div>
+    <div class="election-overlay-sub" id="election-overlay-sub"></div>
+    <div class="election-counter" id="election-counter"></div>
+    <div class="election-parties" id="election-parties"></div>
+    <button class="election-submit-btn" id="election-submit-btn" disabled onclick="submitElection()">
+      Stem uitbrengen
+    </button>
+    <div class="election-confirmation" id="election-confirmation"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -517,6 +651,111 @@
     document.getElementById('vote-confirmation').classList.remove('visible');
   }
 
+  // ── ELECTION OVERLAY ─────────────────────────────────────────
+  let electionDistribution = {};
+  let electionMySeats = 0;
+  let electionOtherParties = [];
+
+  function updateElectionCounter() {
+    const used = Object.values(electionDistribution).reduce((a, b) => a + b, 0);
+    const left = electionMySeats - used;
+    const counter = document.getElementById('election-counter');
+    if (!counter) return;
+    counter.textContent = left === 0 ? '✓ Alle stemfiches verdeeld' : `Nog ${left} te verdelen`;
+    counter.className = 'election-counter' + (left === 0 ? ' zero' : '');
+    const alreadySubmitted = sessionStorage.getItem('submitted_VERKIEZING');
+    document.getElementById('election-submit-btn').disabled = left !== 0 || !!alreadySubmitted;
+    electionOtherParties.forEach(id => {
+      const minBtn = document.getElementById(`elec-min-${id}`);
+      const plusBtn = document.getElementById(`elec-plus-${id}`);
+      if (minBtn) minBtn.disabled = electionDistribution[id] <= 0;
+      if (plusBtn) plusBtn.disabled = left <= 0;
+    });
+  }
+
+  function adjustElectionVote(id, delta) {
+    electionDistribution[id] = Math.max(0, (electionDistribution[id] || 0) + delta);
+    document.getElementById(`elec-count-${id}`).textContent = electionDistribution[id];
+    updateElectionCounter();
+  }
+
+  function showElectionOverlay(session) {
+    const activeParties = session.active_parties || PARTIES.map(p => p.id);
+    const sorted = [...activeParties].sort();
+    const base = Math.floor(150 / sorted.length);
+    const remainder = 150 % sorted.length;
+    electionMySeats = sorted.indexOf(partyId) < remainder ? base + 1 : base;
+    electionOtherParties = sorted.filter(id => id !== partyId);
+
+    electionDistribution = {};
+    electionOtherParties.forEach(id => { electionDistribution[id] = 0; });
+
+    document.getElementById('election-overlay-sub').textContent =
+      `Jij speelt ${partyId} — je hebt ${electionMySeats} stemfiches te verdelen`;
+
+    const partiesEl = document.getElementById('election-parties');
+    partiesEl.innerHTML = '';
+    electionOtherParties.forEach(id => {
+      const party = PARTIES.find(p => p.id === id);
+      const name = party ? `${party.id} — ${party.full}` : id;
+      const row = document.createElement('div');
+      row.className = 'election-party-row';
+      row.innerHTML = `
+        <span class="election-party-name">${name}</span>
+        <div class="election-party-controls">
+          <button class="election-adj-btn" id="elec-min-${id}" disabled
+            onclick="adjustElectionVote('${id}', -1)">−</button>
+          <span class="election-party-count" id="elec-count-${id}">0</span>
+          <button class="election-adj-btn" id="elec-plus-${id}"
+            onclick="adjustElectionVote('${id}', 1)">+</button>
+        </div>`;
+      partiesEl.appendChild(row);
+    });
+
+    const alreadySubmitted = sessionStorage.getItem('submitted_VERKIEZING');
+    if (alreadySubmitted) {
+      const conf = document.getElementById('election-confirmation');
+      conf.textContent = '✓ Jouw stem is uitgebracht';
+      conf.classList.add('visible');
+    } else {
+      document.getElementById('election-confirmation').classList.remove('visible');
+    }
+
+    updateElectionCounter();
+    document.getElementById('election-overlay').classList.add('active');
+  }
+
+  function hideElectionOverlay() {
+    document.getElementById('election-overlay').classList.remove('active');
+    document.getElementById('election-confirmation').classList.remove('visible');
+  }
+
+  async function submitElection() {
+    const btn = document.getElementById('election-submit-btn');
+    if (btn.disabled) return;
+    if (sessionStorage.getItem('submitted_VERKIEZING')) return;
+    btn.disabled = true;
+
+    const { error } = await sb.from('player_votes').upsert({
+      game_id:    gameId,
+      party_id:   partyId,
+      vote_topic: 'VERKIEZING',
+      choice:     JSON.stringify(electionDistribution),
+    }, { onConflict: 'game_id,party_id,vote_topic' });
+
+    if (error) {
+      console.error('Supabase election submit error:', error.code, error.message, error.details);
+      btn.disabled = false;
+      alert(`Fout bij indienen: ${error.message || 'Probeer opnieuw.'}`);
+      return;
+    }
+
+    sessionStorage.setItem('submitted_VERKIEZING', '1');
+    const conf = document.getElementById('election-confirmation');
+    conf.textContent = '✓ Jouw stem is uitgebracht';
+    conf.classList.add('visible');
+  }
+
   // ── CAST VOTE ────────────────────────────────────────────────
   async function castVote(choice) {
     const topic = currentVoteTopic;
@@ -526,18 +765,18 @@
     document.getElementById('btn-voor').disabled  = true;
     document.getElementById('btn-tegen').disabled = true;
 
-    const { error } = await sb.from('player_votes').insert({
+    const { error } = await sb.from('player_votes').upsert({
       game_id:      gameId,
       party_id:     partyId,
       vote_topic:   topic,
       choice:       choice,
-    });
+    }, { onConflict: 'game_id,party_id,vote_topic' });
 
     if (error) {
-      // Re-enable on failure
+      console.error('Supabase vote error:', error.code, error.message, error.details);
       document.getElementById('btn-voor').disabled  = false;
       document.getElementById('btn-tegen').disabled = false;
-      alert('Fout bij stemmen. Probeer opnieuw.');
+      alert(`Fout bij stemmen: ${error.message || 'Probeer opnieuw.'}`);
       return;
     }
 
@@ -550,10 +789,15 @@
   // ── SESSION HANDLER ──────────────────────────────────────────
   function updateFromSession(session) {
     updateStatusBar(session.vote_open, session.vote_label);
-    if (session.vote_open && session.vote_topic) {
+    if (session.vote_open && session.vote_topic === 'VERKIEZING') {
+      hideVoteOverlay();
+      showElectionOverlay(session);
+    } else if (session.vote_open && session.vote_topic) {
+      hideElectionOverlay();
       showVoteOverlay(session.vote_topic, session.vote_label);
     } else {
       hideVoteOverlay();
+      hideElectionOverlay();
     }
   }
 
