@@ -27,6 +27,66 @@ De spelleider beheert alles op de laptop. Wat verzonden wordt verschijnt automat
 
 > ⚠️ Beide vensters moeten in **dezelfde browser op dezelfde computer** open staan — ze communiceren via `localStorage`.
 
+## Localhost tutorial
+
+Wil je de app via een lokale server draaien — handig als je fonts offline wilt laden, of voor ontwikkeling — gebruik dan één van de opties hieronder.
+
+### Optie 1: Python (geen installatie nodig)
+
+Python is standaard aanwezig op macOS en Linux. Op Windows kun je het downloaden via [python.org](https://python.org).
+
+```bash
+# Navigeer naar de projectmap
+cd pad/naar/formatie
+
+# Start de server
+python3 -m http.server 8080
+```
+
+Open daarna:
+- **Informateur-paneel**: `http://localhost:8080/index.html`
+- **TV-scherm**: `http://localhost:8080/tv.html`
+
+Stop de server met `Ctrl+C`.
+
+### Optie 2: Node.js / npx (geen installatie nodig als Node al aanwezig is)
+
+```bash
+# Navigeer naar de projectmap
+cd pad/naar/formatie
+
+# Start de server (downloadt 'serve' automatisch, eenmalig)
+npx serve .
+```
+
+Open daarna de URLs die in de terminal verschijnen (standaard poort 3000).
+
+### Optie 3: VS Code Live Server
+
+Als je VS Code gebruikt:
+
+1. Installeer de extensie **Live Server** (Ritwick Dey)
+2. Rechtermuisknop op `index.html` → **Open with Live Server**
+3. Navigeer handmatig naar `tv.html` in een ander venster
+
+### Beide schermen op dezelfde machine houden
+
+Ongeacht welke methode je gebruikt: het TV-scherm en het informateur-paneel moeten in **dezelfde browser op dezelfde computer** draaien. Ze communiceren via `localStorage`, wat niet werkt tussen verschillende apparaten of browsers.
+
+Wil je de app echt op twee aparte apparaten draaien (bijv. laptop + smart TV), dan is een aanpassing nodig — zie de sectie [Meerdere apparaten](#meerdere-apparaten) hieronder.
+
+### Meerdere apparaten (geavanceerd)
+
+`localStorage` werkt alleen binnen dezelfde browser. Voor een echte multi-device setup heb je een alternatief nodig:
+
+| Optie | Complexiteit | Wat je nodig hebt |
+|---|---|---|
+| **BroadcastChannel API** | Laag | Werkt al in moderne browsers, alleen voor meerdere tabs/vensters op dezelfde machine |
+| **WebSockets** | Gemiddeld | Node.js server, bijv. met `ws` of `socket.io` |
+| **PartyKit** | Laag | Gratis hosted service, minimale code-aanpassing |
+
+Voor een gewone spellenavond op één machine is dit niet nodig.
+
 ## Features
 
 ### Informateur-paneel (`index.html`)
