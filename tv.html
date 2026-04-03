@@ -1938,84 +1938,10 @@
   </div>
 </div>
 
+<script src="config.js"></script>
+<script src="data.js"></script>
 <script>
-const PARTIES = [
-  { id: 'PPP', name: 'PPP', full: 'Partij voor Plant en Planeet' },
-  { id: 'FBL', name: 'FBL', full: 'Front voor Betaalbaar Luieren' },
-  { id: 'KCV', name: 'KCV', full: 'Kunst, Cultuur en Vlaai' },
-  { id: 'WIFI', name: 'WIFI', full: 'Werkelijk Innovatief Fantastisch Internet' },
-  { id: 'DAM', name: 'DAM', full: 'De Absolute Middenpartij' },
-  { id: 'VBB', name: 'VBB', full: 'Verbond voor Bitterballen en Borrel' },
-  { id: 'KKB', name: 'KKB', full: 'De Koninklijke Kaasbeweging' },
-  { id: 'DDP', name: 'DDP', full: 'De Dikke Portemonnee' },
-  { id: 'FRR', name: 'FRR', full: 'Front voor Rust, Regels en Regelmaat' },
-  { id: 'PAN', name: 'PAN', full: 'Partij Absoluut Niks' },
-  { id: 'OMA', name: 'OMA', full: 'Ouderenzorg, Memoires en Appeltaart' },
-  { id: 'BNB', name: 'BNB', full: 'Boer en Nederlandsch Boerenverstand' },
-  { id: 'WOK', name: 'WOK', full: 'Wonen of Kraken' },
-  { id: 'KGW', name: 'KGW', full: 'Kerk, Gezin en Waarden' },
-  { id: 'SVB', name: 'SVB', full: 'Sportief Verbond voor Beweging' },
-];
-
-const PARTY_LEADERS = {
-  PPP:  'Bloem Windmolen-de Vries',
-  FBL:  'Sjaak van de Hangmat',
-  KCV:  'Floris-Jan van het Podium',
-  WIFI: 'Byte van Dijkstra',
-  DAM:  'Jan-Willem Gemiddeld',
-  VBB:  'Henk Krokansen',
-  KKB:  'Gouda van Leerdammer',
-  DDP:  'Maximiliansen van Cashflow III',
-  FRR:  'Gerrit Klokslag',
-  PAN:  'Nihil "Nelis" van Niansen',
-  OMA:  'Tante Riet van de Rolstoel',
-  BNB:  'Kees van den Trekker',
-  WOK:  'Vera van de Wachtlijst',
-  KGW:  'Dominee Adriaan van het Kruispad',
-  SVB:  'Duco Spierenboer-Hardloper',
-};
-
-const PARTY_QUIRKS = {
-  PPP:  'Mag het woord "economie" niet zeggen → zegt "eco-harmonie" + boom-knuffel-gebaar',
-  FBL:  'Gaapt demonstratief, stelt constant voor om pauze te nemen',
-  KCV:  'Citeert steeds verzonnen dichters en filosofen',
-  WIFI: 'Vervangt alles door Engelse tech-termen ("coalition-API updaten")',
-  DAM:  'Kan nooit ergens definitief voor of tegen zijn, maakt zinnen nooit af',
-  VBB:  'Onderbouwt elk argument met een vergelijking met eten',
-  KKB:  'Relateert werkelijk alles aan kaas',
-  DDP:  'Noemt alles een "investering" of "groeikans"',
-  FRR:  'Houdt iedereen streng aan de tijd, kijkt constant op horloge',
-  PAN:  'Is het automatisch oneens met het laatste wat iemand zei',
-  OMA:  'Vergeet halverwege wat ze wilde zeggen en vertelt een irrelevant verhaal over 1987',
-  BNB:  'Elke politieke stelling "bewijst" hij met een anekdote over zijn koe Betsie',
-  WOK:  'Elke zin eindigt met "...en mijn wachtlijst staat al op jaar zeven"',
-  KGW:  'Citeert bijbelteksten die totaal niet van toepassing zijn, volkomen serieus',
-  SVB:  'Elk debatpunt begint met "als in topsport..." en eindigt met aanmoedigend "kom op team!"',
-};
-
-const PARTY_CROWN_JEWELS = {
-  PPP:  'Vleesvrije Werkweek',
-  FBL:  '3-daagse werkweek',
-  KCV:  'Nationale Vlaaidag als officiële feestdag',
-  WIFI: 'WiFi als grondrecht',
-  DAM:  'Werkgroep over het woord "draagvlak"',
-  VBB:  'BTW op snacks naar 0%',
-  KKB:  'Ministerie van Zuivel',
-  DDP:  'Belastingverlaging',
-  FRR:  'De avondklok',
-  PAN:  'Minimaal één wet afschaffen',
-  OMA:  'Pensioenleeftijd terug naar 60 + gratis stamppot in elk verzorgingstehuis',
-  BNB:  'Alle stikstofregels afgeschaft',
-  WOK:  'Maximale huurprijs €400 per maand',
-  KGW:  'Zondag als verplichte nationale rustdag',
-  SVB:  'Verplicht gym-uur per werkdag voor alle ambtenaren',
-};
-
-const PARTY_DEALBREAKERS = {
-  PPP: 'KKB', FBL: 'DDP', KCV: 'PAN', WIFI: 'FRR',
-  DAM: null,   VBB: 'PPP', KKB: 'PPP', DDP: 'FBL', FRR: 'PAN', PAN: 'FRR',
-  OMA: 'WIFI', BNB: 'PPP', WOK: 'DDP', KGW: 'FBL', SVB: 'FBL',
-};
+// PARTIES wordt geladen vanuit data.js
 
 // Dynamische partijenlijst — wordt ingesteld via 'setup' event van de master
 let activeParties = PARTIES.slice();
@@ -2034,15 +1960,6 @@ let totalSeatsCount = 150;
     }
   } catch(e) {}
 })();
-
-const PHASE_LABELS = {
-  prep: 'Voorbereiding',
-  r1: 'Ronde 1 — Campagne',
-  r2: 'Ronde 2 — Formatie',
-  r3: 'Ronde 3 — Regeerperiode',
-  r4: 'Ronde 4 — Kabinetscrisis',
-  score: 'Eindstand',
-};
 
 function showView(id) {
   document.querySelectorAll('.tv-view').forEach(v => v.classList.remove('active'));

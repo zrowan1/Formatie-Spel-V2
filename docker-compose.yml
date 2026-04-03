@@ -1,12 +1,98 @@
-version: '3.8'
+# ============================================================
+# DOCKER COMPOSE - De Formatie App
+# ============================================================
+# 
+# USAGE:
+#   sudo docker compose up -d        # Start de app
+#   sudo docker compose down         # Stop de app
+#   sudo docker compose logs -f      # Bekijk logs
+#
+# MET DOMEIN (SSL):
+#   1. Zet je domein in het .env bestand
+#   2. Uncomment de nginx-proxy en letsencrypt services
+#   3. Voeg VIRTUAL_HOST en LETSENCRYPT_HOST toe aan de web service
+# ============================================================
 
 services:
+  # --- MAIN WEB SERVER ---
   web:
     image: nginx:alpine
     container_name: formatie_nginx
     restart: unless-stopped
     ports:
-      - "8081:80"
+      # HTTP poort - LET OP: 8080 is bezet door freqtrade!
+      # Standaard 8081, pas aan in .env als je een andere poort wilt
+      - "${HTTP_PORT:-8081}:80"
+      # HTTPS poort (TEMP - voor testen)
+      - "${HTTPS_PORT:-443}:443"
     volumes:
-      # Koppel de huidige map (waar index.html in staat) aan de Nginx html-map
+      # Serve de static files
       - ./:/usr/share/nginx/html:ro
+      # Nginx configuratie (voor rewrite rules, compression, etc.)
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # SSL certificaten (voor HTTPS test)
+      - ./ssl.crt:/etc/nginx/ssl/ssl.crt:ro
+      - ./ssl.key:/etc/nginx/ssl/ssl.key:ro
+    environment:
+      # Voor nginx-proxy (indien gebruikt)
+      - VIRTUAL_HOST=${DOMAIN:-}
+      - LETSENCRYPT_HOST=${DOMAIN:-}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-}
+    networks:
+      - formatie_network
+    labels:
+      # Labels voor nginx-proxy automatische detectie
+      - "traefik.enable=false"
+
+  # --- REVERSE PROXY MET SSL (OPTIONEEL) ---
+  # Uncomment deze sectie als je een domeinnaam hebt en SSL wilt
+  # 
+  # nginx-proxy:
+  #   image: nginxproxy/nginx-proxy:alpine
+  #   container_name: formatie_proxy
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - /var/run/docker.sock:/tmp/docker.sock:ro
+  #     - nginx-certs:/etc/nginx/certs
+  #     - nginx-vhost:/etc/nginx/vhost.d
+  #     - nginx-html:/usr/share/nginx/html
+  #   networks:
+  #     - formatie_network
+  #   labels:
+  #     - "com.github.nginx-proxy.nginx"
+
+  # --- LET'S ENCRYPT COMPANION (OPTIONEEL) ---
+  # Werkt samen met nginx-proxy voor automatische SSL certificaten
+  #
+  # letsencrypt:
+  #   image: nginxproxy/acme-companion
+  #   container_name: formatie_letsencrypt
+  #   restart: unless-stopped
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - nginx-certs:/etc/nginx/certs
+  #     - nginx-vhost:/etc/nginx/vhost.d
+  #     - nginx-html:/usr/share/nginx/html
+  #     - acme-data:/etc/acme.sh
+  #   environment:
+  #     - DEFAULT_EMAIL=${LETSENCRYPT_EMAIL:-}
+  #     - NGINX_PROXY_CONTAINER=formatie_proxy
+  #   depends_on:
+  #     - nginx-proxy
+  #   networks:
+  #     - formatie_network
+
+# --- NETWORKS ---
+networks:
+  formatie_network:
+    driver: bridge
+
+# --- VOLUMES (voor SSL certificaten) ---
+volumes:
+  nginx-certs:
+  nginx-vhost:
+  nginx-html:
+  acme-data:

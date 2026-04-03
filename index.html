@@ -1753,9 +1753,16 @@
 <div class="notification" id="notification"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js?v=2"></script>
+<script src="data.js?v=2"></script>
 <script>
+// DEBUG: Forceer frisse start als ?reset in URL
+if (window.location.search.includes('reset')) {
+  console.log('RESET: Clearing localStorage');
+  localStorage.clear();
+}
 // ============================================================
-// DATA
+// SPEL SPECIFIEKE DATA (alleen gebruikt in dit bestand)
 // ============================================================
 
 const STELLINGEN = [
@@ -1809,24 +1816,6 @@ const STELLINGEN = [
   { text: "Politieke partijen worden verboden; individuele kandidaten lopen.", parties: ['PAN','DAM'] },
 ];
 
-const PARTIES = [
-  { id: 'PPP', name: 'PPP', full: 'Partij voor Plant en Planeet', seats: 15 },
-  { id: 'FBL', name: 'FBL', full: 'Front voor Betaalbaar Luieren', seats: 15 },
-  { id: 'KCV', name: 'KCV', full: 'Kunst, Cultuur en Vlaai', seats: 15 },
-  { id: 'WIFI', name: 'WIFI', full: 'Werkelijk Innovatief Fantastisch Internet', seats: 15 },
-  { id: 'DAM', name: 'DAM', full: 'De Absolute Middenpartij', seats: 15 },
-  { id: 'VBB', name: 'VBB', full: 'Verbond voor Bitterballen en Borrel', seats: 15 },
-  { id: 'KKB', name: 'KKB', full: 'De Koninklijke Kaasbeweging', seats: 15 },
-  { id: 'DDP', name: 'DDP', full: 'De Dikke Portemonnee', seats: 15 },
-  { id: 'FRR', name: 'FRR', full: 'Front voor Rust, Regels en Regelmaat', seats: 15 },
-  { id: 'PAN', name: 'PAN', full: 'Partij Absoluut Niks', seats: 15 },
-  { id: 'OMA', name: 'OMA', full: 'Ouderenzorg, Memoires en Appeltaart', seats: 15 },
-  { id: 'BNB', name: 'BNB', full: 'Boer en Nederlandsch Boerenverstand', seats: 15 },
-  { id: 'WOK', name: 'WOK', full: 'Wonen of Kraken', seats: 15 },
-  { id: 'KGW', name: 'KGW', full: 'Kerk, Gezin en Waarden', seats: 15 },
-  { id: 'SVB', name: 'SVB', full: 'Sportief Verbond voor Beweging', seats: 15 },
-];
-
 // ============================================================
 // DYNAMISCHE PARTIJSELECTIE
 // ============================================================
@@ -1840,102 +1829,6 @@ function getMajorityThreshold() {
 function getTotalSeats() {
   return getActiveParties().reduce((s, p) => s + (state.seats[p.id] || 15), 0);
 }
-
-const PARTY_LEADERS = {
-  PPP:  'Bloem Windmolen-de Vries',
-  FBL:  'Sjaak van de Hangmat',
-  KCV:  'Floris-Jan van het Podium',
-  WIFI: 'Byte van Dijkstra',
-  DAM:  'Jan-Willem Gemiddeld',
-  VBB:  'Henk Krokansen',
-  KKB:  'Gouda van Leerdammer',
-  DDP:  'Maximiliansen van Cashflow III',
-  FRR:  'Gerrit Klokslag',
-  PAN:  'Nihil "Nelis" van Niansen',
-  OMA:  'Tante Riet van de Rolstoel',
-  BNB:  'Kees van den Trekker',
-  WOK:  'Vera van de Wachtlijst',
-  KGW:  'Dominee Adriaan van het Kruispad',
-  SVB:  'Duco Spierenboer-Hardloper',
-};
-
-const PARTY_QUIRKS = {
-  PPP:  'Mag het woord "economie" niet zeggen → zegt "eco-harmonie" + boom-knuffel-gebaar',
-  FBL:  'Gaapt demonstratief, stelt constant voor om pauze te nemen',
-  KCV:  'Citeert steeds verzonnen dichters en filosofen',
-  WIFI: 'Vervangt alles door Engelse tech-termen ("coalition-API updaten")',
-  DAM:  'Kan nooit ergens definitief voor of tegen zijn, maakt zinnen nooit af',
-  VBB:  'Onderbouwt elk argument met een vergelijking met eten',
-  KKB:  'Relateert werkelijk alles aan kaas',
-  DDP:  'Noemt alles een "investering" of "groeikans"',
-  FRR:  'Houdt iedereen streng aan de tijd, kijkt constant op horloge',
-  PAN:  'Is het automatisch oneens met het laatste wat iemand zei',
-  OMA:  'Vergeet halverwege wat ze wilde zeggen en vertelt een irrelevant verhaal over 1987',
-  BNB:  'Elke politieke stelling "bewijst" hij met een anekdote over zijn koe Betsie',
-  WOK:  'Elke zin eindigt met "...en mijn wachtlijst staat al op jaar zeven"',
-  KGW:  'Citeert bijbelteksten die totaal niet van toepassing zijn, volkomen serieus',
-  SVB:  'Elk debatpunt begint met "als in topsport..." en eindigt met aanmoedigend "kom op team!"',
-};
-
-const PARTY_CROWN_JEWELS = {
-  PPP:  'Vleesvrije Werkweek',
-  FBL:  '3-daagse werkweek',
-  KCV:  'Nationale Vlaaidag als officiële feestdag',
-  WIFI: 'WiFi als grondrecht',
-  DAM:  'Werkgroep over het woord "draagvlak"',
-  VBB:  'BTW op snacks naar 0%',
-  KKB:  'Ministerie van Zuivel',
-  DDP:  'Belastingverlaging',
-  FRR:  'De avondklok',
-  PAN:  'Minimaal één wet afschaffen',
-  OMA:  'Pensioenleeftijd terug naar 60 + gratis stamppot in elk verzorgingstehuis',
-  BNB:  'Alle stikstofregels afgeschaft',
-  WOK:  'Maximale huurprijs €400 per maand',
-  KGW:  'Zondag als verplichte nationale rustdag',
-  SVB:  'Verplicht gym-uur per werkdag voor alle ambtenaren',
-};
-
-const PARTY_INTROS = {
-  PPP:  'De enige partij die de planeet boven de portemonnee stelt. Bloem Windmolen-de Vries strijdt voor een vleesvrije werkweek en een groenere toekomst — ook als dat "eco-harmonisch" klinkt. Kroonjuweel: de Vleesvrije Werkweek.',
-  FBL:  'Rust is een recht, geen luxe. Sjaak van de Hangmat pleit voor de 3-daagse werkweek en betaalbaar niksdoen voor iedereen. Eventueel na de pauze. Kroonjuweel: de 3-daagse werkweek.',
-  KCV:  'Schoonheid, cultuur en gebak als staatszaak. Floris-Jan van het Podium wil de Nationale Vlaaidag invoeren als officiële feestdag. De filosofen zijn het erover eens — ook al bestaan ze niet. Kroonjuweel: de Nationale Vlaaidag.',
-  WIFI: 'Internet is een grondrecht. Byte van Dijkstra wil WiFi voor iedereen en innovatie als nationaal speerpunt. De coalition-API moet worden geüpdatet. Kroonjuweel: WiFi als grondrecht.',
-  DAM:  'Niemand blij, niemand boos. Jan-Willem Gemiddeld zoekt draagvlak, vormt werkgroepen en houdt zijn opties open. Definitief besluiten doet hij misschien... later. Kroonjuweel: meer draagvlak en een werkgroep.',
-  VBB:  'Gezelligheid is beleid. Henk Krokansen wil de BTW op snacks naar 0% — want een land dat samenkomt bij bitterballen, formeert beter. Kroonjuweel: BTW snacks naar 0%.',
-  KKB:  'Nederland is kaas, kaas is Nederland. Gouda van Leerdammer eist een Ministerie van Zuivel en beschermt de Hollandse identiteit met hart en ziel. Kroonjuweel: het Ministerie van Zuivel.',
-  DDP:  'Minder belasting, meer groei. Maximiliansen van Cashflow III ziet in elke uitgave een investering en in elke bezuiniging een groeikans. De markt lost het op. Kroonjuweel: belastingverlaging.',
-  FRR:  'Orde, structuur en een avondklok. Gerrit Klokslag houdt iedereen aan de tijd en eist concrete regels in elk akkoord. Vergaderen zonder agenda is bij FRR verboden. Kroonjuweel: de avondklok.',
-  PAN:  'Minder is meer. Nihil "Nelis" van Niansen wil wetten schrappen, regels afschaffen en de overheid terugdringen. Hij is het trouwens niet eens met wat net werd gezegd. Kroonjuweel: minimaal één wet afschaffen.',
-  OMA:  'Vroeger was alles beter, en dat bewijzen wij met cijfers. Tante Riet van de Rolstoel strijdt voor een eerlijk pensioen en gratis stamppot in elk verzorgingstehuis. Ze had hier nog iets over te zeggen, maar... waar was ze gebleven? O ja. Kroonjuweel: pensioenleeftijd naar 60.',
-  BNB:  'Gewoon boerenverstand, dat is alles wat dit land nodig heeft. Kees van den Trekker laat zijn koe Betsie zien hoe beleid werkt en eist dat alle stikstofregels per direct de prullenbak in gaan. Kroonjuweel: afschaffen alle stikstofregels.',
-  WOK:  'Een dak boven je hoofd is geen luxe, het is een recht. Vera van de Wachtlijst staat zelf op jaar zeven van de wachtlijst en vecht voor een maximale huurprijs van €400. En haar wachtlijst staat al op jaar zeven. Kroonjuweel: maximale huurprijs €400.',
-  KGW:  'Het gezin is de hoeksteen van de samenleving, en de zondag is heilig. Dominee Adriaan van het Kruispad baseert elk standpunt op een passende bijbeltekst — hoe minder van toepassing, hoe meer overtuiging. Kroonjuweel: verplichte nationale rustdag op zondag.',
-  SVB:  'Een gezond kabinet begint met een gezond lichaam. Duco Spierenboer-Hardloper wil een verplicht gym-uur voor alle ambtenaren en behandelt elke coalitieonderhandeling als een teamwedstrijd. Kom op team! Kroonjuweel: verplicht gym-uur voor ambtenaren.',
-};
-
-const PARTY_DEALBREAKERS = {
-  PPP: 'KKB', FBL: 'DDP', KCV: 'PAN', WIFI: 'FRR',
-  DAM: null,   VBB: 'PPP', KKB: 'PPP', DDP: 'FBL', FRR: 'PAN', PAN: 'FRR',
-  OMA: 'WIFI', BNB: 'PPP', WOK: 'DDP', KGW: 'FBL', SVB: 'FBL',
-};
-
-const PARTY_BONUSES = {
-  PPP:  'Wordt Minister van Klimaat & Natuur (+3)',
-  FBL:  'Woord "vrij" of "rust" staat in de TITEL van het akkoord (+3)',
-  KCV:  'Nationale Vlaaidag wordt écht feestdag in het akkoord (+3)',
-  WIFI: 'Woord "digitaal", "innovatie" of "tech" staat in het akkoord (+3)',
-  DAM:  'In coalitie zónder dat één DAM-standpunt letterlijk in akkoord staat (+3)',
-  VBB:  'Wordt Minister van Feestelijk Beleid (+3)',
-  KKB:  'Woord "kaas" staat in de TITEL van het akkoord (+3)',
-  DDP:  'Wordt Minister van Financiën (+3)',
-  FRR:  'Minimaal 4 concrete regels/verplichtingen in het akkoord (+3)',
-  PAN:  'Kabinet is een minderheidskabinet (+3)',
-  OMA:  'Woord "pensioen" staat in de TITEL van het akkoord (+3)',
-  BNB:  'Geen enkele milieuregel in het akkoord (+3)',
-  WOK:  'Maximale huurprijs staat letterlijk in het akkoord (+3)',
-  KGW:  'Zondag als rustdag staat in het akkoord (+3)',
-  SVB:  'Woord "sport" of "gezondheid" staat in het akkoord (+3)',
-};
 
 const CRISIS_R2 = [
   { num: 1, title: 'Geheim Overleg Uitgelekt!', text: 'De Informateur wijst twee partijen aan die stiekem samen gezien zijn. Zij moeten 2 minuten samen staan en hun "geheime plan" verzinnen en presenteren. De rest mag boe roepen.' },
@@ -2014,14 +1907,7 @@ const LAWS_POOL = [
 ];
 const LAWS = [...LAWS_POOL].sort(() => Math.random() - 0.5).slice(0, 8).map((l, i) => ({ ...l, num: i + 1 }));
 
-const AGENDA_DISTRIBUTION = {
-  6:  ['LOYALIST','LOYALIST','OPSTANDELING','OPSTANDELING','OPPORTUNIST','KINGMAKER'],
-  7:  ['LOYALIST','LOYALIST','LOYALIST','OPSTANDELING','OPSTANDELING','OPPORTUNIST','KINGMAKER'],
-  8:  ['LOYALIST','LOYALIST','LOYALIST','OPSTANDELING','OPSTANDELING','OPSTANDELING','OPPORTUNIST','KINGMAKER'],
-  9:  ['LOYALIST','LOYALIST','LOYALIST','OPSTANDELING','OPSTANDELING','OPSTANDELING','OPPORTUNIST','OPPORTUNIST','KINGMAKER'],
-  10: ['LOYALIST','LOYALIST','LOYALIST','OPSTANDELING','OPSTANDELING','OPSTANDELING','OPPORTUNIST','OPPORTUNIST','KINGMAKER','KINGMAKER'],
-};
-const AGENDA_TYPES = AGENDA_DISTRIBUTION[10]; // backwards compat
+// AGENDA_DISTRIBUTION en AGENDA_TYPES worden geladen vanuit data.js
 
 const TUTORIAL_SLIDES = [
   {
@@ -2414,6 +2300,8 @@ let state = {
   timerRunning: false,
   timerLabel: 'Klaar om te starten',
   timerDefault: 120,
+  timerStartTime: null,  // Timestamp when timer was started
+  timerRemainingAtStart: 0,  // Remaining seconds when timer was started
   players: [],
   assignments: {},
   coalitie: { titel: '', premier: '', ministeries: {}, punten: ['', '', '', '', '', ''] },
@@ -2423,12 +2311,52 @@ let state = {
   currentVoteLabel: '',
 };
 
+// State validatie functie (MOET voor state loading staan!)
+function validateState(s) {
+  if (!s || typeof s !== 'object') return false;
+  
+  // Check required fields and types
+  if (s.gameStarted !== undefined && typeof s.gameStarted !== 'boolean') return false;
+  if (s.selectedPartyIds !== undefined && !Array.isArray(s.selectedPartyIds)) return false;
+  if (s.seats !== undefined && typeof s.seats !== 'object') return false;
+  if (s.scores !== undefined && typeof s.scores !== 'object') return false;
+  if (s.gameId !== undefined && typeof s.gameId !== 'string') return false;
+  
+  // Validate party IDs if present
+  if (s.selectedPartyIds) {
+    const validIds = PARTIES.map(p => p.id);
+    for (const id of s.selectedPartyIds) {
+      if (!validIds.includes(id)) return false;
+    }
+  }
+  
+  // Validate timer values
+  if (s.timerSeconds !== undefined && (typeof s.timerSeconds !== 'number' || s.timerSeconds < 0)) return false;
+  if (s.timerDefault !== undefined && (typeof s.timerDefault !== 'number' || s.timerDefault < 0)) return false;
+  
+  return true;
+}
+
 // Load opgeslagen state (als die bestaat)
 (function() {
   try {
     const saved = localStorage.getItem('formatie_state');
-    if (saved) Object.assign(state, JSON.parse(saved));
-  } catch(e) {}
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Validate state structure
+      if (validateState(parsed)) {
+        Object.assign(state, parsed);
+      } else {
+        console.warn('Ongeldige state gevonden, reset naar defaults');
+        // Keep gameId if valid
+        if (parsed.gameId && typeof parsed.gameId === 'string') {
+          state.gameId = parsed.gameId;
+        }
+      }
+    }
+  } catch(e) {
+    console.error('Fout bij laden state:', e);
+  }
 })();
 
 // Genereer gameId als die nog niet bestaat
@@ -2469,11 +2397,69 @@ if (state.gameStarted && state.selectedPartyIds.length >= 6) {
 }
 
 // ============================================================
+// TIMER VARIABELEN (moeten voor functies staan)
+// ============================================================
+let timerInterval = null;
+let timerCurrentSeconds = 120;
+let timerDefaultSeconds = 120;
+
+// ============================================================
+// TIMER HERSTEL (na page refresh)
+// ============================================================
+function restoreTimer() {
+  // Restore timer values from state
+  timerDefaultSeconds = state.timerDefault || 120;
+  timerCurrentSeconds = state.timerSeconds || timerDefaultSeconds;
+  
+  // If timer was running, calculate remaining time
+  if (state.timerStartTime && state.timerRunning) {
+    const elapsed = Math.floor((Date.now() - state.timerStartTime) / 1000);
+    const remaining = (state.timerRemainingAtStart || timerDefaultSeconds) - elapsed;
+    
+    if (remaining > 0) {
+      timerCurrentSeconds = remaining;
+      // Auto-start the timer again
+      setTimeout(() => {
+        if (!state.timerRunning) return; // User may have paused
+        document.getElementById('timer-toggle').textContent = '⏸ Pauze';
+        timerInterval = setInterval(() => {
+          timerCurrentSeconds--;
+          updateTimerDisplay();
+          broadcast('timer', { seconds: timerCurrentSeconds, label: state.timerLabel, running: true });
+          if (timerCurrentSeconds <= 0) {
+            clearInterval(timerInterval);
+            state.timerRunning = false;
+            state.timerStartTime = null;
+            document.getElementById('timer-toggle').textContent = '▶ Start';
+            document.getElementById('timer-display').textContent = '0:00';
+            playSound('timer');
+            broadcast('timer', { seconds: 0, label: state.timerLabel, running: false, done: true });
+            saveState();
+          }
+        }, 1000);
+      }, 100);
+    } else {
+      // Timer expired while away
+      timerCurrentSeconds = 0;
+      state.timerRunning = false;
+      state.timerStartTime = null;
+    }
+  }
+  
+  updateTimerDisplay();
+}
+
+// Restore timer on page load
+restoreTimer();
+
+// ============================================================
 // STATE PERSISTENTIE
 // ============================================================
 function saveState() {
   try {
-    localStorage.setItem('formatie_state', JSON.stringify({ ...state, timerRunning: false }));
+    // Update timerSeconds to current value before saving
+    state.timerSeconds = timerCurrentSeconds;
+    localStorage.setItem('formatie_state', JSON.stringify(state));
   } catch(e) {}
 }
 window.addEventListener('beforeunload', saveState);
@@ -2488,16 +2474,23 @@ function broadcast(type, data) {
 // ============================================================
 // SUPABASE
 // ============================================================
-const SUPABASE_URL = 'https://vkfwthueozgcqvadbcfx.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrZnd0aHVlb3pnY3F2YWRiY2Z4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTUyMTgsImV4cCI6MjA4ODI5MTIxOH0.H_QIujPFl2EOhq28AIegZf_9pSTXfyEXsaJzb8WJVQs';
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 
 async function pushAgendas() {
   if (!state.gameId || !state.agendas || Object.keys(state.agendas).length === 0) return;
-  await supabaseClient.from('game_sessions').upsert({
-    game_id: state.gameId,
-    agendas: state.agendas,
-  }, { onConflict: 'game_id' });
+  try {
+    const { error } = await supabaseClient.from('game_sessions').upsert({
+      game_id: state.gameId,
+      agendas: state.agendas,
+    }, { onConflict: 'game_id' });
+    if (error) {
+      console.warn('Supabase pushAgendas error:', error);
+      notify('⚠️ Kan agendas niet synchroniseren (offline?)');
+    }
+  } catch (err) {
+    console.error('Supabase pushAgendas exception:', err);
+    notify('⚠️ Netwerkfout bij synchroniseren agendas');
+  }
 }
 
 // Push agendas op page load als spel al bezig is
@@ -2509,24 +2502,41 @@ async function openVoting(topic, label) {
   state.currentVoteTopic = topic;
   state.currentVoteLabel = label;
   saveState();
-  await supabaseClient.from('game_sessions').upsert({
-    game_id: state.gameId,
-    vote_open: true,
-    vote_topic: topic,
-    vote_label: label,
-    phase: 'r3',
-    active_parties: getActiveParties().map(p => p.id),
-  }, { onConflict: 'game_id' });
-  await refreshVoteCounter();
-  notify('📱 Stemming geopend in speler-app');
+  try {
+    const { error } = await supabaseClient.from('game_sessions').upsert({
+      game_id: state.gameId,
+      vote_open: true,
+      vote_topic: topic,
+      vote_label: label,
+      phase: 'r3',
+      active_parties: getActiveParties().map(p => p.id),
+    }, { onConflict: 'game_id' });
+    if (error) {
+      console.warn('Supabase openVoting error:', error);
+      notify('⚠️ Kan stemming niet openen: ' + error.message);
+      return;
+    }
+    await refreshVoteCounter();
+    notify('📱 Stemming geopend in speler-app');
+  } catch (err) {
+    console.error('Supabase openVoting exception:', err);
+    notify('⚠️ Netwerkfout bij openen stemming');
+  }
 }
 
 async function closeVoting() {
   state.currentVoteTopic = null;
   saveState();
-  await supabaseClient.from('game_sessions')
-    .update({ vote_open: false })
-    .eq('game_id', state.gameId);
+  try {
+    const { error } = await supabaseClient.from('game_sessions')
+      .update({ vote_open: false })
+      .eq('game_id', state.gameId);
+    if (error) {
+      console.warn('Supabase closeVoting error:', error);
+    }
+  } catch (err) {
+    console.error('Supabase closeVoting exception:', err);
+  }
   const el = document.getElementById('vote-app-counter');
   if (el) el.textContent = '';
   notify('Stemming gesloten');
@@ -2534,31 +2544,53 @@ async function closeVoting() {
 
 async function refreshVoteCounter() {
   if (!state.currentVoteTopic || !state.gameId) return;
-  const { count } = await supabaseClient.from('player_votes')
-    .select('*', { count: 'exact', head: true })
-    .eq('game_id', state.gameId)
-    .eq('vote_topic', state.currentVoteTopic);
-  const total = getActiveParties().length;
-  const el = document.getElementById('vote-app-counter');
-  if (el) el.textContent = `${count ?? 0} / ${total} gestemd via app`;
+  try {
+    const { count, error } = await supabaseClient.from('player_votes')
+      .select('*', { count: 'exact', head: true })
+      .eq('game_id', state.gameId)
+      .eq('vote_topic', state.currentVoteTopic);
+    if (error) {
+      console.warn('Supabase refreshVoteCounter error:', error);
+      return;
+    }
+    const total = getActiveParties().length;
+    const el = document.getElementById('vote-app-counter');
+    if (el) el.textContent = `${count ?? 0} / ${total} gestemd via app`;
+  } catch (err) {
+    console.error('Supabase refreshVoteCounter exception:', err);
+  }
 }
 
 function startVoteSubscription() {
-  supabaseClient.channel('player_votes_feed')
-    .on('postgres_changes', {
-      event: 'INSERT', schema: 'public', table: 'player_votes',
-      filter: `game_id=eq.${state.gameId}`
-    }, (payload) => {
-      const { party_id, choice, vote_topic } = payload.new;
-      if (vote_topic === state.currentVoteTopic) {
-        state.votes[party_id] = choice;
-        renderVoteRows();
-        updateVoteResult();
-        saveState();
-      }
-      refreshVoteCounter();
-    })
-    .subscribe();
+  try {
+    supabaseClient.channel('player_votes_feed')
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'player_votes',
+        filter: `game_id=eq.${state.gameId}`
+      }, (payload) => {
+        try {
+          const { party_id, choice, vote_topic } = payload.new;
+          if (vote_topic === state.currentVoteTopic) {
+            state.votes[party_id] = choice;
+            renderVoteRows();
+            updateVoteResult();
+            saveState();
+          }
+          refreshVoteCounter();
+        } catch (err) {
+          console.error('Error in vote subscription handler:', err);
+        }
+      })
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.warn('Vote subscription channel error');
+          notify('⚠️ Realtime verbinding verbroken (stemmen worden geladen bij refresh)');
+        }
+      });
+  } catch (err) {
+    console.error('Failed to start vote subscription:', err);
+    notify('⚠️ Kan geen realtime verbinding maken');
+  }
 }
 
 // ── ELECTION ──────────────────────────────────────────────────
@@ -2571,14 +2603,20 @@ async function openElection() {
   const remainder = 150 % numPlayers;
   const sorted = [...active.map(p => p.id)].sort();
 
-  await supabaseClient.from('game_sessions').upsert({
-    game_id:       state.gameId,
-    vote_open:     true,
-    vote_topic:    'VERKIEZING',
-    vote_label:    'Verkiezingen',
-    phase:         'r1',
-    active_parties: sorted,
-  }, { onConflict: 'game_id' });
+  try {
+    const { error } = await supabaseClient.from('game_sessions').upsert({
+      game_id:       state.gameId,
+      vote_open:     true,
+      vote_topic:    'VERKIEZING',
+      vote_label:    'Verkiezingen',
+      phase:         'r1',
+      active_parties: sorted,
+    }, { onConflict: 'game_id' });
+    if (error) {
+      console.warn('Supabase openElection error:', error);
+      notify('⚠️ Kan verkiezingen niet openen: ' + error.message);
+      return;
+    }
 
   // Update UI
   const btnOpen = document.getElementById('btn-open-election');
@@ -2593,29 +2631,48 @@ async function openElection() {
   const hint = `${base}${remainder > 0 ? '–' + (base + 1) : ''}`;
   document.getElementById('chips-hint-r1').textContent = hint;
 
-  await refreshElectionCounter();
-  _electionPollInterval = setInterval(refreshElectionCounter, 3000);
-  notify(`📱 Verkiezingen geopend — ${numPlayers} spelers kunnen nu stemmen`);
+    await refreshElectionCounter();
+    _electionPollInterval = setInterval(refreshElectionCounter, 3000);
+    notify(`📱 Verkiezingen geopend — ${numPlayers} spelers kunnen nu stemmen`);
+  } catch (err) {
+    console.error('Supabase openElection exception:', err);
+    notify('⚠️ Netwerkfout bij openen verkiezingen');
+  }
 }
 
 async function refreshElectionCounter() {
   if (!state.gameId) return;
-  const { data } = await supabaseClient.from('player_votes')
-    .select('party_id')
-    .eq('game_id', state.gameId)
-    .eq('vote_topic', 'VERKIEZING');
-  const unique = new Set((data || []).map(r => r.party_id)).size;
-  const countEl = document.getElementById('election-count');
-  if (countEl) countEl.textContent = unique;
+  try {
+    const { data, error } = await supabaseClient.from('player_votes')
+      .select('party_id')
+      .eq('game_id', state.gameId)
+      .eq('vote_topic', 'VERKIEZING');
+    if (error) {
+      console.warn('Supabase refreshElectionCounter error:', error);
+      return;
+    }
+    const unique = new Set((data || []).map(r => r.party_id)).size;
+    const countEl = document.getElementById('election-count');
+    if (countEl) countEl.textContent = unique;
+  } catch (err) {
+    console.error('Supabase refreshElectionCounter exception:', err);
+  }
 }
 
 async function closeElection() {
   clearInterval(_electionPollInterval);
   _electionPollInterval = null;
 
-  await supabaseClient.from('game_sessions')
-    .update({ vote_open: false })
-    .eq('game_id', state.gameId);
+  try {
+    const { error } = await supabaseClient.from('game_sessions')
+      .update({ vote_open: false })
+      .eq('game_id', state.gameId);
+    if (error) {
+      console.warn('Supabase closeElection error:', error);
+    }
+  } catch (err) {
+    console.error('Supabase closeElection exception:', err);
+  }
 
   const btnOpen = document.getElementById('btn-open-election');
   if (btnOpen) { btnOpen.textContent = '📱 Open verkiezingen'; btnOpen.disabled = false; }
@@ -2626,15 +2683,22 @@ async function closeElection() {
 }
 
 async function tallyElection() {
-  const { data } = await supabaseClient.from('player_votes')
-    .select('party_id, choice')
-    .eq('game_id', state.gameId)
-    .eq('vote_topic', 'VERKIEZING');
+  try {
+    const { data, error } = await supabaseClient.from('player_votes')
+      .select('party_id, choice')
+      .eq('game_id', state.gameId)
+      .eq('vote_topic', 'VERKIEZING');
+    
+    if (error) {
+      console.warn('Supabase tallyElection error:', error);
+      notify('⚠️ Fout bij ophalen verkiezingsresultaten');
+      return;
+    }
 
-  if (!data || data.length === 0) {
-    notify('⚠ Geen stemmen ontvangen — zetels niet gewijzigd');
-    return;
-  }
+    if (!data || data.length === 0) {
+      notify('⚠ Geen stemmen ontvangen — zetels niet gewijzigd');
+      return;
+    }
 
   const active = getActiveParties();
   const newSeats = {};
@@ -2648,11 +2712,15 @@ async function tallyElection() {
     });
   });
 
-  Object.assign(state.seats, newSeats);
-  saveState();
-  renderPartyGrid();
-  broadcast('seats', { seats: state.seats, coalition: state.coalition, parties: active });
-  notify('✓ Zetels bijgewerkt op basis van verkiezingsuitslag');
+    Object.assign(state.seats, newSeats);
+    saveState();
+    renderPartyGrid();
+    broadcast('seats', { seats: state.seats, coalition: state.coalition, parties: active });
+    notify('✓ Zetels bijgewerkt op basis van verkiezingsuitslag');
+  } catch (err) {
+    console.error('Supabase tallyElection exception:', err);
+    notify('⚠️ Fout bij verwerken verkiezingsresultaten');
+  }
 }
 // ──────────────────────────────────────────────────────────────
 
@@ -2946,9 +3014,54 @@ function exportAkkoord() {
 // ============================================================
 function resetGame() {
   if (!confirm('⚠️ Weet je zeker dat je het gehele spel wilt resetten?\n\nAlle scores, zetels, stemmen en voortgang worden gewist. Dit kan niet ongedaan worden gemaakt.')) return;
+  
+  // Stop timer if running
+  clearInterval(timerInterval);
+  
+  // Clear all localStorage
   localStorage.removeItem('formatie_state');
   localStorage.removeItem('formatie_event');
-  location.reload();
+  localStorage.removeItem('formatie_active_parties');
+  
+  // Reset state to defaults
+  state.selectedPartyIds = [];
+  state.gameStarted = false;
+  state.seats = {};
+  state.coalition = {};
+  state.scores = {};
+  state.votes = {};
+  state.lawResults = {};
+  state.agendas = {};
+  state.currentLaw = 1;
+  state.crisisRevealed = {};
+  state.agendaRevealed = {};
+  state.superpowersUsed = {};
+  state.superpowerLog = [];
+  state.timerSeconds = 120;
+  state.timerRunning = false;
+  state.timerLabel = 'Klaar om te starten';
+  state.timerDefault = 120;
+  state.timerStartTime = null;
+  state.timerRemainingAtStart = 0;
+  state.players = [];
+  state.assignments = {};
+  state.coalitie = { titel: '', premier: '', ministeries: {}, punten: ['', '', '', '', '', ''] };
+  state.amendementen = {};
+  state.gameId = Date.now().toString();
+  state.currentVoteTopic = null;
+  state.currentVoteLabel = '';
+  
+  // Broadcast reset to TV
+  broadcast('reset', {});
+  
+  // Show setup screen
+  document.getElementById('setup-screen').classList.remove('hidden');
+  renderSetupScreen();
+  
+  // Update UI
+  renderAll();
+  
+  notify('🔄 Spel is gereset — kies nieuwe partijen om te beginnen');
 }
 
 let exitPollParties = [];
@@ -3071,7 +3184,8 @@ function renderAkkoordForm() {
       PPP:'Bloem Windmolen-de Vries', FBL:'Sjaak van de Hangmat', KCV:'Floris-Jan van het Podium',
       WIFI:'Byte van Dijkstra', DAM:'Jan-Willem Gemiddeld', VBB:'Henk Krokansen',
       KKB:'Gouda van Leerdammer', DDP:'Maximiliansen van Cashflow III', FRR:'Gerrit Klokslag',
-      PAN:'Nihil "Nelis" van Niansen'
+      PAN:'Nihil "Nelis" van Niansen', OMA:'Tante Riet van de Rolstoel', BNB:'Kees van den Trekker',
+      WOK:'Vera van de Wachtlijst', KGW:'Dominee Adriaan van het Kruispad', SVB:'Duco Spierenboer-Hardloper'
     };
     const opt = document.createElement('option');
     opt.value = p.id;
@@ -3161,22 +3275,21 @@ function setAmendement(partyId) {
 
 function totalScore(id) {
   const s = state.scores[id];
+  if (!s) return 0;
   return (s.coalition||0) + (s.mustHave||0) + (s.bonus||0) + (s.dealbreaker||0) + (s.regeer||0) + (s.agenda||0) + (s.mp||0) + (s.amendement||0);
 }
 
 // ============================================================
-// TIMER
+// TIMER FUNCTIES
 // ============================================================
-let timerInterval = null;
-let timerCurrentSeconds = 120;
-let timerDefaultSeconds = 120;
-
 function startTimer(seconds, label) {
   clearInterval(timerInterval);
   timerDefaultSeconds = seconds;
   timerCurrentSeconds = seconds;
   state.timerLabel = label;
   state.timerRunning = false;
+  state.timerStartTime = null;
+  state.timerRemainingAtStart = seconds;
   updateTimerDisplay();
   document.getElementById('timer-toggle').textContent = '▶ Start';
   broadcast('timer', { seconds, label, running: false });
@@ -3187,10 +3300,15 @@ function toggleTimer() {
   if (state.timerRunning) {
     clearInterval(timerInterval);
     state.timerRunning = false;
+    state.timerStartTime = null;
+    state.timerRemainingAtStart = timerCurrentSeconds;
     document.getElementById('timer-toggle').textContent = '▶ Start';
     broadcast('timer', { seconds: timerCurrentSeconds, label: state.timerLabel, running: false });
+    saveState();
   } else {
     state.timerRunning = true;
+    state.timerStartTime = Date.now();
+    state.timerRemainingAtStart = timerCurrentSeconds;
     document.getElementById('timer-toggle').textContent = '⏸ Pauze';
     timerInterval = setInterval(() => {
       timerCurrentSeconds--;
@@ -3199,6 +3317,7 @@ function toggleTimer() {
       if (timerCurrentSeconds <= 0) {
         clearInterval(timerInterval);
         state.timerRunning = false;
+        state.timerStartTime = null;
         document.getElementById('timer-toggle').textContent = '▶ Start';
         document.getElementById('timer-display').textContent = '0:00';
         playSound('timer');
@@ -3206,6 +3325,7 @@ function toggleTimer() {
       }
     }, 1000);
   }
+  saveState();
 }
 
 function setCustomTimer() {
@@ -3218,10 +3338,12 @@ function setCustomTimer() {
 function resetTimer() {
   clearInterval(timerInterval);
   state.timerRunning = false;
+  state.timerStartTime = null;
   timerCurrentSeconds = timerDefaultSeconds;
   document.getElementById('timer-toggle').textContent = '▶ Start';
   updateTimerDisplay();
   broadcast('timer', { seconds: timerCurrentSeconds, label: state.timerLabel, running: false });
+  saveState();
 }
 
 function updateTimerDisplay() {
