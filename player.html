@@ -946,8 +946,8 @@
     electionDistribution = {};
     electionOtherParties.forEach(id => { electionDistribution[id] = 0; });
 
-    document.getElementById('election-overlay-sub').textContent =
-      `Jij speelt ${partyId} — je hebt ${electionMySeats} stemfiches te verdelen`;
+    document.getElementById('election-overlay-sub').innerHTML =
+      `Jij speelt ${partyId} — je hebt <strong>${electionMySeats}</strong> stemfiches te verdelen<br><small style="color:var(--text-dim)">💡 Elke partij krijgt minimaal 5 zetels + bonus op basis van stemmen</small>`;
 
     const partiesEl = document.getElementById('election-parties');
     partiesEl.innerHTML = '';
