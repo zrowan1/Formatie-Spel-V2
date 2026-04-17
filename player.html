@@ -605,6 +605,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script src="data.js"></script>
+  <script src="data-scenarios.js"></script>
   <script>
   // ── SUPABASE CLIENT ─────────────────────────────────────────
   const sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
@@ -804,7 +805,7 @@
     const party = PARTIES.find(p => p.id === partyId);
     if (!party) { showError('Onbekende partij', `Partij "${partyId}" bestaat niet.`); return; }
 
-    const db = PARTY_DEALBREAKERS[partyId];
+    const db = getPartyDealbreaker(partyId, null);
     const dbParty = db ? PARTIES.find(p => p.id === db) : null;
     const dbLabel = dbParty ? `Dealbreaker: niet met ${db} (${dbParty.full})` : null;
 
@@ -889,7 +890,7 @@
         <div class="card-section">
           <div class="section-label">Geheime bonus</div>
           <button class="bonus-toggle" onclick="toggleBonus(this)">🔒 Toon geheime bonus (alleen voor jou)</button>
-          <div class="bonus-revealed" id="bonus-text">${PARTY_BONUSES[partyId] || '—'}</div>
+          <div class="bonus-revealed" id="bonus-text">${getPartyBonus(partyId, null) || '—'}</div>
         </div>
 
         <div class="card-section" id="agenda-section">

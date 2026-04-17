@@ -1053,6 +1053,18 @@
   .setup-shuffle-btn { padding:14px 20px;font-size:1rem;background:var(--navy-mid);border:1px solid var(--border);color:var(--gold);font-family:'Oswald',sans-serif;letter-spacing:1px;cursor:pointer;border-radius:2px;transition:all 0.2s; }
   .setup-shuffle-btn:hover { border-color:var(--gold);background:rgba(201,168,76,0.1); }
   .setup-hint { margin-top:12px;font-size:0.75rem;color:var(--text-dim);text-align:center; }
+
+  /* ===== SCENARIO SELECTOR ===== */
+  .scenario-section { max-width:800px;width:100%;margin-bottom:24px; }
+  .scenario-label { font-family:'Oswald',sans-serif;font-size:0.8rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;text-align:center; }
+  .scenario-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:8px; }
+  .scenario-card { padding:10px 8px;border:1px solid var(--border);border-radius:2px;background:var(--navy-mid);cursor:pointer;text-align:center;transition:all 0.2s; }
+  .scenario-card:hover { border-color:var(--gold-dim); }
+  .scenario-card.selected { border-color:var(--gold);background:rgba(201,168,76,0.12); }
+  .scenario-card .sc-icon { font-size:1.4rem;margin-bottom:4px;display:block; }
+  .scenario-card .sc-name { font-family:'Oswald',sans-serif;font-size:0.72rem;color:var(--cream);letter-spacing:0.5px;line-height:1.2; }
+  .scenario-card.selected .sc-name { color:var(--gold); }
+  .scenario-desc { margin-top:10px;padding:10px 12px;border-left:2px solid var(--gold-dim);background:rgba(201,168,76,0.05);font-size:0.82rem;color:var(--text-dim);line-height:1.4;font-style:italic;text-align:center; }
 </style>
 </head>
 <body>
@@ -1061,6 +1073,14 @@
 <div id="setup-screen" class="hidden">
   <div class="setup-title">⚖ DE FORMATIE</div>
   <div class="setup-subtitle">Vul de spelersnamen in bij de deelnemende partijen — minimaal 6, maximaal 10</div>
+
+  <!-- SCENARIO SELECTOR -->
+  <div class="scenario-section" id="scenario-section">
+    <div class="scenario-label">🎭 Kies een scenario</div>
+    <div class="scenario-grid" id="scenario-grid"></div>
+    <div class="scenario-desc" id="scenario-desc"></div>
+  </div>
+
   <div class="setup-party-grid" id="setup-party-grid"></div>
   <div class="setup-counter" id="setup-counter">0 partijen geselecteerd</div>
   <div class="setup-actions">
@@ -1721,6 +1741,16 @@
       </div>
     </div>
 
+    <!-- SCENARIO PANEL -->
+    <div class="panel" id="scenario-panel" style="display:none;">
+      <div class="panel-header">
+        <div class="panel-title" id="scenario-panel-title">🎭 Scenario</div>
+      </div>
+      <div class="panel-body" id="scenario-panel-body" style="padding:12px;">
+        <!-- Dynamisch gevuld op basis van scenario -->
+      </div>
+    </div>
+
     <!-- ZETELVERDELING -->
     <div class="panel">
       <div class="panel-header">
@@ -1774,6 +1804,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js?v=2"></script>
 <script src="data.js?v=2"></script>
+<script src="data-scenarios.js?v=2"></script>
+<script src="data-expanded.js?v=2"></script>
 <script>
 // DEBUG: Forceer frisse start als ?reset in URL
 if (window.location.search.includes('reset')) {
@@ -1784,7 +1816,7 @@ if (window.location.search.includes('reset')) {
 // SPEL SPECIFIEKE DATA (alleen gebruikt in dit bestand)
 // ============================================================
 
-const STELLINGEN = [
+let STELLINGEN = [
   // PPP-relevant (klimaat/natuur/veganistisch)
   { text: "Vlees moet drie keer zo duur worden als groente.", parties: ['PPP','KKB','VBB'] },
   { text: "Elke Nederlander plant verplicht één boom per jaar.", parties: ['PPP','FRR'] },
@@ -1843,13 +1875,18 @@ function getActiveParties() {
   return PARTIES.filter(p => state.selectedPartyIds.includes(p.id));
 }
 function getMajorityThreshold() {
+  const cfg = getScenarioConfig(state);
+  if (cfg.allowMinority) {
+    // In minority mode, threshold is lower but coalition still needs > 0
+    return 1; // Any coalition is technically allowed, but we'll show warnings
+  }
   return Math.floor(getActiveParties().length * 15 / 2) + 1;
 }
 function getTotalSeats() {
   return getActiveParties().reduce((s, p) => s + (state.seats[p.id] || 15), 0);
 }
 
-const CRISIS_R2 = [
+const _BASE_CRISIS_R2 = [
   { num: 1, title: 'Geheim Overleg Uitgelekt!', text: 'De Informateur wijst twee partijen aan die stiekem samen gezien zijn. Zij moeten 2 minuten samen staan en hun "geheime plan" verzinnen en presenteren. De rest mag boe roepen.' },
   { num: 2, title: 'De Koning Belt!', text: 'De partij met de meeste zetels moet binnen 30 seconden uitleggen hoe het gaat. Onvoldoende (groep stemt)? Die partij verliest 2 zetels.' },
   { num: 3, title: 'Peiling Alert!', text: 'Gooi een dobbelsteen: EVEN = kleinste partij +3 zetels. ONEVEN = grootste partij -3 zetels. Pas de zetelverdeling aan!' },
@@ -1895,7 +1932,7 @@ const CRISIS_R4_POOL = [
   { severity: 'EXTREEM', title: 'De Nacht van...', text: 'De Koning ontbiedt de MP. Het parlement is in rep en roer. EXTRA: De Informateur mag voor deze stemming de geheime agenda van één speler onthullen!' },
   { severity: 'EXTREEM', title: 'De Motie van Wantrouwen', text: 'De voltallige oppositie dient een motie van wantrouwen in. Het kabinet overleeft ALLEEN als alle coalitiepartijen vóór de MP stemmen. Eén "nee" is genoeg voor een volledige kabinetsval.' },
 ];
-const CRISIS_R4 = [
+const _BASE_CRISIS_R4 = [
   ...CRISIS_R4_POOL.filter(c => c.severity === 'MILD').sort(() => Math.random() - 0.5).slice(0, 1),
   ...CRISIS_R4_POOL.filter(c => c.severity === 'MEDIUM').sort(() => Math.random() - 0.5).slice(0, 2),
   ...CRISIS_R4_POOL.filter(c => c.severity === 'ZWAAR').sort(() => Math.random() - 0.5).slice(0, 2),
@@ -1924,7 +1961,10 @@ const LAWS_POOL = [
   { title: 'De Transparantiewet Overheid', text: 'Alle ministerraadnotulen worden na 1 jaar openbaar. Lobbycontacten van ministers worden wekelijks gepubliceerd.', hint: 'PAN/PPP/WIFI vóór. DDP/KGW: "Privacy!" FRR: "Ordelijk implementeren." DAM: "Misschien na 2 jaar?"' },
   { title: 'Wet Gratis Openbaar Vervoer', text: 'Alle treinen, bussen en trams worden gratis voor iedereen. Dekking via hogere brandstofbelasting.', hint: 'FBL/PPP/WOK sterk vóór. DDP/BNB sterk tegen (autorijders). FRR: "Capaciteitsproblemen oplossen eerst!" WIFI: "Smart mobility!"' },
 ];
-const LAWS = [...LAWS_POOL].sort(() => Math.random() - 0.5).slice(0, 8).map((l, i) => ({ ...l, num: i + 1 }));
+let LAWS = [...LAWS_POOL].sort(() => Math.random() - 0.5).slice(0, 8).map((l, i) => ({ ...l, num: i + 1 }));
+let CRISIS_R2 = [..._BASE_CRISIS_R2];
+let CRISIS_R4 = [..._BASE_CRISIS_R4];
+let _ACTIVE_STELLINGEN = STELLINGEN;
 
 // AGENDA_DISTRIBUTION en AGENDA_TYPES worden geladen vanuit data.js
 
@@ -2304,6 +2344,7 @@ const ROUND_SLIDES = {
 let state = {
   selectedPartyIds: [],
   gameStarted: false,
+  scenario: 'standard',
   seats: {},
   coalition: {},
   scores: {},
@@ -2319,8 +2360,8 @@ let state = {
   timerRunning: false,
   timerLabel: 'Klaar om te starten',
   timerDefault: 120,
-  timerStartTime: null,  // Timestamp when timer was started
-  timerRemainingAtStart: 0,  // Remaining seconds when timer was started
+  timerStartTime: null,
+  timerRemainingAtStart: 0,
   players: [],
   assignments: {},
   coalitie: { titel: '', premier: '', ministeries: {}, punten: ['', '', '', '', '', ''] },
@@ -2328,6 +2369,13 @@ let state = {
   gameId: null,
   currentVoteTopic: null,
   currentVoteLabel: '',
+  // Scenario-uitbreidingen
+  dilemmas: {},
+  dilemmaRevealed: {},
+  newsEvents: [],
+  plotTwists: [],
+  variableDealbreakers: null,
+  variableBonuses: null,
 };
 
 // State validatie functie (MOET voor state loading staan!)
@@ -2389,6 +2437,8 @@ if (!state.gameId) {
 // ============================================================
 function initGameState() {
   const active = getActiveParties();
+  const cfg = getScenarioConfig(state);
+  const activeIds = active.map(p => p.id);
   const baseSeats = Math.floor(150 / active.length);
   const remainder = 150 % active.length;
   active.forEach((p, i) => {
@@ -2402,13 +2452,83 @@ function initGameState() {
   if (!state.players || state.players.length !== active.length) {
     state.players = Array(active.length).fill('').map((_, i) => (state.players || [])[i] || '');
   }
-  // Random agenda-toewijzing alleen als nog niet gedaan
-  if (!active.every(p => p.id in state.agendas)) {
+
+  // Agenda-toewijzing (alleen als scenario agendas heeft)
+  if (cfg.agendasEnabled && !active.every(p => p.id in state.agendas)) {
     const dist = AGENDA_DISTRIBUTION[active.length] || AGENDA_DISTRIBUTION[10];
     const shuffled = [...dist].sort(() => Math.random() - 0.5);
     active.forEach((p, i) => { state.agendas[p.id] = shuffled[i]; });
-    saveState();
   }
+  // Als agendas uitgeschakeld zijn, leegmaken
+  if (!cfg.agendasEnabled) {
+    state.agendas = {};
+  }
+
+  // Dilemma's (voor Vergeetputje scenario)
+  if (cfg.dilemmas && Object.keys(state.dilemmas).length === 0) {
+    state.dilemmas = drawDilemmas(activeIds);
+  }
+
+  // Plot twists array initialiseren
+  if (cfg.plotTwists && state.plotTwists.length === 0) {
+    state.plotTwists = [];
+  }
+
+  // Nieuws events array initialiseren
+  if (cfg.newsEvents && state.newsEvents.length === 0) {
+    state.newsEvents = [];
+  }
+
+  // Variabele dealbreakers
+  if (cfg.variableDealbreakers && !state.variableDealbreakers) {
+    state.variableDealbreakers = drawVariableDealbreakers(activeIds);
+  }
+
+  // Variabele bonussen
+  if (cfg.variableBonuses && !state.variableBonuses) {
+    state.variableBonuses = drawVariableBonuses(activeIds);
+  }
+
+  // === DYNAMISCHE POOLS OP BASIS VAN SCENARIO ===
+  // Wetten
+  const allLaws = (typeof LAWS_POOL !== 'undefined' ? LAWS_POOL : []).concat(typeof LAWS_EXTRA !== 'undefined' ? LAWS_EXTRA : []);
+  const lawCount = cfg.lawCount || 8;
+  LAWS.length = 0;
+  const shuffledLaws = [...allLaws].sort(() => Math.random() - 0.5).slice(0, lawCount);
+  shuffledLaws.forEach((l, i) => LAWS.push({ ...l, num: i + 1 }));
+
+  // Formatiecrisiskaarten (R2)
+  const allR2 = (typeof _BASE_CRISIS_R2 !== 'undefined' ? _BASE_CRISIS_R2 : []).concat(typeof CRISIS_R2_EXTRA !== 'undefined' ? CRISIS_R2_EXTRA : []);
+  const r2Count = cfg.crisisR2Count || allR2.length;
+  const shuffledR2 = [...allR2].sort(() => Math.random() - 0.5).slice(0, r2Count);
+  // Clear and refill the global CRISIS_R2 array
+  while (CRISIS_R2.length > 0) CRISIS_R2.pop();
+  shuffledR2.forEach((c, i) => CRISIS_R2.push({ ...c, num: i + 1 }));
+
+  // Kabinetscrisiskaarten (R4)
+  const allR4Pool = (typeof CRISIS_R4_POOL !== 'undefined' ? CRISIS_R4_POOL : []).concat(typeof CRISIS_R4_EXTRA !== 'undefined' ? CRISIS_R4_EXTRA : []);
+  const r4Count = cfg.crisisR4Count || 6;
+  const r4Mild = allR4Pool.filter(c => c.severity === 'MILD').sort(() => Math.random() - 0.5).slice(0, 2);
+  const r4Medium = allR4Pool.filter(c => c.severity === 'MEDIUM').sort(() => Math.random() - 0.5).slice(0, 3);
+  const r4Zwaar = allR4Pool.filter(c => c.severity === 'ZWAAR').sort(() => Math.random() - 0.5).slice(0, 3);
+  const r4Extreem = allR4Pool.filter(c => c.severity === 'EXTREEM').sort(() => Math.random() - 0.5).slice(0, 2);
+  const r4Pool = [
+    ...r4Mild.slice(0, Math.max(1, Math.floor(r4Count * 0.17))),
+    ...r4Medium.slice(0, Math.max(2, Math.floor(r4Count * 0.33))),
+    ...r4Zwaar.slice(0, Math.max(2, Math.floor(r4Count * 0.33))),
+    ...r4Extreem.slice(0, Math.max(1, Math.floor(r4Count * 0.17))),
+  ].sort(() => Math.random() - 0.5).slice(0, r4Count);
+  while (CRISIS_R4.length > 0) CRISIS_R4.pop();
+  r4Pool.forEach((c, i) => CRISIS_R4.push({ ...c, num: `${i + 1}/${r4Count}` }));
+
+  // Stellingen (speed-debat)
+  if (typeof STELLINGEN !== 'undefined' && typeof STELLINGEN_EXTRA !== 'undefined') {
+    _ACTIVE_STELLINGEN = [...STELLINGEN, ...STELLINGEN_EXTRA];
+  } else {
+    _ACTIVE_STELLINGEN = STELLINGEN;
+  }
+
+  saveState();
 }
 
 if (state.gameStarted && state.selectedPartyIds.length >= 6) {
@@ -2849,17 +2969,14 @@ function generatePairings(e) {
 }
 
 function findBestStelling(p1, p2, used) {
-  // Priority 1: stelling where BOTH parties appear
-  let idx = STELLINGEN.findIndex((s, i) => !used.has(i) && s.parties.includes(p1) && s.parties.includes(p2));
+  const pool = (typeof _ACTIVE_STELLINGEN !== 'undefined' && _ACTIVE_STELLINGEN.length > 0) ? _ACTIVE_STELLINGEN : STELLINGEN;
+  let idx = pool.findIndex((s, i) => !used.has(i) && s.parties.includes(p1) && s.parties.includes(p2));
   if (idx >= 0) return idx;
-  // Priority 2: stelling where at least ONE party appears
-  idx = STELLINGEN.findIndex((s, i) => !used.has(i) && (s.parties.includes(p1) || s.parties.includes(p2)));
+  idx = pool.findIndex((s, i) => !used.has(i) && (s.parties.includes(p1) || s.parties.includes(p2)));
   if (idx >= 0) return idx;
-  // Priority 3: any unused stelling
-  idx = STELLINGEN.findIndex((s, i) => !used.has(i));
+  idx = pool.findIndex((s, i) => !used.has(i));
   if (idx >= 0) return idx;
-  // Fallback: random (allow reuse if pool exhausted)
-  return Math.floor(Math.random() * STELLINGEN.length);
+  return Math.floor(Math.random() * pool.length);
 }
 
 function broadcastStelling(pairIndex) {
@@ -3147,6 +3264,13 @@ function resetGame() {
   state.gameId = Date.now().toString();
   state.currentVoteTopic = null;
   state.currentVoteLabel = '';
+  state.scenario = 'standard';
+  state.dilemmas = {};
+  state.dilemmaRevealed = {};
+  state.newsEvents = [];
+  state.plotTwists = [];
+  state.variableDealbreakers = null;
+  state.variableBonuses = null;
   
   // Broadcast reset to TV
   broadcast('reset', {});
@@ -3535,7 +3659,7 @@ function toggleCoalition(id, btn) {
     const active = getActiveParties();
     const conflictingParties = active.filter(p => {
       if (!state.coalition[p.id] || p.id === id) return false;
-      return PARTY_DEALBREAKERS[id] === p.id || PARTY_DEALBREAKERS[p.id] === id;
+      return getPartyDealbreaker(id, state) === p.id || getPartyDealbreaker(p.id, state) === id;
     });
 
     if (conflictingParties.length > 0) {
@@ -3561,8 +3685,14 @@ function updateCoalitionTotal() {
   const total = getActiveParties().reduce((sum, p) => sum + (state.coalition[p.id] ? state.seats[p.id] : 0), 0);
   const el = document.getElementById('coalition-total');
   el.textContent = total;
+  const cfg = getScenarioConfig(state);
   const maj = getMajorityThreshold();
-  el.className = 'seats-number ' + (total >= maj ? 'majority' : total >= Math.floor(maj / 2) ? 'minority' : 'low');
+  if (cfg.allowMinority) {
+    // In minority mode: any coalition > 0 is "allowed" but we still show majority as green
+    el.className = 'seats-number ' + (total >= maj ? 'majority' : total > 0 ? 'minority' : 'low');
+  } else {
+    el.className = 'seats-number ' + (total >= maj ? 'majority' : total >= Math.floor(maj / 2) ? 'minority' : 'low');
+  }
   
   // Update totaal aantal zetels
   const totalSeats = getTotalSeats();
@@ -3583,7 +3713,7 @@ function showPartyCard(id) {
     leader: PARTY_LEADERS[id],
     crown: PARTY_CROWN_JEWELS[id],
     quirk: PARTY_QUIRKS[id],
-    dealbreaker: PARTY_DEALBREAKERS[id] || null,
+    dealbreaker: getPartyDealbreaker(id, state) || null,
   });
 }
 
@@ -3772,7 +3902,28 @@ function revealRandomCrisis() {
 function renderAgendaGrid() {
   const el = document.getElementById('agenda-grid');
   if (!el) return;
+  const cfg = getScenarioConfig(state);
   el.innerHTML = '';
+
+  // Dilemma-modus (Vergeetputje)
+  if (cfg.dilemmas) {
+    getActiveParties().forEach(p => {
+      const revealed = state.dilemmaRevealed[p.id];
+      const dilemma = state.dilemmas[p.id];
+      const div = document.createElement('div');
+      div.className = `agenda-card${revealed ? ' revealed' : ''}`;
+      div.innerHTML = `
+        <div class="agenda-party">${p.name}</div>
+        <div class="agenda-type ${revealed ? 'opportunist' : 'hidden'}">${revealed ? (dilemma ? dilemma.type.toUpperCase() : '???') : '???'}</div>
+        <button class="agenda-reveal-btn" onclick="revealDilemma('${p.id}')">${revealed ? 'Verbergen' : 'Onthul dilemma'}</button>
+        ${revealed && dilemma ? `<div style="margin-top:8px;font-size:0.82rem;color:var(--cream);line-height:1.4;">${dilemma.text}</div>` : ''}
+      `;
+      el.appendChild(div);
+    });
+    return;
+  }
+
+  // Standaard agenda-modus
   getActiveParties().forEach(p => {
     const revealed = state.agendaRevealed[p.id];
     const type = state.agendas[p.id];
@@ -3797,8 +3948,24 @@ function revealAgenda(id) {
   }
 }
 
+function revealDilemma(id) {
+  state.dilemmaRevealed[id] = !state.dilemmaRevealed[id];
+  renderAgendaGrid();
+  saveState();
+  if (state.dilemmaRevealed[id]) {
+    const d = state.dilemmas[id];
+    broadcast('agenda', { party: id, type: 'DILEMMA', text: d ? d.text : '' });
+    notify(`Dilemma onthuld voor ${id}`);
+  }
+}
+
 function revealAllAgendas() {
-  getActiveParties().forEach(p => { state.agendaRevealed[p.id] = true; });
+  const cfg = getScenarioConfig(state);
+  if (cfg.dilemmas) {
+    getActiveParties().forEach(p => { state.dilemmaRevealed[p.id] = true; });
+  } else {
+    getActiveParties().forEach(p => { state.agendaRevealed[p.id] = true; });
+  }
   renderAgendaGrid();
   saveState();
   broadcast('agendaAll', { agendas: state.agendas });
@@ -4202,8 +4369,10 @@ function closeAnnouncement() {
 // SETUP SCHERM
 // ============================================================
 let _pendingPlayerNames = {};
+let _pendingScenario = 'standard';
 
 function renderSetupScreen() {
+  renderScenarioGrid();
   const grid = document.getElementById('setup-party-grid');
   grid.innerHTML = '';
   PARTIES.forEach(p => {
@@ -4220,6 +4389,30 @@ function renderSetupScreen() {
     grid.appendChild(card);
   });
   updateSetupCounter();
+}
+
+function renderScenarioGrid() {
+  const grid = document.getElementById('scenario-grid');
+  const descEl = document.getElementById('scenario-desc');
+  if (!grid) return;
+  grid.innerHTML = '';
+  Object.values(SCENARIOS).forEach(sc => {
+    const card = document.createElement('div');
+    card.className = 'scenario-card' + (sc.id === _pendingScenario ? ' selected' : '');
+    card.onclick = () => {
+      _pendingScenario = sc.id;
+      renderScenarioGrid();
+    };
+    card.innerHTML = `
+      <span class="sc-icon">${sc.icon}</span>
+      <span class="sc-name">${sc.name}</span>
+    `;
+    grid.appendChild(card);
+  });
+  const selected = SCENARIOS[_pendingScenario];
+  if (descEl && selected) {
+    descEl.textContent = selected.description;
+  }
 }
 
 function updatePartyNameInput(id, value) {
@@ -4264,15 +4457,25 @@ async function confirmSetup() {
   state.selectedPartyIds = activeIds;
   state.players = activeIds.map(id => _pendingPlayerNames[id].trim());
   state.gameStarted = true;
+  state.scenario = _pendingScenario || 'standard';
+  // Reset scenario-specifieke state
+  state.dilemmas = {};
+  state.dilemmaRevealed = {};
+  state.newsEvents = [];
+  state.plotTwists = [];
+  state.variableDealbreakers = null;
+  state.variableBonuses = null;
   initGameState();
   saveState();
   pushAgendas();
   // Broadcast setup to TV
   const active = getActiveParties();
+  const scInfo = getScenarioInfo(state);
   broadcast('setup', {
     parties: active.map(p => ({ id: p.id, name: p.name, full: p.full })),
     totalSeats: 150,
     majority: getMajorityThreshold(),
+    scenario: { name: scInfo.name, icon: scInfo.icon, subtitle: scInfo.subtitle },
   });
   // Sync initial phase to Supabase so player apps know the game started
   try {
@@ -4289,6 +4492,106 @@ async function confirmSetup() {
   renderAll();
 }
 
+function renderScenarioPanel() {
+  const panel = document.getElementById('scenario-panel');
+  const title = document.getElementById('scenario-panel-title');
+  const body = document.getElementById('scenario-panel-body');
+  if (!panel || !body) return;
+  const scInfo = getScenarioInfo(state);
+  const cfg = getScenarioConfig(state);
+
+  // Only show panel if there are scenario-specific actions
+  const hasActions = cfg.plotTwists || cfg.newsEvents || cfg.dilemmas || cfg.variableDealbreakers || cfg.variableBonuses;
+  panel.style.display = hasActions ? 'block' : 'none';
+  if (!hasActions) return;
+
+  title.textContent = `${scInfo.icon} ${scInfo.name}`;
+
+  let html = '';
+
+  // Plot twists
+  if (cfg.plotTwists) {
+    html += `<div style="margin-bottom:10px;">
+      <div style="font-family:'Oswald',sans-serif;font-size:0.72rem;color:var(--gold);margin-bottom:6px;">🎲 Plot Twists</div>`;
+    if (state.plotTwists.length === 0) {
+      html += `<button class="btn btn-sm" onclick="drawAndShowPlotTwist()">Trek plot twist</button>`;
+    } else {
+      state.plotTwists.forEach((tw, i) => {
+        html += `<div style="font-size:0.78rem;color:var(--cream);margin-bottom:4px;padding:6px;border:1px solid var(--border);border-radius:2px;">
+          <strong>${tw.title}</strong><br><span style="color:var(--text-dim);">${tw.text}</span>
+        </div>`;
+      });
+      html += `<button class="btn btn-sm" onclick="drawAndShowPlotTwist()">Trek nog een plot twist</button>`;
+    }
+    html += `</div>`;
+  }
+
+  // News events
+  if (cfg.newsEvents) {
+    html += `<div style="margin-bottom:10px;">
+      <div style="font-family:'Oswald',sans-serif;font-size:0.72rem;color:var(--gold);margin-bottom:6px;">📰 Nieuwsbericht</div>`;
+    if (state.newsEvents.length === 0) {
+      html += `<button class="btn btn-sm" onclick="generateNewsEvent()">Genereer nieuwsbericht</button>`;
+    } else {
+      const lastNews = state.newsEvents[state.newsEvents.length - 1];
+      html += `<div style="font-size:0.78rem;color:var(--cream);margin-bottom:4px;padding:6px;border:1px solid var(--border);border-radius:2px;">
+        <strong>${lastNews.headline}</strong><br><span style="color:var(--text-dim);">${lastNews.text}</span>
+      </div>`;
+      html += `<button class="btn btn-sm" onclick="generateNewsEvent()">Nieuw bericht</button>`;
+    }
+    html += `</div>`;
+  }
+
+  // Dilemmas summary
+  if (cfg.dilemmas) {
+    const revealedCount = Object.keys(state.dilemmaRevealed).length;
+    const totalCount = Object.keys(state.dilemmas).length;
+    html += `<div style="margin-bottom:10px;">
+      <div style="font-family:'Oswald',sans-serif;font-size:0.72rem;color:var(--gold);margin-bottom:6px;">🕳 Dilemma's</div>
+      <div style="font-size:0.78rem;color:var(--text-dim);">${revealedCount} van ${totalCount} onthuld</div>
+    </div>`;
+  }
+
+  // Variable dealbreakers/bonuses
+  if (cfg.variableDealbreakers || cfg.variableBonuses) {
+    html += `<div style="margin-bottom:10px;">
+      <div style="font-family:'Oswald',sans-serif;font-size:0.72rem;color:var(--gold);margin-bottom:6px;">🎭 Variabele dynamiek</div>
+      <div style="font-size:0.78rem;color:var(--text-dim);">Dealbreakers en bonussen zijn willekeurig getrokken voor dit spel.</div>
+    </div>`;
+  }
+
+  body.innerHTML = html;
+}
+
+function drawAndShowPlotTwist() {
+  const twist = drawPlotTwist();
+  state.plotTwists.push(twist);
+  saveState();
+  renderScenarioPanel();
+  broadcast('plotTwist', { twist });
+  notify(`Plot twist getrokken: ${twist.title}`);
+}
+
+function generateNewsEvent() {
+  const activeIds = getActiveParties().map(p => p.id);
+  const ev = drawNewsEvent(activeIds, state.seats);
+  state.newsEvents.push(ev);
+  // Apply seat changes
+  if (ev.targets && ev.delta !== 0) {
+    ev.targets.forEach(id => {
+      if (state.seats[id] !== undefined) {
+        state.seats[id] = Math.max(0, state.seats[id] + ev.delta);
+      }
+    });
+  }
+  saveState();
+  renderScenarioPanel();
+  renderPartyGrid();
+  broadcastSeats();
+  broadcast('newsEvent', { event: ev });
+  notify(`Nieuws: ${ev.headline}`);
+}
+
 function renderAll() {
   // Update chips-per-player hints
   const n = getActiveParties().length || 10;
@@ -4300,7 +4603,14 @@ function renderAll() {
     if (el) el.textContent = chipsText;
   });
   const mjEl = document.getElementById('majority-hint');
-  if (mjEl) mjEl.textContent = getMajorityThreshold();
+  if (mjEl) {
+    const cfg = getScenarioConfig(state);
+    if (cfg.allowMinority) {
+      mjEl.textContent = 'minderheid is toegestaan';
+    } else {
+      mjEl.textContent = getMajorityThreshold();
+    }
+  }
   renderPartyGrid();
   renderVoteRows();
   renderScoreSidebar();
@@ -4314,6 +4624,7 @@ function renderAll() {
   renderScoreboardDetail();
   renderAgendaGrid();
   renderLawSelector();
+  renderScenarioPanel();
 }
 
 // ============================================================

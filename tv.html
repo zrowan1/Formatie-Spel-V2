@@ -101,6 +101,19 @@
     font-style: italic;
     letter-spacing: 1px;
   }
+  .tv-scenario-badge {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+    text-align: center;
+    margin-top: 4px;
+    padding: 2px 8px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 2px;
+    display: inline-block;
+  }
 
   .tv-timer-box {
     display: flex;
@@ -1658,6 +1671,7 @@
   <div style="display:flex;flex-direction:column;align-items:center;">
     <div class="tv-phase-label" id="tv-phase-label">Welkom</div>
     <div class="tv-phase-subtitle" id="tv-phase-subtitle"></div>
+    <div class="tv-scenario-badge" id="tv-scenario-badge" style="display:none;"></div>
   </div>
   <div class="tv-timer-box">
     <div class="tv-timer" id="tv-timer">—</div>
@@ -2006,6 +2020,13 @@ function handleEvent(ev) {
     totalSeatsCount = data.totalSeats;
     try { localStorage.setItem('formatie_active_parties', JSON.stringify(data.parties)); } catch(e) {}
     updateTVLabels(data.totalSeats, data.majority);
+    if (data.scenario) {
+      const scEl = document.getElementById('tv-scenario-badge');
+      if (scEl) {
+        scEl.textContent = `${data.scenario.icon} ${data.scenario.name}`;
+        scEl.style.display = 'inline-block';
+      }
+    }
     return;
   }
 
@@ -2022,6 +2043,20 @@ function handleEvent(ev) {
     document.getElementById('tv-phase-label').textContent = PHASE_LABELS[data.phase] || data.phase;
     document.getElementById('tv-phase-subtitle').textContent = PHASE_SUBTITLES[data.phase] || '';
     showView('view-standby');
+  }
+
+  if (type === 'plotTwist') {
+    const subtitle = document.getElementById('tv-phase-subtitle');
+    const original = subtitle.textContent;
+    subtitle.textContent = `🎲 PLOT TWIST: ${data.twist.title} — ${data.twist.text}`;
+    setTimeout(() => { subtitle.textContent = original; }, 8000);
+  }
+
+  if (type === 'newsEvent') {
+    const subtitle = document.getElementById('tv-phase-subtitle');
+    const original = subtitle.textContent;
+    subtitle.textContent = `📰 ${data.event.headline} — ${data.event.text}`;
+    setTimeout(() => { subtitle.textContent = original; }, 8000);
   }
 
   if (type === 'timer') {

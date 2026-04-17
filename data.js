@@ -169,6 +169,6 @@ if (typeof module !== 'undefined' && module.exports) {
     PARTY_BONUSES,
     AGENDA_DEFINITIONS,
     AGENDA_DISTRIBUTION,
-    PHASE_LABELS
+    PHASE_LABELS,
   };
 }
