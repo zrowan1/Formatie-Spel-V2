@@ -2630,6 +2630,7 @@ async function openElection() {
       vote_label:    'Verkiezingen',
       phase:         'r1',
       active_parties: sorted,
+      election_votes: {},
     }, { onConflict: 'game_id' });
     if (error) {
       console.warn('Supabase openElection error:', error);
@@ -2662,17 +2663,18 @@ async function openElection() {
 async function refreshElectionCounter() {
   if (!state.gameId) return;
   try {
-    const { data, error } = await supabaseClient.from('player_votes')
-      .select('party_id')
+    const { data, error } = await supabaseClient.from('game_sessions')
+      .select('election_votes')
       .eq('game_id', state.gameId)
-      .eq('vote_topic', 'VERKIEZING');
+      .single();
     if (error) {
       console.warn('Supabase refreshElectionCounter error:', error);
       return;
     }
-    const unique = new Set((data || []).map(r => r.party_id)).size;
+    const votes = data?.election_votes || {};
+    const count = Object.keys(votes).length;
     const countEl = document.getElementById('election-count');
-    if (countEl) countEl.textContent = unique;
+    if (countEl) countEl.textContent = count;
   } catch (err) {
     console.error('Supabase refreshElectionCounter exception:', err);
   }

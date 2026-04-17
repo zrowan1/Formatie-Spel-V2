@@ -1075,6 +1075,21 @@
         return;
       }
 
+      // Also mark this party as voted in game_sessions so the host can see the counter
+      try {
+        const { data: sessionData } = await sb.from('game_sessions')
+          .select('election_votes')
+          .eq('game_id', gameId)
+          .single();
+        const currentVotes = sessionData?.election_votes || {};
+        currentVotes[partyId] = true;
+        await sb.from('game_sessions')
+          .update({ election_votes: currentVotes })
+          .eq('game_id', gameId);
+      } catch (syncErr) {
+        console.warn('Failed to sync election vote count:', syncErr);
+      }
+
       sessionStorage.setItem('submitted_VERKIEZING', '1');
       const conf = document.getElementById('election-confirmation');
       conf.textContent = '✓ Jouw stem is uitgebracht';
