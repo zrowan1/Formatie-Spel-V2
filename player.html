@@ -1061,15 +1061,22 @@
     btn.disabled = true;
 
     try {
-      const { error } = await sb.from('player_votes').upsert({
-        game_id:    gameId,
-        party_id:   partyId,
-        vote_topic: 'VERKIEZING',
-        choice:     JSON.stringify(electionDistribution),
-      }, { onConflict: 'game_id,party_id,vote_topic' });
+      // Try insert first (upsert can conflict with RLS policies that don't allow SELECT/UPDATE)
+      let error = null;
+      try {
+        const res = await sb.from('player_votes').insert({
+          game_id:    gameId,
+          party_id:   partyId,
+          vote_topic: 'VERKIEZING',
+          choice:     JSON.stringify(electionDistribution),
+        });
+        error = res.error;
+      } catch (insertErr) {
+        error = insertErr;
+      }
 
       if (error) {
-        console.error('Supabase election submit error:', error.code, error.message, error.details);
+        console.error('Supabase election submit error:', error.code || error, error.message, error.details);
         btn.disabled = false;
         alert(`Fout bij indienen: ${error.message || 'Probeer opnieuw.'}`);
         return;
