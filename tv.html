@@ -1720,6 +1720,17 @@
     </div>
   </div>
 
+  <!-- ELECTION CALCULATION -->
+  <div class="tv-view" id="view-election-calc" style="flex-direction:column;padding:40px 60px;gap:16px;">
+    <div style="font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--gold);text-align:center;margin-bottom:8px;">📊 Verkiezingsberekening</div>
+    <div style="font-family:'EB Garamond',serif;font-size:1rem;color:var(--text-dim);text-align:center;margin-bottom:16px;">Elke partij krijgt minimaal 5 zetels. De rest wordt proportioneel verdeeld.</div>
+    <div style="width:100%;max-width:800px;display:flex;flex-direction:column;gap:10px;" id="tv-election-calc-rows"></div>
+    <div style="width:100%;max-width:800px;margin-top:10px;border-top:2px solid var(--gold-dim);padding-top:14px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-family:'Oswald',sans-serif;font-size:1rem;color:var(--text-dim);">TOTAAL</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--gold);">150 zetels</div>
+    </div>
+  </div>
+
   <!-- EXIT POLL -->
   <div class="tv-view" id="view-exitpoll">
     <div class="ep-header">
@@ -2087,6 +2098,7 @@ function handleEvent(ev) {
   }
 
   if (type === 'superpower') {
+    playSound('superpower');
     // Briefly flash on ticker
     const ticker = document.getElementById('tv-ticker');
     const orig = ticker.textContent;
@@ -2162,6 +2174,11 @@ function handleEvent(ev) {
   if (type === 'superpowerLog') {
     renderSuperpowerLogTV(data.log || []);
     showView('view-superpower-log');
+  }
+
+  if (type === 'electionCalc') {
+    renderElectionCalc(data);
+    showView('view-election-calc');
   }
 
   if (type === 'stelling') {
@@ -2808,6 +2825,31 @@ function renderAllParties() {
 }
 
 // ===== SUPERKRACHTEN LOG TV =====
+function renderElectionCalc(data) {
+  const el = document.getElementById('tv-election-calc-rows');
+  if (!el) return;
+  const rows = (data.rows || []).map(r => {
+    const party = PARTIES.find(p => p.id === r.id);
+    const name = party ? `${party.name} — ${party.full}` : r.id;
+    return `
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--navy-mid);border:1px solid var(--border);border-radius:2px;">
+        <div style="font-family:'Oswald',sans-serif;font-size:1.1rem;color:var(--gold);width:80px;flex-shrink:0;">${r.id}</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px;">
+          <div style="font-size:0.8rem;color:var(--text-dim);">${name}</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;">
+            <div style="font-size:0.78rem;color:var(--text-dim);">Stemmen: <strong style="color:var(--cream);">${r.votes}</strong></div>
+            <div style="font-size:0.78rem;color:var(--text-dim);">Basis: <strong style="color:var(--cream);">+${r.base}</strong></div>
+            <div style="font-size:0.78rem;color:var(--text-dim);">Proportioneel: <strong style="color:var(--cream);">+${r.proportional}</strong></div>
+            ${r.correction ? `<div style="font-size:0.78rem;color:var(--gold);">Afronding: <strong>+${r.correction}</strong></div>` : ''}
+          </div>
+        </div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--cream);width:60px;text-align:right;">${r.total}</div>
+      </div>
+    `;
+  }).join('');
+  el.innerHTML = rows || '<div style="text-align:center;color:var(--text-dim);">Geen berekeningsdata beschikbaar</div>';
+}
+
 function renderSuperpowerLogTV(log) {
   const el = document.getElementById('tv-splog-list');
   if (!el) return;
@@ -2820,9 +2862,13 @@ function renderSuperpowerLogTV(log) {
     const t = new Date(entry.ts);
     const time = `${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}`;
     const icon = icons[entry.id] || '⚡';
+    const detail = entry.detail ? `<div style="font-size:0.75rem;color:var(--text-dim);margin-top:2px;font-family:'EB Garamond',serif;">${entry.detail}</div>` : '';
     return `<div class="splog-entry">
       <div class="splog-entry-icon">${icon}</div>
-      <div class="splog-entry-name">${entry.name}</div>
+      <div style="flex:1;">
+        <div class="splog-entry-name">${entry.name}</div>
+        ${detail}
+      </div>
       <div class="splog-entry-time">${time}</div>
     </div>`;
   }).join('');

@@ -1270,6 +1270,7 @@
                 <span id="election-count">0</span> / <span id="election-total">10</span> stemmen ontvangen
               </div>
               <button class="btn" id="btn-close-election" style="display:none;background:rgba(76,175,80,0.15);border:1px solid #4caf50;color:#4caf50;" onclick="closeElection()">✓ Sluit &amp; verwerk stemmen</button>
+              <button class="btn btn-secondary" id="btn-show-election-calc" style="display:none;" onclick="broadcastElectionCalc()">📊 Toon berekening op TV</button>
             </div>
           </div>
         </div>
@@ -1752,6 +1753,20 @@
 
   </div><!-- end sidebar -->
 </div><!-- end main-layout -->
+
+<!-- SUPERPOWER MODAL -->
+<div id="sp-modal" style="display:none;position:fixed;inset:0;background:rgba(10,22,40,0.9);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:var(--navy-mid);border:1px solid var(--gold-dim);border-radius:4px;padding:24px;max-width:400px;width:90%;">
+    <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold);margin-bottom:16px;" id="sp-modal-title">Superkracht gebruiken</div>
+    <div id="sp-modal-body" style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+      <!-- dynamic fields -->
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn" onclick="closeSuperpowerModal()">Annuleren</button>
+      <button class="btn btn-primary" onclick="confirmSuperpowerModal()">Gebruik</button>
+    </div>
+  </div>
+</div>
 
 <!-- NOTIFICATION -->
 <div class="notification" id="notification"></div>
@@ -2686,6 +2701,15 @@ async function closeElection() {
   await tallyElection();
 }
 
+function broadcastElectionCalc() {
+  if (!state.electionBreakdown || !state.electionBreakdown.rows) {
+    notify('⚠ Geen verkiezingsberekening beschikbaar');
+    return;
+  }
+  broadcast('electionCalc', state.electionBreakdown);
+  notify('📊 Verkiezingsberekening op TV getoond');
+}
+
 async function tallyElection() {
   try {
     const { data, error } = await supabaseClient.from('player_votes')
@@ -2729,6 +2753,7 @@ async function tallyElection() {
     const totalVotes = Object.values(rawVotes).reduce((a, b) => a + b, 0);
     
     const newSeats = {};
+    const breakdownRows = [];
     active.forEach(p => {
       const partyVotes = rawVotes[p.id] || 0;
       // Basis zetels + proportioneel deel van de rest
@@ -2740,6 +2765,14 @@ async function tallyElection() {
         proportionalPart = Math.floor(REMAINING_SEATS / numParties);
       }
       newSeats[p.id] = MIN_SEATS + proportionalPart;
+      breakdownRows.push({
+        id: p.id,
+        votes: partyVotes,
+        base: MIN_SEATS,
+        proportional: proportionalPart,
+        correction: 0,
+        total: newSeats[p.id]
+      });
     });
     
     // Stap 3: Corrigeer afrondingsfouten (som moet precies 150 zijn)
@@ -2765,7 +2798,19 @@ async function tallyElection() {
         }
         idx++;
       }
+      // Update corrections in breakdown
+      breakdownRows.forEach(r => {
+        r.correction = newSeats[r.id] - (r.base + r.proportional);
+        r.total = newSeats[r.id];
+      });
     }
+
+    // Sla berekening op voor TV weergave
+    state.electionBreakdown = {
+      rows: breakdownRows.sort((a, b) => b.votes - a.votes),
+      totalVotes,
+      minSeats: MIN_SEATS
+    };
 
     Object.assign(state.seats, newSeats);
     saveState();
@@ -2776,6 +2821,10 @@ async function tallyElection() {
     const minSeats = Math.min(...Object.values(newSeats));
     const maxSeats = Math.max(...Object.values(newSeats));
     notify(`✓ Zetels verdeeld! Kleinste: ${minSeats}, Grootste: ${maxSeats}`);
+
+    // Toon de "Toon berekening op TV" knop
+    const calcBtn = document.getElementById('btn-show-election-calc');
+    if (calcBtn) calcBtn.style.display = 'block';
     
   } catch (err) {
     console.error('Supabase tallyElection exception:', err);
@@ -3097,6 +3146,7 @@ function resetGame() {
   state.agendaRevealed = {};
   state.superpowersUsed = {};
   state.superpowerLog = [];
+  state.electionBreakdown = null;
   state.timerSeconds = 120;
   state.timerRunning = false;
   state.timerLabel = 'Klaar om te starten';
@@ -3117,6 +3167,10 @@ function resetGame() {
   // Show setup screen
   document.getElementById('setup-screen').classList.remove('hidden');
   renderSetupScreen();
+  
+  // Hide election calc button
+  const calcBtn = document.getElementById('btn-show-election-calc');
+  if (calcBtn) calcBtn.style.display = 'none';
   
   // Update UI
   renderAll();
@@ -3841,20 +3895,96 @@ function adjustScore(id, cat, delta) {
 // ============================================================
 // SUPERPOWERS
 // ============================================================
-function useSuperpower(id) {
+let _pendingSuperpowerId = null;
+
+function openSuperpowerModal(id) {
   if (state.superpowersUsed[id]) return;
+  _pendingSuperpowerId = id;
+  const names = { 'sp-bonus': '10 Bonuszetels', 'sp-veto': 'Veto', 'sp-marriage': 'Gedwongen Huwelijk', 'sp-press': 'De Pers Bellen' };
+  const name = names[id] || id;
+  document.getElementById('sp-modal-title').textContent = `${name} gebruiken`;
+
+  const active = getActiveParties();
+  const partyOptions = active.map(p => `<option value="${p.id}">${p.id} — ${p.full}</option>`).join('');
+
+  let fields = '';
+  if (id === 'sp-bonus') {
+    fields = `
+      <label style="font-family:'Oswald',sans-serif;font-size:0.75rem;color:var(--text-dim);">Kies partij</label>
+      <select id="sp-modal-target" style="background:var(--navy);border:1px solid var(--border);color:var(--cream);padding:8px;font-family:'EB Garamond',serif;">${partyOptions}</select>
+      <label style="font-family:'Oswald',sans-serif;font-size:0.75rem;color:var(--text-dim);">Reden (optioneel)</label>
+      <input id="sp-modal-reason" type="text" style="background:var(--navy);border:1px solid var(--border);color:var(--cream);padding:8px;font-family:'EB Garamond',serif;" placeholder="Waarom deze partij?">
+    `;
+  } else if (id === 'sp-veto') {
+    fields = `
+      <label style="font-family:'Oswald',sans-serif;font-size:0.75rem;color:var(--text-dim);">Welke deal wordt geblokkeerd?</label>
+      <input id="sp-modal-target" type="text" style="background:var(--navy);border:1px solid var(--border);color:var(--cream);padding:8px;font-family:'EB Garamond',serif;" placeholder="Bijv. PPP + KKB akkoord">
+      <label style="font-family:'Oswald',sans-serif;font-size:0.75rem;color:var(--text-dim);">Reden (optioneel)</label>
+      <input id="sp-modal-reason" type="text" style="background:var(--navy);border:1px solid var(--border);color:var(--cream);padding:8px;font-family:'EB Garamond',serif;" placeholder="Waarom het veto?">
+    `;
+  } else if (id === 'sp-marriage') {
+    fields = `
+      <label style="font-family:'Oswald',sans-serif;font-size:0.75rem;color:var(--text-dim);">Partij 1</label>
+      <select id="sp-modal-target" style="background:var(--navy);border:1px solid var(--border);color:var(--cream);padding:8px;font-family:'EB Garamond',serif;">${partyOptions}</select>
+      <label style="font-family:'Oswald',sans-serif;font-size:0.75rem;color:var(--text-dim);">Partij 2</label>
+      <select id="sp-modal-target2" style="background:var(--navy);border:1px solid var(--border);color:var(--cream);padding:8px;font-family:'EB Garamond',serif;">${partyOptions}</select>
+    `;
+  } else if (id === 'sp-press') {
+    fields = `
+      <label style="font-family:'Oswald',sans-serif;font-size:0.75rem;color:var(--text-dim);">Kies partij</label>
+      <select id="sp-modal-target" style="background:var(--navy);border:1px solid var(--border);color:var(--cream);padding:8px;font-family:'EB Garamond',serif;">${partyOptions}</select>
+      <label style="font-family:'Oswald',sans-serif;font-size:0.75rem;color:var(--text-dim);">Welk objectief wordt onthuld? (optioneel)</label>
+      <input id="sp-modal-reason" type="text" style="background:var(--navy);border:1px solid var(--border);color:var(--cream);padding:8px;font-family:'EB Garamond',serif;" placeholder="Bijv. Geheime bonus of agenda">
+    `;
+  }
+
+  document.getElementById('sp-modal-body').innerHTML = fields;
+  document.getElementById('sp-modal').style.display = 'flex';
+}
+
+function closeSuperpowerModal() {
+  _pendingSuperpowerId = null;
+  document.getElementById('sp-modal').style.display = 'none';
+}
+
+function confirmSuperpowerModal() {
+  const id = _pendingSuperpowerId;
+  if (!id || state.superpowersUsed[id]) { closeSuperpowerModal(); return; }
+
+  const names = { 'sp-bonus': '10 Bonuszetels', 'sp-veto': 'Veto', 'sp-marriage': 'Gedwongen Huwelijk', 'sp-press': 'De Pers Bellen' };
+  const name = names[id] || id;
+
+  const targetEl = document.getElementById('sp-modal-target');
+  const target2El = document.getElementById('sp-modal-target2');
+  const reasonEl = document.getElementById('sp-modal-reason');
+
+  const target = targetEl ? targetEl.value.trim() : '';
+  const target2 = target2El ? target2El.value.trim() : '';
+  const reason = reasonEl ? reasonEl.value.trim() : '';
+
+  // Build detail string
+  let detail = '';
+  if (id === 'sp-bonus') detail = target ? `→ ${target}${reason ? ' (' + reason + ')' : ''}` : (reason || '');
+  else if (id === 'sp-veto') detail = target || (reason || '');
+  else if (id === 'sp-marriage') detail = target && target2 ? `→ ${target} + ${target2}` : '';
+  else if (id === 'sp-press') detail = target ? `→ ${target}${reason ? ' (' + reason + ')' : ''}` : (reason || '');
+
   state.superpowersUsed[id] = true;
   const el = document.getElementById(id);
   if (el) el.classList.add('used');
-  const names = { 'sp-bonus': '10 Bonuszetels', 'sp-veto': 'Veto', 'sp-marriage': 'Gedwongen Huwelijk', 'sp-press': 'De Pers Bellen' };
-  const name = names[id] || id;
   if (!state.superpowerLog) state.superpowerLog = [];
-  state.superpowerLog.push({ id, name, ts: Date.now() });
+  state.superpowerLog.push({ id, name, ts: Date.now(), target, target2, reason, detail });
   renderSuperpowerLog();
   playSound('superpower');
   notify(`Superkracht gebruikt: ${name}`);
-  broadcast('superpower', { id, name });
+  broadcast('superpower', { id, name, detail });
   saveState();
+  closeSuperpowerModal();
+}
+
+function useSuperpower(id) {
+  if (state.superpowersUsed[id]) return;
+  openSuperpowerModal(id);
 }
 
 function renderSuperpowerLog() {
@@ -3867,7 +3997,8 @@ function renderSuperpowerLog() {
     const t = new Date(entry.ts);
     const time = `${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}`;
     const icon = icons[entry.id] || '⚡';
-    return `<div class="sp-log-entry"><span class="sp-log-time">${time}</span><span class="sp-log-icon">${icon}</span><span class="sp-log-name">${entry.name}</span></div>`;
+    const detail = entry.detail ? `<span style="color:var(--text-dim);margin-left:6px;font-size:0.75rem;">${entry.detail}</span>` : '';
+    return `<div class="sp-log-entry"><span class="sp-log-time">${time}</span><span class="sp-log-icon">${icon}</span><span class="sp-log-name">${entry.name}</span>${detail}</div>`;
   }).join('');
 }
 
