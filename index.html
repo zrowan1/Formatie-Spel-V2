@@ -2648,7 +2648,8 @@ async function openElection() {
   if (totalEl) totalEl.textContent = numPlayers;
 
   const hint = `${base}${remainder > 0 ? '–' + (base + 1) : ''}`;
-  document.getElementById('chips-hint-r1').textContent = hint;
+  const chipsHintR1 = document.getElementById('chips-hint-r1');
+  if (chipsHintR1) chipsHintR1.textContent = hint;
 
     await refreshElectionCounter();
     _electionPollInterval = setInterval(refreshElectionCounter, 3000);
