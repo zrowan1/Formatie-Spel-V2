@@ -1065,6 +1065,41 @@
   .scenario-card .sc-name { font-family:'Oswald',sans-serif;font-size:0.72rem;color:var(--cream);letter-spacing:0.5px;line-height:1.2; }
   .scenario-card.selected .sc-name { color:var(--gold); }
   .scenario-desc { margin-top:10px;padding:10px 12px;border-left:2px solid var(--gold-dim);background:rgba(201,168,76,0.05);font-size:0.82rem;color:var(--text-dim);line-height:1.4;font-style:italic;text-align:center; }
+
+  /* ===== DEBUG / SIMULATION PANEL ===== */
+  .debug-panel { border-color: var(--red); background: rgba(192,57,43,0.08); }
+  .debug-panel .panel-header { border-bottom-color: var(--red); }
+  .debug-panel .panel-title { color: var(--red); }
+  .debug-btn { width: 100%; margin-bottom: 8px; font-size: 0.65rem; letter-spacing: 0.5px; padding: 6px 4px; text-align: left; }
+  .debug-btn:last-child { margin-bottom: 0; }
+  .debug-log { font-family: monospace; font-size: 0.65rem; color: var(--text-dim); max-height: 80px; overflow-y: auto; margin-top: 8px; padding: 6px; background: var(--navy); border: 1px solid var(--border); }
+  .debug-log div { margin-bottom: 2px; }
+
+  /* ===== SOLO MODE VOTE UI ===== */
+  .solo-vote-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,22,40,0.95);
+    z-index: 2000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 24px;
+    overflow-y: auto;
+  }
+  .solo-vote-overlay.active { display: flex; }
+  .solo-vote-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--gold); margin-bottom: 24px; text-align: center; }
+  .solo-vote-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; width: 100%; max-width: 500px; }
+  .solo-vote-party { width: 60px; font-family: 'Oswald', sans-serif; color: var(--gold); font-size: 0.9rem; }
+  .solo-vote-party-full { flex: 1; font-size: 0.8rem; color: var(--text-dim); }
+  .solo-vote-radio { display: flex; gap: 8px; }
+  .solo-vote-radio label { font-family: 'Oswald', sans-serif; font-size: 0.75rem; color: var(--text); cursor: pointer; padding: 4px 10px; border: 1px solid var(--border); border-radius: 2px; }
+  .solo-vote-radio input { display: none; }
+  .solo-vote-radio input:checked + label.voor { background: var(--green); color: white; border-color: var(--green); }
+  .solo-vote-radio input:checked + label.tegen { background: var(--red); color: white; border-color: var(--red); }
+  .solo-vote-actions { margin-top: 24px; display: flex; gap: 12px; }
+  .solo-election-input { width: 48px; text-align: center; background: var(--navy-mid); border: 1px solid var(--border); color: var(--cream); font-family: 'Oswald', sans-serif; padding: 4px; }
 </style>
 </head>
 <body>
@@ -1787,6 +1822,24 @@
       </div>
       <div class="panel-body" style="padding:8px;">
         <div class="score-grid" id="score-grid-sidebar"></div>
+      </div>
+    </div>
+
+    <!-- DEBUG / SIMULATION PANEL -->
+    <div class="panel debug-panel" id="debug-panel" style="display:none;">
+      <div class="panel-header">
+        <div class="panel-title">🐞 Debug / Simulatie</div>
+      </div>
+      <div class="panel-body" style="padding:10px;">
+        <button class="btn debug-btn btn-danger" onclick="debugStartTestGame(6)">▶ Start testspel (6)</button>
+        <button class="btn debug-btn btn-danger" onclick="debugStartTestGame(10)">▶ Start testspel (10)</button>
+        <button class="btn debug-btn" onclick="debugSimulateElectionVotes()">🗳 Simuleer verkiezingen</button>
+        <button class="btn debug-btn" onclick="debugSimulateVotes('random')">🎲 Simuleer stemmen (random)</button>
+        <button class="btn debug-btn" onclick="debugSimulateVotes('coalition')">🏛 Simuleer stemmen (coalitie=voor)</button>
+        <button class="btn debug-btn" onclick="debugSetTimer(5)">⏱ Timer = 5 sec</button>
+        <button class="btn debug-btn" onclick="debugSetTimer(0)">⏱ Timer = 0 (skip)</button>
+        <button class="btn debug-btn" onclick="debugForceNextPhase()">⏭ Forceer volgende fase</button>
+        <div class="debug-log" id="debug-log"></div>
       </div>
     </div>
 
@@ -2650,6 +2703,10 @@ async function openVoting(topic, label) {
   state.currentVoteTopic = topic;
   state.currentVoteLabel = label;
   saveState();
+  if (CONFIG.SOLO_MODE) {
+    openSoloVoteOverlay(topic, label);
+    return;
+  }
   try {
     const { error } = await supabaseClient.from('game_sessions').upsert({
       game_id: state.gameId,
@@ -2751,6 +2808,24 @@ async function openElection() {
   const remainder = 150 % numPlayers;
   const sorted = [...active.map(p => p.id)].sort();
 
+  if (CONFIG.SOLO_MODE) {
+    // Update UI
+    const btnOpen = document.getElementById('btn-open-election');
+    if (btnOpen) { btnOpen.textContent = '⏳ Verkiezingen zijn open…'; btnOpen.disabled = true; }
+    const progress = document.getElementById('election-progress');
+    if (progress) progress.style.display = 'block';
+    const btnClose = document.getElementById('btn-close-election');
+    if (btnClose) btnClose.style.display = 'block';
+    const totalEl = document.getElementById('election-total');
+    if (totalEl) totalEl.textContent = numPlayers;
+    const hint = `${base}${remainder > 0 ? '–' + (base + 1) : ''}`;
+    const chipsHintR1 = document.getElementById('chips-hint-r1');
+    if (chipsHintR1) chipsHintR1.textContent = hint;
+    openSoloElectionOverlay();
+    notify(`📱 Verkiezingen geopend (solo-modus)`);
+    return;
+  }
+
   try {
     const { error } = await supabaseClient.from('game_sessions').upsert({
       game_id:       state.gameId,
@@ -2826,13 +2901,85 @@ function broadcastElectionCalc() {
   notify('📊 Verkiezingsberekening op TV getoond');
 }
 
+function processElectionResults(rawVotes) {
+  const active = getActiveParties();
+  const numParties = active.length;
+  const MIN_SEATS = 5;
+  const BASE_SEATS = MIN_SEATS * numParties;
+  const REMAINING_SEATS = 150 - BASE_SEATS;
+  const totalVotes = Object.values(rawVotes).reduce((a, b) => a + b, 0);
+
+  const newSeats = {};
+  const breakdownRows = [];
+  active.forEach(p => {
+    const partyVotes = rawVotes[p.id] || 0;
+    let proportionalPart = 0;
+    if (totalVotes > 0) {
+      proportionalPart = Math.round((partyVotes / totalVotes) * REMAINING_SEATS);
+    } else {
+      proportionalPart = Math.floor(REMAINING_SEATS / numParties);
+    }
+    newSeats[p.id] = MIN_SEATS + proportionalPart;
+    breakdownRows.push({
+      id: p.id,
+      votes: partyVotes,
+      base: MIN_SEATS,
+      proportional: proportionalPart,
+      correction: 0,
+      total: newSeats[p.id]
+    });
+  });
+
+  let currentTotal = Object.values(newSeats).reduce((a, b) => a + b, 0);
+  let diff = 150 - currentTotal;
+
+  if (diff !== 0) {
+    const sortedParties = active
+      .map(p => ({ id: p.id, votes: rawVotes[p.id] || 0 }))
+      .sort((a, b) => b.votes - a.votes);
+    let idx = 0;
+    while (diff !== 0) {
+      const partyId = sortedParties[idx % numParties].id;
+      if (diff > 0) {
+        newSeats[partyId]++;
+        diff--;
+      } else if (diff < 0 && newSeats[partyId] > MIN_SEATS) {
+        newSeats[partyId]--;
+        diff++;
+      }
+      idx++;
+    }
+    breakdownRows.forEach(r => {
+      r.correction = newSeats[r.id] - (r.base + r.proportional);
+      r.total = newSeats[r.id];
+    });
+  }
+
+  state.electionBreakdown = {
+    rows: breakdownRows.sort((a, b) => b.votes - a.votes),
+    totalVotes,
+    minSeats: MIN_SEATS
+  };
+
+  Object.assign(state.seats, newSeats);
+  saveState();
+  renderPartyGrid();
+
+  const minSeats = Math.min(...Object.values(newSeats));
+  const maxSeats = Math.max(...Object.values(newSeats));
+  notify(`✓ Zetels verdeeld! Kleinste: ${minSeats}, Grootste: ${maxSeats}`);
+
+  const calcBtn = document.getElementById('btn-show-election-calc');
+  if (calcBtn) calcBtn.style.display = 'block';
+}
+
 async function tallyElection() {
   try {
     const { data, error } = await supabaseClient.from('player_votes')
       .select('party_id, choice')
       .eq('game_id', state.gameId)
       .eq('vote_topic', 'VERKIEZING');
-    
+
     if (error) {
       console.warn('Supabase tallyElection error:', error);
       notify('⚠️ Fout bij ophalen verkiezingsresultaten');
@@ -2845,9 +2992,6 @@ async function tallyElection() {
     }
 
     const active = getActiveParties();
-    const numParties = active.length;
-    
-    // Stap 1: Tel de ruwe stemmen
     const rawVotes = {};
     active.forEach(p => { rawVotes[p.id] = 0; });
 
@@ -2859,89 +3003,7 @@ async function tallyElection() {
       });
     });
 
-    // Stap 2: Basishandicap systeem
-    // Elke partij krijgt minimaal 5 zetels (basis aanhang)
-    // De resterende zetels worden proportioneel verdeeld
-    const MIN_SEATS = 5;
-    const BASE_SEATS = MIN_SEATS * numParties; // 5 per partij
-    const REMAINING_SEATS = 150 - BASE_SEATS;  // Rest voor verdeling
-    
-    const totalVotes = Object.values(rawVotes).reduce((a, b) => a + b, 0);
-    
-    const newSeats = {};
-    const breakdownRows = [];
-    active.forEach(p => {
-      const partyVotes = rawVotes[p.id] || 0;
-      // Basis zetels + proportioneel deel van de rest
-      let proportionalPart = 0;
-      if (totalVotes > 0) {
-        proportionalPart = Math.round((partyVotes / totalVotes) * REMAINING_SEATS);
-      } else {
-        // Als niemand stemt, gelijke verdeling van resterende zetels
-        proportionalPart = Math.floor(REMAINING_SEATS / numParties);
-      }
-      newSeats[p.id] = MIN_SEATS + proportionalPart;
-      breakdownRows.push({
-        id: p.id,
-        votes: partyVotes,
-        base: MIN_SEATS,
-        proportional: proportionalPart,
-        correction: 0,
-        total: newSeats[p.id]
-      });
-    });
-    
-    // Stap 3: Corrigeer afrondingsfouten (som moet precies 150 zijn)
-    let currentTotal = Object.values(newSeats).reduce((a, b) => a + b, 0);
-    let diff = 150 - currentTotal;
-    
-    if (diff !== 0) {
-      // Sorteer partijen op stemmen (meeste eerst)
-      const sortedParties = active
-        .map(p => ({ id: p.id, votes: rawVotes[p.id] || 0 }))
-        .sort((a, b) => b.votes - a.votes);
-      
-      // Geef of neem zetels bij de partijen met meeste/meeste stemmen
-      let idx = 0;
-      while (diff !== 0) {
-        const partyId = sortedParties[idx % numParties].id;
-        if (diff > 0) {
-          newSeats[partyId]++;
-          diff--;
-        } else if (diff < 0 && newSeats[partyId] > MIN_SEATS) {
-          newSeats[partyId]--;
-          diff++;
-        }
-        idx++;
-      }
-      // Update corrections in breakdown
-      breakdownRows.forEach(r => {
-        r.correction = newSeats[r.id] - (r.base + r.proportional);
-        r.total = newSeats[r.id];
-      });
-    }
-
-    // Sla berekening op voor TV weergave
-    state.electionBreakdown = {
-      rows: breakdownRows.sort((a, b) => b.votes - a.votes),
-      totalVotes,
-      minSeats: MIN_SEATS
-    };
-
-    Object.assign(state.seats, newSeats);
-    saveState();
-    renderPartyGrid();
-    // NB: we do NOT broadcast seats here — the host reveals them manually via exit poll
-    
-    // Toon uitslag met duidelijke melding
-    const minSeats = Math.min(...Object.values(newSeats));
-    const maxSeats = Math.max(...Object.values(newSeats));
-    notify(`✓ Zetels verdeeld! Kleinste: ${minSeats}, Grootste: ${maxSeats}`);
-
-    // Toon de "Toon berekening op TV" knop
-    const calcBtn = document.getElementById('btn-show-election-calc');
-    if (calcBtn) calcBtn.style.display = 'block';
-    
+    processElectionResults(rawVotes);
   } catch (err) {
     console.error('Supabase tallyElection exception:', err);
     notify('⚠️ Fout bij verwerken verkiezingsresultaten');
@@ -4635,6 +4697,233 @@ function renderAll() {
 }
 
 // ============================================================
+// DEBUG & SOLO MODE FUNCTIONS
+// ============================================================
+function logDebug(msg) {
+  const el = document.getElementById('debug-log');
+  if (!el) return;
+  const line = document.createElement('div');
+  line.textContent = `> ${msg}`;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+function debugStartTestGame(count) {
+  const shuffled = [...PARTIES].sort(() => Math.random() - 0.5).slice(0, count);
+  state.selectedPartyIds = shuffled.map(p => p.id);
+  state.players = shuffled.map((p, i) => `Bot ${i + 1} (${p.name})`);
+  state.gameStarted = true;
+  initGameState();
+  saveState();
+  renderAll();
+  const active = getActiveParties();
+  broadcast('setup', { parties: active, majority: getMajorityThreshold(), totalSeats: getTotalSeats() });
+  notify(`Testspel gestart met ${count} partijen`);
+  logDebug(`Testspel gestart: ${count} partijen, ID=${state.gameId}`);
+}
+
+async function debugSimulateElectionVotes() {
+  const active = getActiveParties();
+  const votes = {};
+  active.forEach(p => { votes[p.id] = 0; });
+  // Verdeel 10 stemmen per partij willekeurig over alle partijen
+  for (const p of active) {
+    let remaining = 10;
+    const dist = {};
+    active.forEach(ap => { dist[ap.id] = 0; });
+    while (remaining > 0) {
+      const target = active[Math.floor(Math.random() * active.length)].id;
+      dist[target]++;
+      remaining--;
+    }
+    try {
+      await supabaseClient.from('player_votes').insert({
+        game_id: state.gameId,
+        party_id: p.id,
+        vote_topic: 'VERKIEZING',
+        choice: JSON.stringify(dist)
+      });
+    } catch (e) {
+      console.warn('Debug insert election failed', e);
+    }
+  }
+  notify('🎲 Verkiezingsstemmen gesimuleerd');
+  logDebug('Verkiezingsstemmen ingevoerd in Supabase');
+}
+
+async function debugSimulateVotes(mode) {
+  if (!state.currentVoteTopic) {
+    notify('⚠ Geen openstaande stemming');
+    return;
+  }
+  const active = getActiveParties();
+  for (const p of active) {
+    let choice = 'voor';
+    if (mode === 'random') {
+      choice = Math.random() < 0.5 ? 'voor' : 'tegen';
+    } else if (mode === 'coalition') {
+      choice = state.coalition[p.id] ? 'voor' : 'tegen';
+    }
+    try {
+      await supabaseClient.from('player_votes').upsert({
+        game_id: state.gameId,
+        party_id: p.id,
+        vote_topic: state.currentVoteTopic,
+        choice: choice
+      });
+    } catch (e) {
+      console.warn('Debug insert vote failed', e);
+    }
+  }
+  notify(`🎲 Stemmen gesimuleerd (${mode})`);
+  logDebug(`Stemmen gesimuleerd voor ${state.currentVoteTopic} (${mode})`);
+}
+
+function debugSetTimer(seconds) {
+  timerCurrentSeconds = seconds;
+  timerDefaultSeconds = seconds;
+  state.timerSeconds = seconds;
+  state.timerDefault = seconds;
+  updateTimerDisplay();
+  saveState();
+  notify(`⏱ Timer op ${seconds}s gezet`);
+}
+
+function debugForceNextPhase() {
+  const phases = ['prep', 'r1', 'r2', 'r3', 'r4', 'score'];
+  const idx = phases.indexOf(state.phase || 'prep');
+  const next = phases[Math.min(idx + 1, phases.length - 1)];
+  setPhase(next);
+  notify(`⏭ Geforceerd naar fase ${next}`);
+  logDebug(`Geforceerd naar fase ${next}`);
+}
+
+// --- SOLO MODE VOTE UI ---
+function openSoloVoteOverlay(topic, label) {
+  const title = document.getElementById('solo-vote-title');
+  if (title) title.textContent = `🗳 ${label || topic}`;
+  const rows = document.getElementById('solo-vote-rows');
+  if (!rows) return;
+  rows.innerHTML = '';
+  getActiveParties().forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'solo-vote-row';
+    const current = state.votes[p.id] || '';
+    row.innerHTML = `
+      <div class="solo-vote-party">${p.name}</div>
+      <div class="solo-vote-party-full">${p.full}</div>
+      <div class="solo-vote-radio">
+        <input type="radio" name="solo-vote-${p.id}" id="sv-${p.id}-voor" value="voor" ${current === 'voor' ? 'checked' : ''}>
+        <label for="sv-${p.id}-voor" class="voor">VOOR</label>
+        <input type="radio" name="solo-vote-${p.id}" id="sv-${p.id}-tegen" value="tegen" ${current === 'tegen' ? 'checked' : ''}>
+        <label for="sv-${p.id}-tegen" class="tegen">TEGEN</label>
+      </div>
+    `;
+    rows.appendChild(row);
+  });
+  document.getElementById('solo-vote-overlay').classList.add('active');
+}
+
+function closeSoloVoteOverlay() {
+  document.getElementById('solo-vote-overlay').classList.remove('active');
+}
+
+function randomSoloVotes() {
+  getActiveParties().forEach(p => {
+    const val = Math.random() < 0.5 ? 'voor' : 'tegen';
+    const el = document.getElementById(`sv-${p.id}-${val}`);
+    if (el) el.checked = true;
+  });
+}
+
+function submitSoloVotes() {
+  getActiveParties().forEach(p => {
+    const voor = document.getElementById(`sv-${p.id}-voor`);
+    const tegen = document.getElementById(`sv-${p.id}-tegen`);
+    if (voor && voor.checked) state.votes[p.id] = 'voor';
+    else if (tegen && tegen.checked) state.votes[p.id] = 'tegen';
+  });
+  saveState();
+  renderVoteRows();
+  updateVoteResult();
+  closeSoloVoteOverlay();
+  notify('✓ Solo-stemmen verwerkt');
+}
+
+// --- SOLO MODE ELECTION UI ---
+let _soloElectionData = {};
+
+function openSoloElectionOverlay() {
+  const rows = document.getElementById('solo-election-rows');
+  if (!rows) return;
+  rows.innerHTML = '';
+  _soloElectionData = {};
+  const active = getActiveParties();
+  active.forEach(voter => {
+    const block = document.createElement('div');
+    block.style.cssText = 'margin-bottom:18px;width:100%;max-width:500px;border:1px solid var(--border);padding:10px;border-radius:4px;';
+    let inputsHtml = `<div style="font-family:'Oswald',sans-serif;color:var(--gold);margin-bottom:8px;">${voter.name} — 10 fiches</div><div style="display:flex;flex-wrap:wrap;gap:8px;">`;
+    active.forEach(target => {
+      inputsHtml += `
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span style="font-size:0.75rem;color:var(--text-dim);">${target.name}</span>
+          <input type="number" min="0" max="10" value="0" class="solo-election-input" data-voter="${voter.id}" data-target="${target.id}">
+        </div>`;
+    });
+    inputsHtml += '</div>';
+    block.innerHTML = inputsHtml;
+    rows.appendChild(block);
+  });
+  document.getElementById('solo-election-overlay').classList.add('active');
+}
+
+function closeSoloElectionOverlay() {
+  document.getElementById('solo-election-overlay').classList.remove('active');
+}
+
+function randomSoloElection() {
+  const inputs = document.querySelectorAll('.solo-election-input');
+  const active = getActiveParties();
+  active.forEach(voter => {
+    const voterInputs = Array.from(inputs).filter(i => i.dataset.voter === voter.id);
+    voterInputs.forEach(i => i.value = 0);
+    let remaining = 10;
+    while (remaining > 0) {
+      const target = voterInputs[Math.floor(Math.random() * voterInputs.length)];
+      target.value = (parseInt(target.value, 10) || 0) + 1;
+      remaining--;
+    }
+  });
+}
+
+function submitSoloElection() {
+  const inputs = document.querySelectorAll('.solo-election-input');
+  const active = getActiveParties();
+  const rawVotes = {};
+  active.forEach(p => { rawVotes[p.id] = 0; });
+  inputs.forEach(inp => {
+    const voter = inp.dataset.voter;
+    const target = inp.dataset.target;
+    const val = parseInt(inp.value, 10) || 0;
+    rawVotes[target] = (rawVotes[target] || 0) + val;
+  });
+  processElectionResults(rawVotes);
+  closeSoloElectionOverlay();
+
+  // Reset UI knoppen
+  const btnOpen = document.getElementById('btn-open-election');
+  if (btnOpen) { btnOpen.textContent = '📱 Open verkiezingen'; btnOpen.disabled = false; }
+  const btnClose = document.getElementById('btn-close-election');
+  if (btnClose) btnClose.style.display = 'none';
+}
+
+// Show debug panel if enabled
+if (CONFIG.DEBUG_ENABLED) {
+  const dp = document.getElementById('debug-panel');
+  if (dp) dp.style.display = 'block';
+}
+
+// ============================================================
 // INIT
 // ============================================================
 if (state.gameStarted && state.selectedPartyIds.length >= 6) {
@@ -4662,5 +4951,28 @@ document.getElementById('timer-label').textContent = state.timerLabel;
 // Start Supabase realtime subscription
 startVoteSubscription();
 </script>
+
+<!-- SOLO MODE: VOTE OVERLAY -->
+<div class="solo-vote-overlay" id="solo-vote-overlay">
+  <div class="solo-vote-title" id="solo-vote-title">🗳 Stemming</div>
+  <div id="solo-vote-rows"></div>
+  <div class="solo-vote-actions">
+    <button class="btn btn-primary" onclick="submitSoloVotes()">Bevestig stemmen</button>
+    <button class="btn" onclick="randomSoloVotes()">🎲 Random</button>
+    <button class="btn" onclick="closeSoloVoteOverlay()">Annuleren</button>
+  </div>
+</div>
+
+<!-- SOLO MODE: ELECTION OVERLAY -->
+<div class="solo-vote-overlay" id="solo-election-overlay">
+  <div class="solo-vote-title">🗳 Verkiezingen — Verdeel 10 stemfiches per partij</div>
+  <div id="solo-election-rows"></div>
+  <div class="solo-vote-actions">
+    <button class="btn btn-primary" onclick="submitSoloElection()">Bevestig alle stemmen</button>
+    <button class="btn" onclick="randomSoloElection()">🎲 Random verdelen</button>
+    <button class="btn" onclick="closeSoloElectionOverlay()">Annuleren</button>
+  </div>
+</div>
+
 </body>
 </html>

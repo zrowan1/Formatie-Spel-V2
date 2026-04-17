@@ -26,7 +26,11 @@ const CONFIG = {
   TIMER_DANGER_THRESHOLD: 10,   // Seconden voor danger kleur
   
   // Debug mode (zet op true voor extra logging)
-  DEBUG: false
+  DEBUG: false,
+  
+  // Test modes — worden geactiveerd via URL params (?debug=1, ?solo=1, ?debug=1&solo=1)
+  SOLO_MODE: /[?&]solo=(1|true)/.test(window.location.search),
+  DEBUG_ENABLED: /[?&]debug=(1|true)/.test(window.location.search)
 };
 
 // Helper functie voor debug logging

@@ -163,3 +163,29 @@ broadcast('setup', { parties, majority, totalSeats });
 - Open `index.html` en `tv.html` in **dezelfde browser** (anders werkt localStorage niet).
 - Voor speler-app: internet vereist, gebruik `?party=PPP&game=TEST123` op `player.html`.
 - Reset spel: "Reset alles" knop in paneel, of clear localStorage.
+
+## Debug & Solo Modus (voor testen)
+
+Om het spel zonder 6–10 fysieke spelers te testen zijn twee hulpmiddelen ingebouwd:
+
+### 1. Debug-paneel (`?debug=1`)
+Open het spelleiderspaneel met de URL-parameter `?debug=1` (bijv. `index.html?debug=1`).
+In de sidebar verschijnt een rood **Debug / Simulatie** paneel met knoppen voor:
+- **Start testspel (6 of 10)** — selecteert willekeurig partijen, vult bot-namen in en start het spel.
+- **Simuleer verkiezingsstemmen** — injecteert willekeurige verkiezingsstemmen in Supabase.
+- **Simuleer stemmen (random / coalitie=voor)** — vult ontbrekende `player_votes` in Supabase voor de huidige stemming.
+- **Timer shortcuts** — zet de timer op 5 sec of 0 (skip).
+- **Forceer volgende fase** — springt direct naar de volgende ronde.
+
+Dit test de volledige Supabase-realtime-laag, maar je hoeft geen tiental spelerschermen open te houden.
+
+### 2. Solo-modus (`?solo=1`)
+Open het paneel met `?solo=1` (bijv. `index.html?solo=1`).
+In deze modus:
+- Supabase wordt volledig omzeild.
+- Bij elke stemming verschijnt er een overlay in het paneel waarin je per partij direct `voor`/`tegen` kunt kiezen (met een "Random" knop).
+- Bij verkiezingen verschijnt er een overlay waarin je per partij 10 stemfiches over alle partijen kunt verdelen (ook hier is een "Random" knop).
+- Ideaal voor snelle flow-tests **zonder internet**.
+
+### Combineren
+Je kunt beide modi tegelijk gebruiken: `index.html?debug=1&solo=1`. Dan zie je het debug-paneel én worden alle stemmingen lokaal afgehandeld.
