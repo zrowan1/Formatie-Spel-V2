@@ -2815,7 +2815,7 @@ async function tallyElection() {
     Object.assign(state.seats, newSeats);
     saveState();
     renderPartyGrid();
-    broadcast('seats', { seats: state.seats, coalition: state.coalition, parties: active });
+    // NB: we do NOT broadcast seats here — the host reveals them manually via exit poll
     
     // Toon uitslag met duidelijke melding
     const minSeats = Math.min(...Object.values(newSeats));
