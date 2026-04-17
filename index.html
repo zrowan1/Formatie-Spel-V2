@@ -1267,7 +1267,7 @@
             <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;" onclick="event.stopPropagation()">
               <button class="btn btn-gold" id="btn-open-election" onclick="openElection()">📱 Open verkiezingen</button>
               <div id="election-progress" style="display:none;font-size:0.85rem;color:var(--text-dim);text-align:center;">
-                <span id="election-count">0</span> / <span id="election-total">10</span> stemmen ontvangen
+                Verkiezingen zijn open — sluit handmatig wanneer iedereen gestemd heeft
               </div>
               <button class="btn" id="btn-close-election" style="display:none;background:rgba(76,175,80,0.15);border:1px solid #4caf50;color:#4caf50;" onclick="closeElection()">✓ Sluit &amp; verwerk stemmen</button>
               <button class="btn btn-secondary" id="btn-show-election-calc" style="display:none;" onclick="broadcastElectionCalc()">📊 Toon berekening op TV</button>
@@ -2630,7 +2630,6 @@ async function openElection() {
       vote_label:    'Verkiezingen',
       phase:         'r1',
       active_parties: sorted,
-      election_votes: {},
     }, { onConflict: 'game_id' });
     if (error) {
       console.warn('Supabase openElection error:', error);
@@ -2661,23 +2660,8 @@ async function openElection() {
 }
 
 async function refreshElectionCounter() {
-  if (!state.gameId) return;
-  try {
-    const { data, error } = await supabaseClient.from('game_sessions')
-      .select('election_votes')
-      .eq('game_id', state.gameId)
-      .single();
-    if (error) {
-      console.warn('Supabase refreshElectionCounter error:', error);
-      return;
-    }
-    const votes = data?.election_votes || {};
-    const count = Object.keys(votes).length;
-    const countEl = document.getElementById('election-count');
-    if (countEl) countEl.textContent = count;
-  } catch (err) {
-    console.error('Supabase refreshElectionCounter exception:', err);
-  }
+  // Disabled: the player_votes table has RLS preventing the host from reading other players' votes,
+  // and we cannot add new columns to game_sessions. The election simply stays open until the host closes it.
 }
 
 async function closeElection() {
