@@ -56,6 +56,63 @@
     }
     .status-vote-label.active { display: block; }
 
+    /* ── ACTION INDICATOR ── */
+    .action-indicator {
+      background: rgba(201,168,76,0.12);
+      border: 1px solid var(--gold-dim);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .action-phase {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .action-text {
+      font-family: 'EB Garamond', serif;
+      font-size: 1rem;
+      color: var(--cream);
+      line-height: 1.4;
+    }
+
+    /* ── ROUND HINT ── */
+    .round-hint-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      margin-top: 4px;
+    }
+    .round-hint-toggle:hover { border-color: var(--gold-dim); color: var(--cream); }
+    .round-hint-body {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      color: var(--cream);
+      line-height: 1.55;
+      text-align: left;
+    }
+    .round-hint-body.visible { display: block; }
+    .round-hint-body ul { padding-left: 18px; margin: 6px 0; }
+    .round-hint-body li { margin-bottom: 4px; }
+
     /* ── PARTY CARD ── */
     .party-card {
       max-width: 540px;
@@ -772,6 +829,11 @@
           <div class="party-leader">Lijsttrekker: ${PARTY_LEADERS[partyId] || '—'}</div>
         </div>
 
+        <div class="action-indicator" id="action-indicator">
+          <div class="action-phase" id="action-phase">Laden...</div>
+          <div class="action-text" id="action-text">Even geduld terwijl we de spelstatus ophalen...</div>
+        </div>
+
         <div class="card-section">
           <div class="section-label">Wie zijn jullie?</div>
           <div class="section-value intro-text">${PARTY_INTROS[partyId] || '—'}</div>
@@ -817,6 +879,12 @@
           <button class="speeltip-toggle" onclick="toggleSpeeltip(this)">💡 Toon speeltip</button>
           <div class="speeltip-revealed" id="speeltip-text">${speeltip}</div>
         </div>` : ''}
+
+        <div class="card-section">
+          <div class="section-label">Wat moet ik doen?</div>
+          <button class="round-hint-toggle" onclick="toggleRoundHint(this)">📖 Toon spiekbriefje voor deze ronde</button>
+          <div class="round-hint-body" id="round-hint-body"></div>
+        </div>
 
         <div class="card-section">
           <div class="section-label">Geheime bonus</div>
@@ -1055,6 +1123,64 @@
     }
   }
 
+  const ROUND_HINTS = {
+    prep:  '<strong>Voorbereiding</strong><br>Wacht tot de spelleider het spel start. Lees ondertussen je partij goed door.',
+    r1:    '<strong>Ronde 1 — Verkiezingscampagne</strong><ul><li>Luister naar de campagnepitches</li><li>Debatteer tijdens het speed-debat</li><li>Verdeel je stemfiches over andere partijen</li></ul>',
+    r2:    '<strong>Ronde 2 — Formatie</strong><ul><li>Onderhandel over een coalitieakkoord</li><li>Zorg voor 76+ zetels als je in de coalitie wilt</li><li>Houd rekening met je dealbreaker en must-have</li></ul>',
+    r3:    '<strong>Ronde 3 — Regeerperiode</strong><ul><li>Luister naar de wetsvoorstellen</li><li>Stem <strong>VOOR</strong> of <strong>TEGEN</strong> op je telefoon</li><li>+1 punt als je aan de winnende kant stemt</li></ul>',
+    r4:    '<strong>Ronde 4 — Kabinetscrisis</strong><ul><li>Luister naar de crisiskaarten</li><li>Stem <strong>groen</strong> (vertrouwen) of <strong>rood</strong> (geen vertrouwen)</li><li>76+ rood = kabinet valt direct</li></ul>',
+    score: '<strong>Eindstand</strong><br>De punten worden geteld. Veel succes!',
+  };
+
+  function updateActionIndicator(session) {
+    const phaseEl = document.getElementById('action-phase');
+    const textEl  = document.getElementById('action-text');
+    const hintBody = document.getElementById('round-hint-body');
+    if (!phaseEl || !textEl) return;
+
+    const phase = session?.phase || 'prep';
+
+    // Update hint body content (only when phase changes, to preserve toggle state)
+    if (hintBody && hintBody.dataset.phase !== phase) {
+      hintBody.innerHTML = ROUND_HINTS[phase] || ROUND_HINTS.prep;
+      hintBody.dataset.phase = phase;
+    }
+
+    // Voting takes precedence
+    if (session.vote_open) {
+      if (session.vote_topic === 'VERKIEZING') {
+        phaseEl.textContent = '🗳 Verkiezingen';
+        textEl.textContent = 'Verdeel je stemfiches over de andere partijen.';
+      } else if (session.vote_topic && session.vote_topic.startsWith('wet_')) {
+        phaseEl.textContent = '🗳 Stemming geopend';
+        textEl.textContent = `Kies VOOR of TEGEN: ${session.vote_label || 'Wetsvoorstel'}`;
+      } else {
+        phaseEl.textContent = '🗳 Stemming geopend';
+        textEl.textContent = `Kies je standpunt: ${session.vote_label || 'Stemming'}`;
+      }
+      return;
+    }
+
+    const labels = {
+      prep:  { phase: 'Voorbereiding', text: 'Wacht tot de spelleider verder gaat. Lees je partijkaart goed door.' },
+      r1:    { phase: 'Ronde 1 — Campagne', text: 'Luister naar de pitches en het speed-debat. Straks mag je stemmen.' },
+      r2:    { phase: 'Ronde 2 — Formatie', text: 'Onderhandel over het coalitieakkoord. Houd je dealbreaker in de gaten!' },
+      r3:    { phase: 'Ronde 3 — Regeerperiode', text: 'Het kabinet behandelt wetsvoorstellen. Wacht op de volgende stemming.' },
+      r4:    { phase: 'Ronde 4 — Kabinetscrisis', text: 'Het kabinet staat onder druk. Luister naar de crisis en stem straks.' },
+      score: { phase: 'Eindstand', text: 'De punten worden geteld. Wie wordt de grootste politicus van de avond?' },
+    };
+
+    const info = labels[phase] || labels.prep;
+    phaseEl.textContent = info.phase;
+    textEl.textContent = info.text;
+  }
+
+  function toggleRoundHint(btn) {
+    const el = document.getElementById('round-hint-body');
+    const visible = el.classList.toggle('visible');
+    btn.textContent = visible ? '📖 Verberg spiekbriefje' : '📖 Toon spiekbriefje voor deze ronde';
+  }
+
   // ── SESSION HANDLER ──────────────────────────────────────────
   function updateFromSession(session) {
     if (session.agendas && session.agendas[partyId] && session.agendas[partyId] !== myAgenda) {
@@ -1062,6 +1188,7 @@
       updateAgendaSection(myAgenda);
     }
     updateStatusBar(session.vote_open, session.vote_label);
+    updateActionIndicator(session);
     if (session.vote_open && session.vote_topic === 'VERKIEZING') {
       hideVoteOverlay();
       showElectionOverlay(session);

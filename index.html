@@ -3488,6 +3488,24 @@ function setSeats(id, value) {
 
 function toggleCoalition(id, btn) {
   const wasIn = state.coalition[id];
+
+  // If adding to coalition, check for dealbreaker conflicts
+  if (!wasIn) {
+    const active = getActiveParties();
+    const conflictingParties = active.filter(p => {
+      if (!state.coalition[p.id] || p.id === id) return false;
+      return PARTY_DEALBREAKERS[id] === p.id || PARTY_DEALBREAKERS[p.id] === id;
+    });
+
+    if (conflictingParties.length > 0) {
+      const names = conflictingParties.map(p => `${p.id} (${p.full})`).join(' en ');
+      const msg = `⚠️ Let op: ${id} mag niet samen in coalitie met ${names}. Dit kost beide partijen 5 punten!\n\nWeet je het zeker?`;
+      if (!confirm(msg)) {
+        return; // Abort the toggle
+      }
+    }
+  }
+
   state.coalition[id] = !wasIn;
   state.scores[id].coalition += wasIn ? -5 : 5;
   renderPartyGrid();
@@ -3863,12 +3881,25 @@ function broadcastSuperpowerLog() {
 // ============================================================
 // NAVIGATION & STEPS
 // ============================================================
-function setPhase(phase) {
+async function setPhase(phase) {
   document.querySelectorAll('.phase-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.phase-btn').forEach(el => el.classList.remove('active'));
   document.getElementById(`phase-${phase}`).classList.add('active');
   event.target.classList.add('active');
   broadcast('phase', { phase });
+
+  // Sync phase to Supabase so player apps see it too
+  if (state.gameId) {
+    try {
+      await supabaseClient.from('game_sessions').upsert({
+        game_id: state.gameId,
+        phase: phase,
+        active_parties: getActiveParties().map(p => p.id),
+      }, { onConflict: 'game_id' });
+    } catch (err) {
+      console.warn('Supabase setPhase error:', err);
+    }
+  }
 
   if (phase === 'r3') { renderLawSelector(); renderVoteRows(); renderAmendementPanel(); }
   if (phase === 'r2') { renderCrisisCards(CRISIS_R2, 'crisis-deck-r2'); renderAkkoordForm(); }
@@ -4109,7 +4140,7 @@ function shuffleSetupNames() {
   renderSetupScreen();
 }
 
-function confirmSetup() {
+async function confirmSetup() {
   const activeIds = PARTIES.filter(p => (_pendingPlayerNames[p.id] || '').trim()).map(p => p.id);
   if (activeIds.length < 6 || activeIds.length > 10) return;
   state.selectedPartyIds = activeIds;
@@ -4125,6 +4156,17 @@ function confirmSetup() {
     totalSeats: 150,
     majority: getMajorityThreshold(),
   });
+  // Sync initial phase to Supabase so player apps know the game started
+  try {
+    await supabaseClient.from('game_sessions').upsert({
+      game_id: state.gameId,
+      phase: 'prep',
+      active_parties: active.map(p => p.id),
+      vote_open: false,
+    }, { onConflict: 'game_id' });
+  } catch (err) {
+    console.warn('Supabase confirmSetup error:', err);
+  }
   document.getElementById('setup-screen').classList.add('hidden');
   renderAll();
 }

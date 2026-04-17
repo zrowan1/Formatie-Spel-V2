@@ -92,6 +92,15 @@
     text-transform: uppercase;
     text-align: center;
   }
+  .tv-phase-subtitle {
+    font-family: 'EB Garamond', serif;
+    font-size: 0.75rem;
+    color: var(--gold-dim);
+    text-align: center;
+    margin-top: 2px;
+    font-style: italic;
+    letter-spacing: 1px;
+  }
 
   .tv-timer-box {
     display: flex;
@@ -1646,7 +1655,10 @@
     <div class="tv-logo-title">⚖ De Formatie</div>
     <div class="tv-logo-sub">Politieke Spellenavond</div>
   </div>
-  <div class="tv-phase-label" id="tv-phase-label">Welkom</div>
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="tv-phase-label" id="tv-phase-label">Welkom</div>
+    <div class="tv-phase-subtitle" id="tv-phase-subtitle"></div>
+  </div>
   <div class="tv-timer-box">
     <div class="tv-timer" id="tv-timer">—</div>
     <div class="tv-timer-label" id="tv-timer-label">Timer</div>
@@ -1986,8 +1998,18 @@ function handleEvent(ev) {
     return;
   }
 
+  const PHASE_SUBTITLES = {
+    prep:  'Lees je partijkaart door en bereid je voor',
+    r1:    'Campagnepitches, speed-debat en verkiezingen',
+    r2:    'Onderhandel over een coalitieakkoord',
+    r3:    'Het kabinet brengt wetsvoorstellen naar de Kamer',
+    r4:    'Overleeft het kabinet de zes crises?',
+    score: 'Wie is de grootste politicus van de avond?',
+  };
+
   if (type === 'phase') {
     document.getElementById('tv-phase-label').textContent = PHASE_LABELS[data.phase] || data.phase;
+    document.getElementById('tv-phase-subtitle').textContent = PHASE_SUBTITLES[data.phase] || '';
     showView('view-standby');
   }
 
