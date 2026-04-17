@@ -1037,12 +1037,9 @@
   .setup-title { font-family:'Playfair Display',serif;font-size:2.4rem;color:var(--gold);letter-spacing:3px;margin-bottom:6px;text-align:center; }
   .setup-subtitle { font-family:'Oswald',sans-serif;font-size:0.85rem;color:var(--text-dim);letter-spacing:2px;margin-bottom:32px;text-transform:uppercase;text-align:center; }
   .setup-party-grid { display:grid;grid-template-columns:repeat(5,1fr);gap:10px;max-width:800px;width:100%;margin-bottom:20px; }
-  .setup-party-check { display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;border:1px solid var(--border);border-radius:2px;transition:all 0.2s;background:var(--navy-mid); }
-  .setup-party-check:focus-within { border-color:rgba(201,168,76,0.5); }
+  .setup-party-check { display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;border:1px solid var(--border);border-radius:2px;transition:all 0.2s;background:var(--navy-mid);cursor:pointer; }
+  .setup-party-check:hover { border-color:rgba(201,168,76,0.35); }
   .setup-party-check.selected { border-color:var(--gold);background:rgba(201,168,76,0.1); }
-  .setup-name-input { width:100%;padding:4px 6px;font-size:0.72rem;font-family:'Oswald',sans-serif;background:var(--navy);border:1px solid var(--border);border-radius:2px;color:var(--cream);text-align:center;margin-top:2px;box-sizing:border-box; }
-  .setup-name-input:focus { outline:none;border-color:var(--gold); }
-  .setup-name-input::placeholder { color:var(--text-dim);font-size:0.68rem; }
   .setup-party-abbr { font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:700;color:var(--gold); }
   .setup-party-full { font-size:0.62rem;color:var(--text-dim);text-align:center;line-height:1.3; }
   .setup-counter { font-family:'Oswald',sans-serif;font-size:0.9rem;color:var(--text-dim);margin-bottom:16px;text-align:center; }
@@ -1052,6 +1049,9 @@
   .setup-start-btn { min-width:260px;padding:14px 32px;font-size:1rem; }
   .setup-shuffle-btn { padding:14px 20px;font-size:1rem;background:var(--navy-mid);border:1px solid var(--border);color:var(--gold);font-family:'Oswald',sans-serif;letter-spacing:1px;cursor:pointer;border-radius:2px;transition:all 0.2s; }
   .setup-shuffle-btn:hover { border-color:var(--gold);background:rgba(201,168,76,0.1); }
+  .setup-shuffle-group { display:flex;gap:8px;align-items:center; }
+  .setup-random-select { padding:13px 10px;font-size:0.95rem;background:var(--navy);border:1px solid var(--border);color:var(--cream);font-family:'Oswald',sans-serif;border-radius:2px;cursor:pointer; }
+  .setup-random-select:focus { outline:none;border-color:var(--gold); }
   .setup-hint { margin-top:12px;font-size:0.75rem;color:var(--text-dim);text-align:center; }
 
   /* ===== SCENARIO SELECTOR ===== */
@@ -1072,7 +1072,7 @@
 <!-- SETUP SCHERM -->
 <div id="setup-screen" class="hidden">
   <div class="setup-title">⚖ DE FORMATIE</div>
-  <div class="setup-subtitle">Vul de spelersnamen in bij de deelnemende partijen — minimaal 6, maximaal 10</div>
+  <div class="setup-subtitle">Kies de deelnemende partijen — minimaal 6, maximaal 10</div>
 
   <!-- SCENARIO SELECTOR -->
   <div class="scenario-section" id="scenario-section">
@@ -1084,10 +1084,19 @@
   <div class="setup-party-grid" id="setup-party-grid"></div>
   <div class="setup-counter" id="setup-counter">0 partijen geselecteerd</div>
   <div class="setup-actions">
-    <button class="setup-shuffle-btn" onclick="shuffleSetupNames()" title="Verdeel de ingevulde namen willekeurig over de partijen">🎲 Schud namen</button>
+    <div class="setup-shuffle-group">
+      <select id="setup-random-count" class="setup-random-select">
+        <option value="6">6 partijen</option>
+        <option value="7">7 partijen</option>
+        <option value="8" selected>8 partijen</option>
+        <option value="9">9 partijen</option>
+        <option value="10">10 partijen</option>
+      </select>
+      <button class="setup-shuffle-btn" onclick="shuffleSetupParties()" title="Kies willekeurig partijen">🎲 Willekeurig</button>
+    </div>
     <button class="btn btn-primary setup-start-btn" id="setup-start-btn" onclick="confirmSetup()" disabled>▶ Spel Starten</button>
   </div>
-  <div class="setup-hint">Vul namen in per partij, of gebruik 🎲 om namen willekeurig te verdelen.</div>
+  <div class="setup-hint">Klik op een partij om deze te selecteren of deselecteren.</div>
 </div>
 
 <!-- HEADER -->
@@ -3272,6 +3281,8 @@ function resetGame() {
   state.variableDealbreakers = null;
   state.variableBonuses = null;
   
+  _pendingSelectedParties = {};
+  
   // Broadcast reset to TV
   broadcast('reset', {});
   
@@ -4368,7 +4379,7 @@ function closeAnnouncement() {
 // ============================================================
 // SETUP SCHERM
 // ============================================================
-let _pendingPlayerNames = {};
+let _pendingSelectedParties = {};
 let _pendingScenario = 'standard';
 
 function renderSetupScreen() {
@@ -4376,15 +4387,14 @@ function renderSetupScreen() {
   const grid = document.getElementById('setup-party-grid');
   grid.innerHTML = '';
   PARTIES.forEach(p => {
-    const name = _pendingPlayerNames[p.id] || '';
+    const selected = !!_pendingSelectedParties[p.id];
     const card = document.createElement('div');
-    card.className = 'setup-party-check' + (name.trim() ? ' selected' : '');
+    card.className = 'setup-party-check' + (selected ? ' selected' : '');
     card.id = `setup-card-${p.id}`;
+    card.onclick = () => toggleSetupParty(p.id);
     card.innerHTML = `
       <div class="setup-party-abbr">${p.name}</div>
       <div class="setup-party-full">${p.full}</div>
-      <input class="setup-name-input" type="text" placeholder="Naam speler" value="${name}"
-        oninput="updatePartyNameInput('${p.id}', this.value)">
     `;
     grid.appendChild(card);
   });
@@ -4415,47 +4425,44 @@ function renderScenarioGrid() {
   }
 }
 
-function updatePartyNameInput(id, value) {
-  _pendingPlayerNames[id] = value;
+function toggleSetupParty(id) {
+  if (_pendingSelectedParties[id]) {
+    delete _pendingSelectedParties[id];
+  } else {
+    _pendingSelectedParties[id] = true;
+  }
   const card = document.getElementById(`setup-card-${id}`);
-  if (card) card.classList.toggle('selected', value.trim() !== '');
+  if (card) card.classList.toggle('selected', !!_pendingSelectedParties[id]);
   updateSetupCounter();
 }
 
 function updateSetupCounter() {
-  const n = PARTIES.filter(p => (_pendingPlayerNames[p.id] || '').trim()).length;
+  const n = PARTIES.filter(p => _pendingSelectedParties[p.id]).length;
   const counter = document.getElementById('setup-counter');
   const btn = document.getElementById('setup-start-btn');
-  const valid = n >= 6 && n <= 10;
+  const valid = n >= CONFIG.MIN_PLAYERS && n <= CONFIG.MAX_PLAYERS;
   counter.textContent = `${n} partij${n === 1 ? '' : 'en'} geselecteerd`;
   counter.className = 'setup-counter ' + (valid ? 'valid' : 'invalid');
   if (btn) btn.disabled = !valid;
 }
 
-function shuffleSetupNames() {
-  // Collect all non-empty names currently entered
-  const names = PARTIES.map(p => (_pendingPlayerNames[p.id] || '').trim()).filter(n => n);
-  if (names.length < 2) return;
-  // Shuffle names
-  for (let i = names.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [names[i], names[j]] = [names[j], names[i]];
+function shuffleSetupParties() {
+  const select = document.getElementById('setup-random-count');
+  let count = select ? parseInt(select.value, 10) : CONFIG.MIN_PLAYERS;
+  if (isNaN(count) || count < CONFIG.MIN_PLAYERS || count > CONFIG.MAX_PLAYERS) {
+    count = Math.floor(Math.random() * (CONFIG.MAX_PLAYERS - CONFIG.MIN_PLAYERS + 1)) + CONFIG.MIN_PLAYERS;
   }
-  // Pick `names.length` random parties from PARTIES (without replacement)
-  const partyPool = [...PARTIES].sort(() => Math.random() - 0.5).slice(0, names.length);
-  // Clear all current assignments
-  _pendingPlayerNames = {};
-  // Assign shuffled names to random parties
-  partyPool.forEach((p, i) => { _pendingPlayerNames[p.id] = names[i]; });
-  // Re-render the grid to reflect new assignments
+  const shuffled = [...PARTIES].sort(() => Math.random() - 0.5);
+  _pendingSelectedParties = {};
+  shuffled.slice(0, count).forEach(p => { _pendingSelectedParties[p.id] = true; });
   renderSetupScreen();
 }
 
 async function confirmSetup() {
-  const activeIds = PARTIES.filter(p => (_pendingPlayerNames[p.id] || '').trim()).map(p => p.id);
-  if (activeIds.length < 6 || activeIds.length > 10) return;
+  const activeIds = PARTIES.filter(p => _pendingSelectedParties[p.id]).map(p => p.id);
+  if (activeIds.length < CONFIG.MIN_PLAYERS || activeIds.length > CONFIG.MAX_PLAYERS) return;
   state.selectedPartyIds = activeIds;
-  state.players = activeIds.map(id => _pendingPlayerNames[id].trim());
+  state.players = activeIds.map(() => '');
   state.gameStarted = true;
   state.scenario = _pendingScenario || 'standard';
   // Reset scenario-specifieke state
